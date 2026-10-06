@@ -19,7 +19,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .logo{font-family:var(--display);font-weight:800;font-size:28px;line-height:1;letter-spacing:-.01em}
 .logo i{font-style:normal}
-.logo i:nth-child(1){color:var(--coral)}.logo i:nth-child(2){color:var(--amber)}.logo i:nth-child(3){color:var(--leaf)}.logo i:nth-child(4){color:var(--sky)}.logo i:nth-child(5){color:var(--grape)}.logo i:nth-child(6){color:var(--rose)}
+.logo i:nth-child(1){color:var(--coral)}.logo i:nth-child(2){color:var(--amber)}.logo i:nth-child(3){color:var(--leaf)}.logo i:nth-child(4){color:var(--sky)}.logo i:nth-child(5){color:var(--grape)}.logo i:nth-child(6){color:var(--rose)}.logo i:nth-child(7){color:var(--amber)}
 .bar-r{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .chip{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:800;font-size:14px;white-space:nowrap}
 .pill{display:flex;align-items:center;gap:6px}

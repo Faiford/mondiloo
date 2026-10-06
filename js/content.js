@@ -1,4 +1,4 @@
-/* Tikito content: words, phrases, stories, UI text in 4 languages.
+/* Mundiko content: words, phrases, stories, UI text in 4 languages.
    Edit this file to add or fix content. Keep the same shapes: [emoji, English, Kreyòl, Français, Español]. */
 
 

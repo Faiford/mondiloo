@@ -63,7 +63,7 @@ function speak(text){
 
 /* ---------- views ---------- */
 const $app=document.getElementById("app");
-const logo=`<div class="logo" aria-label="Tikito">${"Tikito".split("").map(c=>`<i>${c}</i>`).join("")}</div>`;
+const logo=`<div class="logo" aria-label="Mundiko">${"Mundiko".split("").map(c=>`<i>${c}</i>`).join("")}</div>`;
 function bar(){
   return `<div class="bar">${logo}<div class="bar-r">
    ${lang?`<button class="chip" data-go="lang">${LANGS[lang].name}</button>`:""}
@@ -99,7 +99,7 @@ function render(){
   } else {
     h+=`<section class="card">${playTop()}${play()}</section>`;
   }
-  h+=`<p class="foot">Tikito · v${APP_VERSION} · <a href="privacy.html">Privacy</a></p>`;
+  h+=`<p class="foot">Mundiko · v${APP_VERSION} · <a href="privacy.html">Privacy</a></p>`;
   $app.innerHTML=h;
   if(screen==="snake") snakeInit();
   if(screen==="balloon") balloonInit();
