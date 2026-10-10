@@ -1,4 +1,4 @@
-const APP_VERSION="1.1.4";
+const APP_VERSION="1.1.5";
 /* ---------- state ---------- */
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
@@ -33,10 +33,20 @@ function tiki(mood){
    <path d="M53 60h14l-7 10z" fill="#FFC83D"/>${mood==="happy"?'<path d="M54 72q6 6 12 0" stroke="#24305E" stroke-width="3" fill="none" stroke-linecap="round"/>':""}
    <path d="M48 104l-4 8M72 104l4 8" stroke="#F2A007" stroke-width="5" stroke-linecap="round"/></g></svg>`;
 }
-let actx=null;
-function sfx(kind){
+let actx=null, audioOK=true;
+function getCtx(){
+  if(!audioOK) return null;
+  if(actx) return actx;
+  const t0=performance.now();
+  try{const C=window.AudioContext||window.webkitAudioContext; if(!C){audioOK=false;return null;} actx=new C();}catch(e){audioOK=false;return null;}
+  if(performance.now()-t0>250){audioOK=false;}
+  return actx;
+}
+function sfx(kind){ setTimeout(()=>sfxNow(kind),0); }
+function sfxNow(kind){
   if(!sound) return;
-  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const now=actx.currentTime;
+  const _c=getCtx(); if(!_c) return;
+  try{if(_c.state==="suspended")_c.resume();const now=_c.currentTime;
     const seq={ok:[[660,0],[880,.09],[1175,.18]],no:[[220,0],[180,.12]],pop:[[520,0]],star:[[988,0],[1319,.08]]}[kind]||[[440,0]];
     seq.forEach(([f,t0])=>{const o=actx.createOscillator(),g=actx.createGain();o.type=kind==="no"?"triangle":"sine";o.frequency.setValueAtTime(f,now+t0);
       if(kind==="pop")o.frequency.exponentialRampToValueAtTime(140,now+t0+.12);
@@ -441,7 +451,8 @@ function pcTap(i){const g=game;if(g.won)return;
   drawPuzzle();}
 /* ---------- music ---------- */
 function note(i,dur=.5){
-  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const now=actx.currentTime;
+  const _c=getCtx(); if(!_c) return;
+  try{if(_c.state==="suspended")_c.resume();const now=_c.currentTime;
     [1,2].forEach((mult,k)=>{const o=actx.createOscillator(),gn=actx.createGain();o.type=k?"sine":"triangle";o.frequency.value=NOTES[i]*mult;
       gn.gain.setValueAtTime(.0001,now);gn.gain.exponentialRampToValueAtTime(k?.05:.25,now+.02);gn.gain.exponentialRampToValueAtTime(.0001,now+dur);
       o.connect(gn).connect(actx.destination);o.start(now);o.stop(now+dur+.05);});
@@ -492,7 +503,23 @@ function tubeTap(i){const g=game;if(g.won)return;
   else{const b=document.querySelector(`[data-tube="${i}"]`);sfx("no");if(b){b.classList.remove("no");void b.offsetWidth;b.classList.add("no");}g.sel=-1;timers.push(setTimeout(drawSort,350));}
 }
 /* ---------- events ---------- */
-document.addEventListener("click",e=>{
+function showErr(msg){try{let b=document.getElementById("errbox");if(!b){b=document.createElement("div");b.id="errbox";document.body.appendChild(b);}
+  b.textContent="⚠️ "+String(msg).slice(0,160)+" (v"+APP_VERSION+")";b.hidden=false;clearTimeout(b._t);b._t=setTimeout(()=>{b.hidden=true;},9000);}catch(e){}}
+window.addEventListener("error",e=>showErr(e.message||e.error||"error"));
+window.addEventListener("unhandledrejection",e=>showErr((e.reason&&e.reason.message)||e.reason||"promise"));
+let tStart=null, lastTouchTap=0;
+/* Phones: act on the finger lifting (touchend) so taps work even where an in-app browser drops clicks. */
+document.addEventListener("touchstart",e=>{const t=e.touches[0];tStart={x:t.clientX,y:t.clientY,el:e.target};},{passive:true});
+document.addEventListener("touchend",e=>{
+  if(!tStart)return; const t=e.changedTouches[0], st=tStart; tStart=null;
+  if(Math.hypot(t.clientX-st.x,t.clientY-st.y)>12)return;
+  const el=st.el; if(!el||!el.closest||el.closest("#swrap")||el.closest(".bal"))return;
+  const btn=el.closest("button"); if(!btn||btn.disabled)return;
+  lastTouchTap=Date.now(); if(e.cancelable)e.preventDefault();
+  try{onTap({target:el});}catch(err){showErr(err&&err.message||err);}
+},{passive:false});
+document.addEventListener("click",e=>{if(Date.now()-lastTouchTap<700)return;try{onTap(e);}catch(err){showErr(err&&err.message||err);}});
+function onTap(e){
   const g=e.target.closest("[data-go]");
   if(g){stopAll(); screen=g.dataset.go;
     if((["count","add","sub","colors","find","shapes","body","cmp","mul","animals","clock"].includes(screen)||(screen==="days"&&age!=="a"))){newQ();render();speak(q.say);}
@@ -544,7 +571,7 @@ document.addEventListener("click",e=>{
     else if(screen==="nums"){const on=document.querySelector(".board .on"); speak(nw(+on.dataset.n));}
     else if(q) speak(q.say);
   }
-});
+}
 document.addEventListener("keydown",e=>{
   if(screen!=="snake") return;
   const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];

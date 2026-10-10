@@ -233,3 +233,5 @@ canvas{display:block;width:100%;aspect-ratio:1;border-radius:18px;background:#E9
 
 .go.big{font-size:22px;padding:14px 30px}
 .pad{margin-top:4px}
+
+#errbox{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));z-index:40;background:#B3261E;color:#fff;font-weight:800;font-size:14px;border-radius:14px;padding:10px 14px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
