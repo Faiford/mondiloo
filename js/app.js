@@ -1,4 +1,4 @@
-const APP_VERSION="1.1.5";
+const APP_VERSION="1.1.6";
 /* ---------- state ---------- */
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
@@ -33,6 +33,7 @@ function tiki(mood){
    <path d="M53 60h14l-7 10z" fill="#FFC83D"/>${mood==="happy"?'<path d="M54 72q6 6 12 0" stroke="#24305E" stroke-width="3" fill="none" stroke-linecap="round"/>':""}
    <path d="M48 104l-4 8M72 104l4 8" stroke="#F2A007" stroke-width="5" stroke-linecap="round"/></g></svg>`;
 }
+function pt(e,k){try{const l=e&&e[k];if(l&&l.length&&l[0]&&typeof l[0].clientX==="number")return l[0];}catch(err){}return null;}
 let actx=null, audioOK=true;
 function getCtx(){
   if(!audioOK) return null;
@@ -72,7 +73,7 @@ function cheer(text){
 /* Speech never blocks the screen: it runs after the page has painted, only when the device
    reports real voices, and it switches itself off if a call ever stalls (some in-app browsers do). */
 let ttsOK=null, sayT=null;
-function ttsVoices(){try{return window.speechSynthesis?speechSynthesis.getVoices():[];}catch(e){return [];}}
+function ttsVoices(){try{const v=window.speechSynthesis&&speechSynthesis.getVoices&&speechSynthesis.getVoices();return (v&&typeof v.length==="number")?Array.from(v):[];}catch(e){return [];}}
 try{if(window.speechSynthesis){speechSynthesis.onvoiceschanged=()=>{if(ttsOK===null&&ttsVoices().length)ttsOK=true;};if(ttsVoices().length)ttsOK=true;}}catch(e){}
 function speak(text){
   if(!text||lang==="ht"||!sound||ttsOK===false) return;
@@ -307,9 +308,9 @@ function snakeInit(){
     if(d[0]===-g.dir[0]&&d[1]===-g.dir[1]) d=Math.abs(dx)>Math.abs(dy)?[0,Math.sign(dy)||1]:[Math.sign(dx)||1,0];
     turn(d);};
   // touch first (works in app webviews), mouse/pen as fallback; never both for the same tap
-  wrap.addEventListener("touchstart",e=>{lastTouch=Date.now();const p=e.touches[0];begin(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
-  wrap.addEventListener("touchmove",e=>{const p=e.touches[0];move(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
-  wrap.addEventListener("touchend",e=>{const p=e.changedTouches[0];end(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
+  wrap.addEventListener("touchstart",e=>{lastTouch=Date.now();const p=pt(e,"touches");if(!p)return;begin(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
+  wrap.addEventListener("touchmove",e=>{const p=pt(e,"touches");if(!p)return;move(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
+  wrap.addEventListener("touchend",e=>{const p=pt(e,"changedTouches");if(!p){down=false;return;}end(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
   wrap.addEventListener("touchcancel",()=>{down=false;});
   wrap.addEventListener("pointerdown",e=>{if(e.pointerType==="touch"||Date.now()-lastTouch<800)return;begin(e.clientX,e.clientY);});
   wrap.addEventListener("pointermove",e=>{if(e.pointerType==="touch"||Date.now()-lastTouch<800)return;move(e.clientX,e.clientY);});
@@ -505,13 +506,13 @@ function tubeTap(i){const g=game;if(g.won)return;
 /* ---------- events ---------- */
 function showErr(msg){try{let b=document.getElementById("errbox");if(!b){b=document.createElement("div");b.id="errbox";document.body.appendChild(b);}
   b.textContent="⚠️ "+String(msg).slice(0,160)+" (v"+APP_VERSION+")";b.hidden=false;clearTimeout(b._t);b._t=setTimeout(()=>{b.hidden=true;},9000);}catch(e){}}
-window.addEventListener("error",e=>showErr(e.message||e.error||"error"));
+window.addEventListener("error",e=>{const f=String(e.filename||"");const ours=!f||f===location.href||f.indexOf(location.host)>=0||f.startsWith("blob:")||f.startsWith("about:");if(!ours)return;showErr((e.message||"error")+(e.lineno?" @"+e.lineno+":"+e.colno:""));});
 window.addEventListener("unhandledrejection",e=>showErr((e.reason&&e.reason.message)||e.reason||"promise"));
 let tStart=null, lastTouchTap=0;
 /* Phones: act on the finger lifting (touchend) so taps work even where an in-app browser drops clicks. */
-document.addEventListener("touchstart",e=>{const t=e.touches[0];tStart={x:t.clientX,y:t.clientY,el:e.target};},{passive:true});
+document.addEventListener("touchstart",e=>{const t=pt(e,"touches");tStart=t?{x:t.clientX,y:t.clientY,el:e.target}:null;},{passive:true});
 document.addEventListener("touchend",e=>{
-  if(!tStart)return; const t=e.changedTouches[0], st=tStart; tStart=null;
+  if(!tStart)return; const t=pt(e,"changedTouches"), st=tStart; tStart=null; if(!t)return;
   if(Math.hypot(t.clientX-st.x,t.clientY-st.y)>12)return;
   const el=st.el; if(!el||!el.closest||el.closest("#swrap")||el.closest(".bal"))return;
   const btn=el.closest("button"); if(!btn||btn.disabled)return;
