@@ -1,4 +1,4 @@
-const APP_VERSION="1.1.2";
+const APP_VERSION="1.1.3";
 /* ---------- state ---------- */
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
@@ -211,7 +211,8 @@ function play(){
   if(screen==="mem") return memView();
   if(screen==="sort") return `<p class="hint" style="text-align:center">${t("sortS")}</p><div class="sortbox" id="sortbox"></div>
     <div class="nav" style="justify-content:center;gap:10px"><button id="sundo" data-sundo="1">↩ ${t("undo")}</button><button data-again="sort" style="background:var(--coral)">🔄 ${t("restart")}</button></div>`;
-  if(screen==="snake") return `<h2 id="shint" style="font-size:22px"></h2><div class="snakewrap" id="swrap"><canvas id="cv" width="480" height="480"></canvas><div class="over" id="sover"><b>🐍</b><span>${t("swipeHint")}</span></div></div><p class="hint" style="text-align:center;font-size:14px">👆 ${t("swipeHint")}</p>`;
+  if(screen==="snake") return `<h2 id="shint" style="font-size:22px"></h2><div class="snakewrap" id="swrap"><canvas id="cv" width="480" height="480"></canvas><div class="over" id="sover"><b>🐍</b><button class="go big" data-sstart="1">▶ ${t("start")}</button><span>${t("swipeHint")}</span></div></div>
+    <div class="pad"><button class="u" data-dir="0,-1" aria-label="Up">▲</button><button class="l" data-dir="-1,0" aria-label="Left">◀</button><button class="d" data-dir="0,1" aria-label="Down">▼</button><button class="r" data-dir="1,0" aria-label="Right">▶</button></div>`;
   if(screen==="balloon") return `<h2 id="bhint" style="font-size:22px"></h2><div class="sky" id="sky"></div>`;
   return "";
 }
@@ -271,17 +272,25 @@ function snakeInit(){
   const sc0=document.getElementById("score"); if(sc0) sc0.textContent=`🍎 0/${goal}`;
   const hint=document.getElementById("shint"); if(hint) hint.textContent=skip?t("skip").replaceAll("{x}",skip).replace("{y}",skip):"";
   placeFood(); drawSnake();
-  const wrap=document.getElementById("swrap"); let sx=0,sy=0,down=false,swiped=false;
-  wrap.addEventListener("pointerdown",e=>{e.preventDefault();down=true;swiped=false;sx=e.clientX;sy=e.clientY;try{wrap.setPointerCapture(e.pointerId);}catch(err){}});
-  wrap.addEventListener("pointermove",e=>{if(!down||swiped)return;const dx=e.clientX-sx,dy=e.clientY-sy;
-    if(Math.max(Math.abs(dx),Math.abs(dy))>=24){swiped=true;turn(Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)]);}});
-  wrap.addEventListener("pointerup",e=>{if(!down)return;down=false;if(swiped)return;
-    const r=cv.getBoundingClientRect(),g=game,cell=r.width/g.N,hx=r.left+(g.body[0][0]+.5)*cell,hy=r.top+(g.body[0][1]+.5)*cell,dx=e.clientX-hx,dy=e.clientY-hy;
-    if(Math.max(Math.abs(dx),Math.abs(dy))<cell*.6){if(!g.running)turn(g.dir);return;}
+  const wrap=document.getElementById("swrap"); let sx=0,sy=0,down=false,swiped=false,lastTouch=0;
+  const begin=(x,y)=>{down=true;swiped=false;sx=x;sy=y;};
+  const move=(x,y)=>{if(!down||swiped)return;const dx=x-sx,dy=y-sy;
+    if(Math.max(Math.abs(dx),Math.abs(dy))>=22){swiped=true;turn(Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)]);}};
+  const end=(x,y)=>{if(!down)return;down=false;if(swiped)return;const g=game;if(!g.cv)return;
+    if(!g.running){turn(g.dir);return;}
+    const r=cv.getBoundingClientRect(),cell=r.width/g.N,hx=r.left+(g.body[0][0]+.5)*cell,hy=r.top+(g.body[0][1]+.5)*cell,dx=x-hx,dy=y-hy;
+    if(Math.max(Math.abs(dx),Math.abs(dy))<cell*.6)return;
     let d=Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)];
-    if(g.running&&d[0]===-g.dir[0]&&d[1]===-g.dir[1]) d=Math.abs(dx)>Math.abs(dy)?[0,Math.sign(dy)||1]:[Math.sign(dx)||1,0];
-    turn(d);});
-  wrap.addEventListener("pointercancel",()=>{down=false;});
+    if(d[0]===-g.dir[0]&&d[1]===-g.dir[1]) d=Math.abs(dx)>Math.abs(dy)?[0,Math.sign(dy)||1]:[Math.sign(dx)||1,0];
+    turn(d);};
+  // touch first (works in app webviews), mouse/pen as fallback; never both for the same tap
+  wrap.addEventListener("touchstart",e=>{lastTouch=Date.now();const p=e.touches[0];begin(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
+  wrap.addEventListener("touchmove",e=>{const p=e.touches[0];move(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
+  wrap.addEventListener("touchend",e=>{const p=e.changedTouches[0];end(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
+  wrap.addEventListener("touchcancel",()=>{down=false;});
+  wrap.addEventListener("pointerdown",e=>{if(e.pointerType==="touch"||Date.now()-lastTouch<800)return;begin(e.clientX,e.clientY);});
+  wrap.addEventListener("pointermove",e=>{if(e.pointerType==="touch"||Date.now()-lastTouch<800)return;move(e.clientX,e.clientY);});
+  wrap.addEventListener("pointerup",e=>{if(e.pointerType==="touch"||Date.now()-lastTouch<800)return;end(e.clientX,e.clientY);});
 }
 function freeCell(){const g=game;let p;do{p=[rnd(0,g.N-1),rnd(0,g.N-1)];}while(g.body.some(b=>b[0]===p[0]&&b[1]===p[1])||(g.food&&p[0]===g.food[0]&&p[1]===g.food[1])||(g.rocks||[]).some(b=>b[0]===p[0]&&b[1]===p[1]));return p;}
 function placeFood(){const g=game;g.food=null;g.food=freeCell();g.fruit=FRUITS[rnd(0,FRUITS.length-1)];
@@ -507,6 +516,7 @@ document.addEventListener("click",e=>{
   const sz=e.target.closest("[data-sz]");
   if(sz&&game.cv){game.w=+sz.dataset.sz;document.querySelectorAll(".sz").forEach(b=>b.classList.toggle("on",b===sz));return;}
   if(e.target.closest("[data-clear]")&&game.cv){game.c.clearRect(0,0,game.cv.width,game.cv.height);speak(t("clear"));return;}
+  if(e.target.closest("[data-sstart]")){if(game.cv&&!game.running)turn(game.dir);return;}
   const d=e.target.closest("[data-dir]"); if(d){turn(d.dataset.dir.split(",").map(Number));return;}
   const w=e.target.closest("[data-w]");
   if(w){const L=themeList(theme);wIdx=(wIdx+ +w.dataset.w+L.length)%L.length; render(); speak(word(L[wIdx])); return;}

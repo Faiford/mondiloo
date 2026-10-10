@@ -108,7 +108,7 @@ canvas{display:block;width:100%;aspect-ratio:1;border-radius:18px;background:#E9
 .over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(255,246,229,.92);border-radius:18px;text-align:center;padding:16px}
 .over b{font-family:var(--display);font-size:30px}
 .go{border:0;background:var(--leaf);color:#fff;border-radius:18px;padding:12px 22px;font-weight:800;font-size:18px}
-.pad-old{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,56px);gap:8px;justify-content:center}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,56px);gap:8px;justify-content:center}
 .pad button{border:0;background:var(--ink);color:#fff;border-radius:16px;font-size:24px}
 .pad .u{grid-column:2}.pad .l{grid-column:1;grid-row:2}.pad .d{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
 
@@ -230,3 +230,6 @@ canvas{display:block;width:100%;aspect-ratio:1;border-radius:18px;background:#E9
 
 .chip.off{background:#FFE3DF;border-color:var(--coral);color:#B3261E}
 .soon{background:var(--bg);border:2px dashed var(--line);border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px;color:var(--muted)}
+
+.go.big{font-size:22px;padding:14px 30px}
+.pad{margin-top:4px}
