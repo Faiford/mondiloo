@@ -1,4 +1,4 @@
-const APP_VERSION="1.1.6";
+const APP_VERSION="1.2.0";
 /* ---------- state ---------- */
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
@@ -101,14 +101,15 @@ function bar(){
    ${lang?`<button class="chip" data-go="lang">${LANGS[lang].name}</button>`:""}
    ${age?`<button class="chip" data-go="age">${A().e} ${A().label} ${t("yrs")}</button>`:""}
    <button class="chip${sound?"":" off"}" data-snd="1" aria-label="${t("snd")}" aria-pressed="${sound}">${sound?"🔊":"🔇 "+t("snd")}</button>
-   <div class="chip pill">⭐ <span>${stars}</span></div></div></div>`;
+   <div class="chip pill">⭐ <span>${stars}</span></div>
+   ${lang&&age?`<button class="chip" data-parentgo="1" aria-label="${t("parent")}">👪</button>`:""}</div></div>`;
 }
 const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>`;
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
 const PLAYS=["mem","snake","balloon","sort","puzzle","draw","music"];
 const CATOF={phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
-const GAMEINFO={phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
+const GAMEINFO={daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
   mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
 const tile=k=>`<button class="game ${GAMEINFO[k][1]}" data-go="${k}"><span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
@@ -125,9 +126,16 @@ function render(){
     h+=`<section class="card"><div class="hello">${tiki()}<div class="bubble"><b>${t("hiTiki")}</b>${t("hi")}
       <div class="prog"><span>⭐ ${into}/10</span><span class="track"><span class="fill" style="width:${into*10}%;display:block"></span></span><span>🏆</span></div>
       ${tro?`<div class="trophies" aria-label="${tro}">${"🏆".repeat(Math.min(tro,10))}${tro>10?" +"+(tro-10):""}</div>`:`<small style="color:var(--muted);font-weight:700">${t("nextT")}: ${10-into} ⭐</small>`}</div></div>
+      <button class="dailyb${dailyDoneToday()?" done":""}" data-go="daily"><span class="fl">🔥</span><span class="dt"><b>${t("daily")}</b><small>${dailyDoneToday()?t("doneToday"):t("dailyS")}</small></span><span class="st">${streakNow()}<small>${t("streakL")}</small></span></button>
       <div class="cats" role="group">${Object.keys(CATS).map(k=>`<button class="cat" data-cat="${k}" aria-pressed="${homeCat===k}">${CATS[k][0]} ${t(CATS[k][1])}</button>`).join("")}</div>
       ${["play","lang","math","world"].filter(k=>homeCat==="all"||homeCat===k).map(k=>{const items=k==="play"?PLAYS:A().learn.filter(g=>CATOF[g]===k);
         return items.length?`<h3>${CATS[k][0]} ${t(CATS[k][1])}</h3><div class="games">${items.map(tile).join("")}</div>`:"";}).join("")}</section>`;
+  } else if(screen==="parent"){
+    h+=`<section class="card"><div class="top"><button class="back" data-go="home">← ${t("back")}</button></div>${parentView()}</section>`;
+  } else if(screen==="gate"){
+    h+=`<section class="card"><div class="top"><button class="back" data-go="home">← ${t("back")}</button></div>${gateView()}</section>`;
+  } else if(screen==="limit"){
+    h+=`<section class="card">${limitView()}</section>`;
   } else {
     h+=`<section class="card">${playTop()}${play()}</section>`;
   }
@@ -142,31 +150,33 @@ function render(){
 function playTop(){
   const right=["puzzle","music"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
-  return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}`;
+  const dHead=screen==="daily"?`<div class="dhead">🔥 ${t("daily")} · ${Math.min(daily.i+1,3)}/3</div>`:"";
+  return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}${dHead}`;
 }
 
 /* ---------- learning games ---------- */
 function opts3(n,min,max){const s=new Set([n]);const spread=max>30?10:3;let g=0;while(s.size<3&&g<200){g++;const x=n+rnd(-spread,spread);if(x>=min&&x<=max)s.add(x);}return shuffle([...s]);}
 function newQ(){
+  const scr=qScr();
   locked=false; const a=A(); const e=ITEMS[rnd(0,ITEMS.length-1)];
-  if(screen==="count"){const n=rnd(a.count[0],a.count[1]);q={n,e,ans:n,opts:opts3(n,a.count[0],a.count[1]),say:t("qCount")};}
-  if(screen==="add"){let x,y; if(a.add<=10){x=rnd(1,a.add-1);y=rnd(1,a.add-x);} else {x=rnd(5,a.add-10);y=rnd(1,Math.min(20,a.add-x));}
+  if(scr==="count"){const n=rnd(a.count[0],a.count[1]);q={n,e,ans:n,opts:opts3(n,a.count[0],a.count[1]),say:t("qCount")};}
+  if(scr==="add"){let x,y; if(a.add<=10){x=rnd(1,a.add-1);y=rnd(1,a.add-x);} else {x=rnd(5,a.add-10);y=rnd(1,Math.min(20,a.add-x));}
     q={x,y,e,ans:x+y,opts:opts3(x+y,2,a.add),say:`${nw(x)} + ${nw(y)}. ${t("qAdd")}`};}
-  if(screen==="sub"){const x=rnd(3,a.sub),y=rnd(1,Math.min(x-1,20));q={x,y,e,ans:x-y,opts:opts3(x-y,0,a.sub),say:`${nw(x)} − ${nw(y)}. ${t("qSub")}`};}
-  if(screen==="colors"){const c=shuffle(COLORS).slice(0,4);const ans=rnd(0,3);q={c,ans,say:t("qColor").replace("{x}",c[ans][WI[lang]].toLowerCase())};}
-  if(screen==="shapes"){const n=age==="a"?3:4;const sh=shuffle(SHAPES.slice(0,age==="a"?4:7)).slice(0,n);const ans=rnd(0,n-1);q={sh,ans,cols:shuffle(SHAPECOL),say:t("qShape").replace("{x}",sh[ans][WI[lang]].toLowerCase())};}
-  if(screen==="body"){const n=age==="a"?3:4;const bd=shuffle(BODY).slice(0,n);const ans=rnd(0,n-1);q={bd,ans,say:t("qBody").replace("{x}",bd[ans][WI[lang]].toLowerCase())};}
-  if(screen==="cmp"){const max=age==="c"?100:20;let x=rnd(1,max),y;do{y=rnd(1,max);}while(y===x);q={x,y,ans:Math.max(x,y),say:t("qCmp")};}
-  if(screen==="mul"){const x=[2,3,5,10][rnd(0,3)],y=rnd(1,x===10?10:6);const p=x*y;const s2=new Set([p]);while(s2.size<3){const d=p+[-x,x,-1,1,2*x][rnd(0,4)];if(d>0)s2.add(d);}
+  if(scr==="sub"){const x=rnd(3,a.sub),y=rnd(1,Math.min(x-1,20));q={x,y,e,ans:x-y,opts:opts3(x-y,0,a.sub),say:`${nw(x)} − ${nw(y)}. ${t("qSub")}`};}
+  if(scr==="colors"){const c=shuffle(COLORS).slice(0,4);const ans=rnd(0,3);q={c,ans,say:t("qColor").replace("{x}",c[ans][WI[lang]].toLowerCase())};}
+  if(scr==="shapes"){const n=age==="a"?3:4;const sh=shuffle(SHAPES.slice(0,age==="a"?4:7)).slice(0,n);const ans=rnd(0,n-1);q={sh,ans,cols:shuffle(SHAPECOL),say:t("qShape").replace("{x}",sh[ans][WI[lang]].toLowerCase())};}
+  if(scr==="body"){const n=age==="a"?3:4;const bd=shuffle(BODY).slice(0,n);const ans=rnd(0,n-1);q={bd,ans,say:t("qBody").replace("{x}",bd[ans][WI[lang]].toLowerCase())};}
+  if(scr==="cmp"){const max=age==="c"?100:20;let x=rnd(1,max),y;do{y=rnd(1,max);}while(y===x);q={x,y,ans:Math.max(x,y),say:t("qCmp")};}
+  if(scr==="mul"){const x=[2,3,5,10][rnd(0,3)],y=rnd(1,x===10?10:6);const p=x*y;const s2=new Set([p]);while(s2.size<3){const d=p+[-x,x,-1,1,2*x][rnd(0,4)];if(d>0)s2.add(d);}
     q={x,y,e:ITEMS[rnd(0,ITEMS.length-1)],ans:p,opts:shuffle([...s2]),say:`${nw(y)} × ${nw(x)}. ${t("qAdd")}`};}
-  if(screen==="phrases"){const ph=shuffle(PHRASES).slice(0,3);const ans=rnd(0,2);q={ph,ans,say:t("qPhrase")};}
-  if(screen==="animals"){const n=age==="a"?3:4;const an=shuffle(ANIMALS).slice(0,n);const ans=rnd(0,n-1);q={an,ans,say:t("qAnimal").replace("{x}",an[ans][SI[lang]])};}
-  if(screen==="days"){const d=rnd(0,6);const ans=(d+1)%7;const o=new Set([ans]);while(o.size<3)o.add(rnd(0,6));o.delete(d);while(o.size<3){const x=rnd(0,6);if(x!==d)o.add(x);}
+  if(scr==="phrases"){const ph=shuffle(PHRASES).slice(0,3);const ans=rnd(0,2);q={ph,ans,say:t("qPhrase")};}
+  if(scr==="animals"){const n=age==="a"?3:4;const an=shuffle(ANIMALS).slice(0,n);const ans=rnd(0,n-1);q={an,ans,say:t("qAnimal").replace("{x}",an[ans][SI[lang]])};}
+  if(scr==="days"){const d=rnd(0,6);const ans=(d+1)%7;const o=new Set([ans]);while(o.size<3)o.add(rnd(0,6));o.delete(d);while(o.size<3){const x=rnd(0,6);if(x!==d)o.add(x);}
     q={d,ans,opts:shuffle([...o]),say:t("qDay").replace("{x}",["fr","es"].includes(lang)?DAYS[lang][d].toLowerCase():DAYS[lang][d])};}
-  if(screen==="clock"){const mins=age==="c"?[0,15,30,45]:[0];const h=rnd(1,12),m=mins[rnd(0,mins.length-1)];const f=(H,M)=>`${H}:${String(M).padStart(2,"0")}`;
+  if(scr==="clock"){const mins=age==="c"?[0,15,30,45]:[0];const h=rnd(1,12),m=mins[rnd(0,mins.length-1)];const f=(H,M)=>`${H}:${String(M).padStart(2,"0")}`;
     const o=new Set([f(h,m)]);while(o.size<3){const H=rnd(1,12),M=mins[rnd(0,mins.length-1)];o.add(f(H,M));}
     q={h,m,ans:f(h,m),opts:shuffle([...o]),say:t("qClock")};}
-  if(screen==="find"){const w=shuffle(themeList(theme)).slice(0,age==="a"?3:4);const ans=rnd(0,w.length-1);q={w,ans,say:t("qFind").replace("{x}",word(w[ans]))};}
+  if(scr==="find"){const w=shuffle(themeList(theme)).slice(0,age==="a"?3:4);const ans=rnd(0,w.length-1);q={w,ans,say:t("qFind").replace("{x}",word(w[ans]))};}
 }
 function blocks(n){const tens=Math.floor(n/10),ones=n%10;
   return `<div class="blocks" aria-label="${n}">${Array.from({length:tens},()=>`<span class="ten">${"<i></i>".repeat(10)}</span>`).join("")}<span class="ones">${'<span class="one"></span>'.repeat(ones)}</span></div>`;}
@@ -175,7 +185,8 @@ const numOpts=()=>`<div class="opts">${q.opts.map(n=>`<button class="opt" data-a
 const fb=`<p class="fb" id="fb" aria-live="polite"></p>`;
 
 function play(){
-  if(screen==="words"){
+  const scr=qScr();
+  if(scr==="words"){
     const L=themeList(theme); if(wIdx>=L.length) wIdx=0; const w=L[wIdx], txt=word(w);
     const chips=`<div class="cats">${TORDER.map(k=>`<button class="cat" data-theme="${k}" aria-pressed="${k===theme}">${TEMOJI[k]} ${TNAME[k][LI[lang]]}</button>`).join("")}</div>`;
     const others=Object.keys(WI).filter(k=>k!==lang).map(k=>`<span>${LANGS[k].name}: ${w[WI[k]]}</span>`).join("");
@@ -183,24 +194,24 @@ function play(){
       <div class="others">${others}</div>
       <div class="nav"><button data-w="-1">← ${t("prev")}</button><output>${wIdx+1} / ${L.length}</output><button data-w="1">${t("next")} →</button></div>`;
   }
-  if(screen==="nums"){const N=A().nums;
+  if(scr==="nums"){const N=A().nums;
     return `<h2 id="numbig">1 · ${nw(1)}</h2><div class="board ${N>20?"b10":""}">${Array.from({length:N},(_,i)=>`<button data-n="${i+1}" class="${i===0?"on":""}${(i+1)%10===0&&N>20?" ten-row":""}">${i+1}</button>`).join("")}</div>`;}
-  if(screen==="count") return `<h2>${q.say}</h2><div class="stage">${pics(q.e,q.n,true)}</div>${numOpts()}${fb}`;
-  if(screen==="add") return `<h2>${t("qAdd")}</h2><div class="stage">${pics(q.e,q.x)}<span class="op">+</span>${pics(q.e,q.y)}</div><div class="stage"><span class="op">${q.x} + ${q.y} = ?</span></div>${numOpts()}${fb}`;
-  if(screen==="sub"&&q.x>20) return `<h2>${t("qSub")}</h2><div class="stage">${blocks(q.x)}</div><div class="stage"><span class="op">${q.x} − ${q.y} = ?</span></div>${numOpts()}${fb}`;
-  if(screen==="sub") return `<h2>${t("qSub")}</h2><div class="stage"><div class="group wide">${q.e.repeat(q.x-q.y)}<span style="opacity:.22">${q.e.repeat(q.y)}</span></div></div><div class="stage"><span class="op">${q.x} − ${q.y} = ?</span></div>${numOpts()}${fb}`;
-  if(screen==="colors") return `<h2>${q.say}</h2><div class="opts four">${q.c.map((c,i)=>`<button class="opt" data-a="${i}" aria-label="${c[WI[lang]]}"><span class="swatch" style="background:${c[0]}"></span></button>`).join("")}</div>${fb}`;
-  if(screen==="shapes") return `<h2>${q.say}</h2><div class="opts ${q.sh.length===4?"four":""}">${q.sh.map((x,i)=>`<button class="opt" data-a="${i}" aria-label="${x[WI[lang]]}">${shapeSVG(x[0],q.cols[i])}</button>`).join("")}</div>${fb}`;
-  if(screen==="body") return `<h2>${q.say}</h2><div class="opts ${q.bd.length===4?"four":""}">${q.bd.map((x,i)=>`<button class="opt" data-a="${i}" aria-label="${x[WI[lang]]}"><span class="big">${x[0]}</span></button>`).join("")}</div>${fb}`;
-  if(screen==="cmp") return `<h2>${q.say}</h2><div class="opts four">${[q.x,q.y].map(n=>`<button class="opt" data-a="${n}"><span class="n" style="font-size:56px">${n}</span><span class="w">${nw(n)}</span>${n<=20?`<span style="font-size:13px;line-height:1.1;max-width:100%;overflow-wrap:anywhere;color:var(--sky)">${"●".repeat(n)}</span>`:""}</button>`).join("")}</div>${fb}`;
-  if(screen==="mul") return `<h2>${t("qAdd")}</h2><div class="stage">${Array.from({length:q.y},()=>`<div class="group" style="max-width:30%;font-size:${q.x>5?"16px":"22px"}">${q.e.repeat(q.x)}</div>`).join("")}</div><div class="stage"><span class="op">${q.y} × ${q.x} = ?</span></div>${numOpts()}${fb}`;
-  if(screen==="draw") return `<div class="snakewrap"><canvas id="dcv" width="600" height="600" style="background:#fff;border:3px solid var(--line)"></canvas></div>
+  if(scr==="count") return `<h2>${q.say}</h2><div class="stage">${pics(q.e,q.n,true)}</div>${numOpts()}${fb}`;
+  if(scr==="add") return `<h2>${t("qAdd")}</h2><div class="stage">${pics(q.e,q.x)}<span class="op">+</span>${pics(q.e,q.y)}</div><div class="stage"><span class="op">${q.x} + ${q.y} = ?</span></div>${numOpts()}${fb}`;
+  if(scr==="sub"&&q.x>20) return `<h2>${t("qSub")}</h2><div class="stage">${blocks(q.x)}</div><div class="stage"><span class="op">${q.x} − ${q.y} = ?</span></div>${numOpts()}${fb}`;
+  if(scr==="sub") return `<h2>${t("qSub")}</h2><div class="stage"><div class="group wide">${q.e.repeat(q.x-q.y)}<span style="opacity:.22">${q.e.repeat(q.y)}</span></div></div><div class="stage"><span class="op">${q.x} − ${q.y} = ?</span></div>${numOpts()}${fb}`;
+  if(scr==="colors") return `<h2>${q.say}</h2><div class="opts four">${q.c.map((c,i)=>`<button class="opt" data-a="${i}" aria-label="${c[WI[lang]]}"><span class="swatch" style="background:${c[0]}"></span></button>`).join("")}</div>${fb}`;
+  if(scr==="shapes") return `<h2>${q.say}</h2><div class="opts ${q.sh.length===4?"four":""}">${q.sh.map((x,i)=>`<button class="opt" data-a="${i}" aria-label="${x[WI[lang]]}">${shapeSVG(x[0],q.cols[i])}</button>`).join("")}</div>${fb}`;
+  if(scr==="body") return `<h2>${q.say}</h2><div class="opts ${q.bd.length===4?"four":""}">${q.bd.map((x,i)=>`<button class="opt" data-a="${i}" aria-label="${x[WI[lang]]}"><span class="big">${x[0]}</span></button>`).join("")}</div>${fb}`;
+  if(scr==="cmp") return `<h2>${q.say}</h2><div class="opts four">${[q.x,q.y].map(n=>`<button class="opt" data-a="${n}"><span class="n" style="font-size:56px">${n}</span><span class="w">${nw(n)}</span>${n<=20?`<span style="font-size:13px;line-height:1.1;max-width:100%;overflow-wrap:anywhere;color:var(--sky)">${"●".repeat(n)}</span>`:""}</button>`).join("")}</div>${fb}`;
+  if(scr==="mul") return `<h2>${t("qAdd")}</h2><div class="stage">${Array.from({length:q.y},()=>`<div class="group" style="max-width:30%;font-size:${q.x>5?"16px":"22px"}">${q.e.repeat(q.x)}</div>`).join("")}</div><div class="stage"><span class="op">${q.y} × ${q.x} = ?</span></div>${numOpts()}${fb}`;
+  if(scr==="draw") return `<div class="snakewrap"><canvas id="dcv" width="600" height="600" style="background:#fff;border:3px solid var(--line)"></canvas></div>
     <div class="pal">${COLORS.map((c,i)=>`<button class="dot${i===1?" on":""}" data-col="${i}" style="background:${c[0]}" aria-label="${c[WI[lang]]}"></button>`).join("")}</div>
     <div class="pal">${[6,14,26].map((w,i)=>`<button class="sz${i===1?" on":""}" data-sz="${w}" aria-label="${w}"><i style="width:${w}px;height:${w}px"></i></button>`).join("")}</div>`;
-  if(screen==="abc"){const L=ALPHA[lang];const cur=game.letter||L[0];const w=alphaWord(cur);
+  if(scr==="abc"){const L=ALPHA[lang];const cur=game.letter||L[0];const w=alphaWord(cur);
     return `<button class="wcard" data-say="1"><span class="word" style="font-size:72px">${cur} ${cur.toLowerCase()}</span>${w?`<span class="pic" style="font-size:72px">${w[0]}</span><span class="word" style="font-size:34px"><span>${w[1].slice(0,cur.length)}</span>${w[1].slice(cur.length)}</span>`:""}</button>
       <div class="board" style="grid-template-columns:repeat(6,minmax(0,1fr))">${L.map(x=>`<button data-letter="${x}" class="${x===cur?"on":""}">${x}</button>`).join("")}</div>`;}
-  if(screen==="phrases"){
+  if(scr==="phrases"){
     const tabs=`<div class="cats"><button class="cat" data-pmode="learn" aria-pressed="${pMode==="learn"}">📖 ${t("learn")}</button><button class="cat" data-pmode="test" aria-pressed="${pMode==="test"}">❓ ${t("testM")}</button></div>`;
     if(pMode==="learn"){const ph=PHRASES[pIdx];
       return `${tabs}<button class="wcard" data-say="1"><span class="pic">${ph[0]}</span><span class="word" style="font-size:clamp(28px,8vw,44px);text-align:center;text-wrap:balance">${ph[WI[lang]]}</span></button>
@@ -208,46 +219,49 @@ function play(){
         <div class="nav"><button data-pi="-1">← ${t("prev")}</button><output>${pIdx+1} / ${PHRASES.length}</output><button data-pi="1">${t("next")} →</button></div>`;}
     return `${tabs}<div class="stage" style="font-size:80px">${q.ph[q.ans][0]}</div><h2>${t("qPhrase")}</h2>
       <div class="opts" style="grid-template-columns:1fr">${q.ph.map((x,i)=>`<button class="opt" data-a="${i}" style="min-height:58px"><span class="w" style="font-size:19px;color:var(--ink)">${x[WI[lang]]}</span></button>`).join("")}</div>${fb}`;}
-  if(screen==="stories"){
+  if(scr==="stories"){
     if(story<0) return `<div class="games">${STORIES.map((st,i)=>`<button class="game ${["c-coral","c-sky","c-leaf"][i%3]}" data-story="${i}"><span class="e">${st.e}</span><b>${st.t[LI[lang]]}</b><small>${st.p.length} ${t("pages")}</small></button>`).join("")}</div>`;
     const st=STORIES[story], last=sPage===st.p.length-1, pg=st.p[sPage];
     return `<h2>${st.t[LI[lang]]}</h2><div class="book"><div class="pic">${pg[0]}</div><p class="line">${pg[WI[lang]]}</p>
       <details><summary>${t("otherL")}</summary><div class="others" style="margin-top:8px">${Object.keys(WI).filter(k=>k!==lang).map(k=>`<span>${LANGS[k].name}: ${pg[WI[k]]}</span>`).join("")}</div></details></div>
       <div class="dots">${st.p.map((_,i)=>`<i class="${i===sPage?"on":""}"></i>`).join("")}</div>
       <div class="nav"><button data-sp="-1" ${sPage===0?"disabled":""}>← ${t("prev")}</button>${last?`<button data-story="-1" style="background:var(--leaf)">⭐ ${t("theEnd")}</button>`:`<button data-sp="1">${t("next")} →</button>`}</div>`;}
-  if(screen==="animals") return `<h2>${q.say}</h2><div class="opts ${q.an.length===4?"four":""}">${q.an.map((x,i)=>`<button class="opt" data-a="${i}" aria-label="${x[WI[lang]]}"><span class="big">${x[0]}</span><span class="w">${x[WI[lang]]}</span></button>`).join("")}</div>${fb}`;
-  if(screen==="days"){const today=(new Date().getDay()+6)%7;
+  if(scr==="animals") return `<h2>${q.say}</h2><div class="opts ${q.an.length===4?"four":""}">${q.an.map((x,i)=>`<button class="opt" data-a="${i}" aria-label="${x[WI[lang]]}"><span class="big">${x[0]}</span><span class="w">${x[WI[lang]]}</span></button>`).join("")}</div>${fb}`;
+  if(scr==="days"){const today=(new Date().getDay()+6)%7;
     const DC=["#E53935","#FB8C00","#F2B705","#2E9E4F","#13A3A3","#1E63D6","#7E3FD0"];
     const row=`<div class="week">${DAYS[lang].map((d,i)=>`<button class="day${i===today?" today":""}" data-day="${i}" style="--dc:${DC[i]};color:${i===2?"#24305E":"#fff"}"><span class="num">${i+1}</span><b>${d}</b>${i===today?`<small>⭐ ${t("today")}</small>`:""}</button>`).join("")}</div>`;
     if(age==="a") return `<h2>${t("today")}${lang==="fr"?" :":":"} ${["fr","es"].includes(lang)?DAYS[lang][today].toLowerCase():DAYS[lang][today]}</h2>${row}`;
     return `<h2>${q.say}</h2><div class="opts">${q.opts.map(i=>`<button class="opt" data-a="${i}"><span class="w" style="font-size:18px;color:var(--ink)">${DAYS[lang][i]}</span></button>`).join("")}</div>${fb}${row}`;}
-  if(screen==="clock"){const ha=((q.h%12)+q.m/60)*30, ma=q.m*6;
+  if(scr==="clock"){const ha=((q.h%12)+q.m/60)*30, ma=q.m*6;
     const ticks=Array.from({length:12},(_,i)=>{const a=(i+1)*30*Math.PI/180;return `<text x="${100+72*Math.sin(a)}" y="${100-72*Math.cos(a)+7}" text-anchor="middle" font-size="20" font-weight="800" fill="#24305E" font-family="Baloo 2,sans-serif">${i+1}</text>`;}).join("");
     return `<h2>${q.say}</h2><div class="stage"><svg viewBox="0 0 200 200" width="210" height="210" role="img" aria-label="clock"><circle cx="100" cy="100" r="94" fill="#fff" stroke="#24305E" stroke-width="6"/>${ticks}
       <line x1="100" y1="100" x2="${100+46*Math.sin(ha*Math.PI/180)}" y2="${100-46*Math.cos(ha*Math.PI/180)}" stroke="#FF6B5B" stroke-width="9" stroke-linecap="round"/>
       <line x1="100" y1="100" x2="${100+70*Math.sin(ma*Math.PI/180)}" y2="${100-70*Math.cos(ma*Math.PI/180)}" stroke="#2F80ED" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="100" r="7" fill="#24305E"/></svg></div>
       <div class="opts">${q.opts.map(x=>`<button class="opt" data-a="${x}"><span class="n" style="font-size:34px">${x}</span></button>`).join("")}</div>${fb}`;}
-  if(screen==="puzzle") return `<p class="hint" style="text-align:center">${t("tapTwo")}</p><div class="pz" id="pz"></div><img id="pzprev" alt="" style="width:90px;border-radius:12px;align-self:center;border:3px solid var(--line)">`;
-  if(screen==="music"){const lab=lang==="en"?["C","D","E","F","G","A","B","C"]:["Do","Re","Mi","Fa",lang==="ht"?"Sòl":"Sol","La","Si","Do"];
+  if(scr==="puzzle") return `<p class="hint" style="text-align:center">${t("tapTwo")}</p><div class="pz" id="pz"></div><img id="pzprev" alt="" style="width:90px;border-radius:12px;align-self:center;border:3px solid var(--line)">`;
+  if(scr==="music"){const lab=lang==="en"?["C","D","E","F","G","A","B","C"]:["Do","Re","Mi","Fa",lang==="ht"?"Sòl":"Sol","La","Si","Do"];
     return `<div class="piano">${NOTES.map((f,i)=>`<button class="key" data-note="${i}" style="background:${NOTECOL[i]}"><span>${lab[i]}</span></button>`).join("")}</div>
       <div class="nav" style="justify-content:center"><button data-song="1">🎵 ${t("song")}</button></div>`;}
-  if(screen==="find") return `<h2>${q.say}</h2><div class="opts ${q.w.length===4?"four":""}">${q.w.map((w,i)=>`<button class="opt" data-a="${i}" aria-label="${word(w)}"><span class="big">${w[0]}</span></button>`).join("")}</div>${fb}`;
-  if(screen==="mem") return memView();
-  if(screen==="sort") return `<p class="hint" style="text-align:center">${t("sortS")}</p><div class="sortbox" id="sortbox"></div>
+  if(scr==="find") return `<h2>${q.say}</h2><div class="opts ${q.w.length===4?"four":""}">${q.w.map((w,i)=>`<button class="opt" data-a="${i}" aria-label="${word(w)}"><span class="big">${w[0]}</span></button>`).join("")}</div>${fb}`;
+  if(scr==="mem") return memView();
+  if(scr==="sort") return `<p class="hint" style="text-align:center">${t("sortS")}</p><div class="sortbox" id="sortbox"></div>
     <div class="nav" style="justify-content:center;gap:10px"><button id="sundo" data-sundo="1">↩ ${t("undo")}</button><button data-again="sort" style="background:var(--coral)">🔄 ${t("restart")}</button></div>`;
-  if(screen==="snake") return `<h2 id="shint" style="font-size:22px"></h2><div class="snakewrap" id="swrap"><canvas id="cv" width="480" height="480"></canvas><div class="over" id="sover"><b>🐍</b><button class="go big" data-sstart="1">▶ ${t("start")}</button><span>${t("swipeHint")}</span></div></div>
+  if(scr==="snake") return `<h2 id="shint" style="font-size:22px"></h2><div class="snakewrap" id="swrap"><canvas id="cv" width="480" height="480"></canvas><div class="over" id="sover"><b>🐍</b><button class="go big" data-sstart="1">▶ ${t("start")}</button><span>${t("swipeHint")}</span></div></div>
     <div class="pad"><button class="u" data-dir="0,-1" aria-label="Up">▲</button><button class="l" data-dir="-1,0" aria-label="Left">◀</button><button class="d" data-dir="0,1" aria-label="Down">▼</button><button class="r" data-dir="1,0" aria-label="Right">▶</button></div>`;
-  if(screen==="balloon") return `<h2 id="bhint" style="font-size:22px"></h2><div class="sky" id="sky"></div>`;
+  if(scr==="balloon") return `<h2 id="bhint" style="font-size:22px"></h2><div class="sky" id="sky"></div>`;
   return "";
 }
 function answer(btn){
+  const scr=qScr();
   if(locked) return;
-  const v=screen==="clock"?btn.dataset.a:+btn.dataset.a, f=document.getElementById("fb");
+  const v=scr==="clock"?btn.dataset.a:+btn.dataset.a, f=document.getElementById("fb");
   if(v===q.ans){
     locked=true; btn.classList.add("ok"); addStar(); sfx("ok"); confetti(); cheer(t("ok"));
     f.className="fb ok"; f.textContent="⭐ "+t("ok");
-    const said=screen==="phrases"?q.ph[q.ans][WI[lang]]:screen==="animals"?q.an[q.ans][WI[lang]]+". "+q.an[q.ans][SI[lang]]:screen==="days"?DAYS[lang][q.ans]:screen==="clock"?q.ans:screen==="shapes"?q.sh[q.ans][WI[lang]]:screen==="body"?q.bd[q.ans][WI[lang]]:screen==="colors"?q.c[q.ans][WI[lang]]:screen==="find"?word(q.w[q.ans]):nw(q.ans);
+    const said=scr==="phrases"?q.ph[q.ans][WI[lang]]:scr==="animals"?q.an[q.ans][WI[lang]]+". "+q.an[q.ans][SI[lang]]:scr==="days"?DAYS[lang][q.ans]:scr==="clock"?q.ans:scr==="shapes"?q.sh[q.ans][WI[lang]]:scr==="body"?q.bd[q.ans][WI[lang]]:scr==="colors"?q.c[q.ans][WI[lang]]:scr==="find"?word(q.w[q.ans]):nw(q.ans);
     speak(said+". "+t("ok"));
+    statOk();
+    if(screen==="daily"){timers.push(setTimeout(dailyNext,1300));return;}
     timers.push(setTimeout(()=>{newQ();render();speak(q.say);},1500));
   } else {
     btn.classList.remove("no"); void btn.offsetWidth; btn.classList.add("no"); sfx("no");
@@ -461,8 +475,65 @@ function note(i,dur=.5){
   const k=document.querySelector(`[data-note="${i}"]`); if(k){k.classList.add("hit");setTimeout(()=>k.classList.remove("hit"),180);}
 }
 function playSong(){let t0=0;SONG.forEach(i=>{if(i>=0)timers.push(setTimeout(()=>note(i,.45),t0));t0+=i<0?250:420;});}
+
+/* ---------- daily challenge ---------- */
+const todayKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+let DAILY={}; try{DAILY=JSON.parse(localStorage.getItem("tk-daily")||"{}")||{};}catch(e){DAILY={};}
+let daily={types:[],i:0};
+const qScr=()=>screen==="daily"?(daily.types[daily.i]||"count"):screen;
+const DAILYPOOL={a:["count","add","colors","shapes","animals","find","body"],b:["count","add","sub","cmp","colors","shapes","animals","find","days","clock"],c:["add","sub","mul","cmp","clock","days","animals","find","count"]};
+const dailyDoneToday=()=>DAILY.last===todayKey();
+function streakNow(){if(!DAILY.last)return 0;const y=new Date();y.setDate(y.getDate()-1);return (DAILY.last===todayKey()||DAILY.last===todayKey(y))?(DAILY.streak||0):0;}
+function dailyStart(){daily={types:shuffle(DAILYPOOL[age||"b"]).slice(0,3),i:0};newQ();}
+function dailyNext(){
+  daily.i++;
+  if(daily.i<3){newQ();render();speak(q.say);return;}
+  const y=new Date();y.setDate(y.getDate()-1);
+  if(!dailyDoneToday()){DAILY.streak=(DAILY.last===todayKey(y))?(DAILY.streak||0)+1:1;DAILY.last=todayKey();try{localStorage.setItem("tk-daily",JSON.stringify(DAILY));}catch(e){}}
+  addStar(3);sfx("ok");confetti(180);cheer(t("dailyDone"));speak(t("dailyDone"));
+  showLvBox(`<b>🔥 ${t("dailyDone")}</b><span>⭐ +3 · 🔥 ${DAILY.streak} ${t("streakL")}</span><p class="hint" style="margin:0">${t("comeBack")}</p><button class="go alt" data-go="home">← ${t("back")}</button>`);
+}
+/* ---------- usage stats (kept only on this device) ---------- */
+let STATS={}; try{STATS=JSON.parse(localStorage.getItem("tk-stats")||"{}")||{};}catch(e){STATS={};}
+STATS.d=STATS.d||{}; STATS.limit=STATS.limit||0;
+function day(k=todayKey()){return STATS.d[k]=STATS.d[k]||{m:0,a:{},ok:0};}
+function saveStats(){try{const keys=Object.keys(STATS.d).sort();while(keys.length>60)delete STATS.d[keys.shift()];localStorage.setItem("tk-stats",JSON.stringify(STATS));}catch(e){}}
+function statAct(k){const d=day();d.a[k]=(d.a[k]||0)+1;saveStats();}
+function statOk(){day().ok++;saveStats();}
+const NOTIME=["lang","age","parent","gate","limit"];
+setInterval(()=>{if(document.visibilityState==="hidden"||NOTIME.includes(screen))return;const d=day();d.m=Math.round((d.m+0.5)*10)/10;saveStats();
+  if(STATS.limit&&d.m>=STATS.limit&&screen!=="home"){stopAll();screen="limit";render();}},30000);
+const overLimit=()=>STATS.limit&&day().m>=STATS.limit;
+function last7(){const out=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=todayKey(d);out.push([d,STATS.d[k]||{m:0,a:{},ok:0}]);}return out;}
+/* ---------- parent gate + parent area ---------- */
+let gate={a:0,b:0,err:false,next:"parent"};
+function gateNew(next){gate={a:rnd(21,59),b:rnd(12,39),err:false,next:next||"parent"};}
+function parentView(){
+  const w=last7(), wm=w.reduce((s,[,d])=>s+d.m,0), ok=w.reduce((s,[,d])=>s+(d.ok||0),0), mx=Math.max(10,...w.map(([,d])=>d.m));
+  const acts={};w.forEach(([,d])=>Object.entries(d.a||{}).forEach(([k,v])=>acts[k]=(acts[k]||0)+v));
+  const top=Object.entries(acts).sort((x,y)=>y[1]-x[1]).slice(0,5);
+  const lims=[0,15,30,45,60];
+  return `<h1>👪 ${t("parent")}</h1>
+    <div class="pstats">
+      <div><small>${t("todayMin")}</small><b>${Math.round(day().m)} ${t("minU")}</b></div>
+      <div><small>${t("weekMin")}</small><b>${Math.round(wm)} ${t("minU")}</b></div>
+      <div><small>${t("goodAns")}</small><b>${ok}</b></div>
+      <div><small>🔥 ${t("streakL")}</small><b>${streakNow()}</b></div>
+    </div>
+    <h3>${t("timeChart")}</h3>
+    <div class="pchart">${w.map(([d,v])=>`<div class="pcol"><span class="pv">${Math.round(v.m)}</span><i style="height:${Math.max(3,v.m/mx*100)}%"></i><small>${DAYS[lang][(d.getDay()+6)%7].slice(0,3)}</small></div>`).join("")}</div>
+    <h3>${t("topAct")}</h3>
+    ${top.length?`<ol class="ptop">${top.map(([k,v])=>`<li><span>${(GAMEINFO[k]||["•"])[0]} ${t(k)||k}</span><b>${v}×</b></li>`).join("")}</ol>`:`<p class="hint">${t("nothingYet")}</p>`}
+    <h3>${t("limitL")}</h3>
+    <div class="cats">${lims.map(m=>`<button class="cat" data-limit="${m}" aria-pressed="${STATS.limit===m}">${m?m+" "+t("minU"):t("noLimit")}</button>`).join("")}</div>`;
+}
+function gateView(){return `<h2>🔒 ${t("gateQ").replace("{a}",gate.a).replace("{b}",gate.b)}</h2>
+  <div class="gaterow"><input id="pgate" type="number" inputmode="numeric" autocomplete="off" aria-label="answer"><button class="go" data-pgate="1">${t("enter")}</button></div>
+  ${gate.err?`<p class="fb no">${t("wrongGate")}</p>`:""}`;}
+function limitView(){return `<div class="hello" style="flex-direction:column;text-align:center">${tiki("happy")}<h2>${t("limitHit")}</h2><p class="hint">${t("seeTomorrow")}</p></div>
+  <button class="go alt" data-go="home">← ${t("back")}</button><button class="go alt" data-parentgo="1">👪 ${t("parent")}</button>`;}
 /* ---------- level win / fail ---------- */
-function levelWin(g){
+function levelWin(g){ statOk();
   const n=lvl(g); unlockNext(g); addStar(2); sfx("ok"); confetti(160); cheer(t("levelDone").replace("{n}",n)); speak(t("levelDone").replace("{n}",n));
   showLvBox(`<b>🏆 ${t("levelDone").replace("{n}",n)}</b><span>⭐ +2</span><button class="go" data-nextlv="${g}">${t("nextLevel")} ▶</button><button class="go alt" data-again="${g}">${t("again")}</button><button class="go alt" data-go="home">← ${t("back")}</button>`);
 }
@@ -522,7 +593,10 @@ document.addEventListener("touchend",e=>{
 document.addEventListener("click",e=>{if(Date.now()-lastTouchTap<700)return;try{onTap(e);}catch(err){showErr(err&&err.message||err);}});
 function onTap(e){
   const g=e.target.closest("[data-go]");
-  if(g){stopAll(); screen=g.dataset.go;
+  if(g){stopAll(); const dest=g.dataset.go;
+    if(!["home","lang","age"].includes(dest)&&overLimit()){screen="limit";render();return;}
+    screen=dest; if(!["home","lang","age"].includes(dest)) statAct(dest);
+    if(screen==="daily"){dailyStart();render();speak(q.say);return;}
     if((["count","add","sub","colors","find","shapes","body","cmp","mul","animals","clock"].includes(screen)||(screen==="days"&&age!=="a"))){newQ();render();speak(q.say);}
     else {if(screen==="phrases")pMode="learn"; if(screen==="stories")story=-1; render(); if(screen==="words")speak(word(themeList(theme)[wIdx])); if(screen==="age")speak(t("ageQ"));}
     return;}
@@ -536,6 +610,9 @@ function onTap(e){
   const nx=e.target.closest("[data-nextlv]"); if(nx){const g=nx.dataset.nextlv;stopAll();setLv(g,lvl(g)+1);screen=g;render();return;}
   const tbb=e.target.closest("[data-tube]"); if(tbb){tubeTap(+tbb.dataset.tube);return;}
   if(e.target.closest("[data-sundo]")){const g=game;if(g.hist&&g.hist.length){g.tb=g.hist.pop();g.sel=-1;g.moves++;drawSort();}return;}
+  const pg=e.target.closest("[data-parentgo]"); if(pg){stopAll();gateNew("parent");screen="gate";render();return;}
+  if(e.target.closest("[data-pgate]")){const v=+(document.getElementById("pgate")||{}).value;if(v===gate.a+gate.b){screen=gate.next;render();}else{gate.err=true;render();}return;}
+  const lm=e.target.closest("[data-limit]"); if(lm){STATS.limit=+lm.dataset.limit;saveStats();render();return;}
   const ct=e.target.closest("[data-cat]"); if(ct){homeCat=ct.dataset.cat;render();return;}
   const th=e.target.closest("[data-theme]"); if(th){theme=th.dataset.theme;wIdx=0;render();speak(word(themeList(theme)[0]));return;}
   const pm=e.target.closest("[data-pmode]"); if(pm){pMode=pm.dataset.pmode;if(pMode==="test"){newQ();render();speak(q.say);}else render();return;}
