@@ -1,8 +1,15 @@
-const APP_VERSION="1.0.0";
+const APP_VERSION="1.1.0";
 /* ---------- state ---------- */
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
 if(lang&&age) screen="home"; else if(lang) screen="age";
+let LV={}; try{LV=JSON.parse(localStorage.getItem("tk-lv")||"{}")||{};}catch(e){LV={};}
+const LVGAMES=["mem","snake","balloon","puzzle","sort"];
+const lvKey=g=>`${age||"b"}-${g}`;
+const lvl=g=>(LV[lvKey(g)]||{cur:1}).cur;
+const lvMax=g=>(LV[lvKey(g)]||{max:1}).max||1;
+function setLv(g,cur){const k=lvKey(g);const o=LV[k]||{cur:1,max:1};o.cur=Math.max(1,Math.min(cur,o.max||1));LV[k]=o;try{localStorage.setItem("tk-lv",JSON.stringify(LV));}catch(e){}}
+function unlockNext(g){const k=lvKey(g);const o=LV[k]||{cur:1,max:1};o.max=Math.max(o.max||1,o.cur+1);LV[k]=o;try{localStorage.setItem("tk-lv",JSON.stringify(LV));}catch(e){}}
 const save=()=>{try{localStorage.setItem("tk-lang",lang||"");localStorage.setItem("tk-age",age||"");localStorage.setItem("tk-stars",stars);}catch(e){}};
 const t=k=>UI[lang||"ht"][k];
 const A=()=>AGES[age||"b"];
@@ -11,6 +18,7 @@ const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,r)=>p[0]-r[0]).map(x=>x[1])
 const word=w=>w[WI[lang]];
 const nw=n=>numWord(n,lang);
 const addStar=(k=1)=>{const before=Math.floor(stars/10);stars+=k;save();if(Math.floor(stars/10)>before){setTimeout(()=>{confetti(140);cheer("🏆");},300);}const s=document.querySelector(".pill span");if(s)s.textContent=stars;};
+function stopTimersOnly(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];}
 function stopAll(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};try{speechSynthesis.cancel();}catch(e){}}
 
 let sound=true; try{sound=localStorage.getItem("tk-snd")!=="0";}catch(e){}
@@ -74,10 +82,10 @@ function bar(){
 const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>`;
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
-const PLAYS=["mem","snake","balloon","draw","puzzle","music"];
+const PLAYS=["mem","snake","balloon","sort","puzzle","draw","music"];
 const CATOF={phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
 const GAMEINFO={phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
-  mem:["🃏","c-grape"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
+  mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
 const tile=k=>`<button class="game ${GAMEINFO[k][1]}" data-go="${k}"><span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
 function render(){
@@ -105,10 +113,12 @@ function render(){
   if(screen==="balloon") balloonInit();
   if(screen==="draw") drawInit();
   if(screen==="puzzle") puzzleInit();
+  if(screen==="sort") sortInit();
 }
 function playTop(){
-  const right=["puzzle","music"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon"].includes(screen)?`<span class="score" id="score">0 ${t("pts")}</span>`:lang==="ht"?"<span></span>":`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
-  return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>`;
+  const right=["puzzle","music"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?"<span></span>":`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
+  const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
+  return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}`;
 }
 
 /* ---------- learning games ---------- */
@@ -199,8 +209,9 @@ function play(){
       <div class="nav" style="justify-content:center"><button data-song="1">🎵 ${t("song")}</button></div>`;}
   if(screen==="find") return `<h2>${q.say}</h2><div class="opts ${q.w.length===4?"four":""}">${q.w.map((w,i)=>`<button class="opt" data-a="${i}" aria-label="${word(w)}"><span class="big">${w[0]}</span></button>`).join("")}</div>${fb}`;
   if(screen==="mem") return memView();
-  if(screen==="snake") return `<h2 id="shint" style="font-size:22px"></h2><div class="snakewrap"><canvas id="cv" width="420" height="420"></canvas><div class="over" id="sover"><b>🐍</b><span>${t("tapStart")}</span></div></div>
-    <div class="pad"><button class="u" data-dir="0,-1" aria-label="Up">▲</button><button class="l" data-dir="-1,0" aria-label="Left">◀</button><button class="d" data-dir="0,1" aria-label="Down">▼</button><button class="r" data-dir="1,0" aria-label="Right">▶</button></div>`;
+  if(screen==="sort") return `<p class="hint" style="text-align:center">${t("sortS")}</p><div class="sortbox" id="sortbox"></div>
+    <div class="nav" style="justify-content:center;gap:10px"><button id="sundo" data-sundo="1">↩ ${t("undo")}</button><button data-again="sort" style="background:var(--coral)">🔄 ${t("restart")}</button></div>`;
+  if(screen==="snake") return `<h2 id="shint" style="font-size:22px"></h2><div class="snakewrap" id="swrap"><canvas id="cv" width="480" height="480"></canvas><div class="over" id="sover"><b>🐍</b><span>${t("swipeHint")}</span></div></div><p class="hint" style="text-align:center;font-size:14px">👆 ${t("swipeHint")}</p>`;
   if(screen==="balloon") return `<h2 id="bhint" style="font-size:22px"></h2><div class="sky" id="sky"></div>`;
   return "";
 }
@@ -221,7 +232,7 @@ function answer(btn){
 
 /* ---------- memory ---------- */
 function memInit(){
-  const a=A(); let cards=[];
+  const a={...A()}; a.pairs=Math.min({a:8,b:10,c:10}[age||"b"],{a:3,b:4,c:5}[age||"b"]+lvl("mem")-1); let cards=[];
   if(a.memMode==="numword"){const ns=shuffle(Array.from({length:99},(_,i)=>i+2)).slice(0,a.pairs);
     ns.forEach(n=>{cards.push({k:n,face:String(n),say:nw(n)});cards.push({k:n,face:nw(n),say:nw(n),word:true});});}
   else if(a.memMode==="picword"){const ws=shuffle(WORDS).slice(0,a.pairs); ws.forEach((w,i)=>{cards.push({k:i,face:w[0],say:word(w)});cards.push({k:i,face:word(w),say:word(w),word:true});});}
@@ -232,55 +243,67 @@ function memView(){
   if(!game.cards) memInit();
   const done=game.found===game.cards.length/2;
   return `<div class="mem">${game.cards.map((c,i)=>`<button class="mc ${c.up||c.done?"up":"back"}${c.done?" done":""}${(c.up||c.done)&&c.word?" word":""}" data-mc="${i}" aria-label="${c.up||c.done?c.say:"?"}">${c.up||c.done?c.face:""}</button>`).join("")}</div>
-   ${done?`<p class="fb ok">🎉 ${t("win")}</p><div class="nav" style="justify-content:center"><button data-again="mem">${t("again")}</button></div>`:""}`;
+`;
 }
 function memFlip(i){
   const c=game.cards[i]; if(game.busy||c.up||c.done) return;
-  c.up=true; game.open.push(i); speak(c.say); render(); setScore(game.found);
+  c.up=true; game.open.push(i); speak(c.say); const _m=document.querySelector(".mem"); if(_m){_m.outerHTML=memView().split("`;")[0];} else render(); setScore(game.found);
   if(game.open.length===2){
     const [x,y]=game.open.map(j=>game.cards[j]);
     game.busy=true;
     timers.push(setTimeout(()=>{
       if(x.k===y.k){x.done=y.done=true;game.found++;addStar();sfx("star");speak(t("ok"));}
-      x.up=y.up=false; game.open=[]; game.busy=false; render(); setScore(game.found);
-      if(game.found===game.cards.length/2){speak(t("win"));sfx("ok");confetti(150);cheer(t("win"));}
+      x.up=y.up=false; game.open=[]; game.busy=false; const _m2=document.querySelector(".mem"); if(_m2) _m2.outerHTML=memView(); setScore(game.found);
+      if(game.found===game.cards.length/2){levelWin("mem");}
     },x.k===y.k?500:1000));
   }
 }
-function setScore(n){const s=document.getElementById("score");if(s)s.textContent=`${n} ${t("pts")}`;}
+function setScore(n){const s=document.getElementById("score");if(!s)return;if(screen==="mem"&&game.cards)s.textContent=`${n}/${game.cards.length/2}`;else s.textContent=`${n} ${t("pts")}`;}
 
 /* ---------- snake ---------- */
 function snakeInit(){
   const N=A().grid, cv=document.getElementById("cv"), ctx=cv.getContext("2d"), cs=cv.width/N, m=Math.floor(N/2);
   const skip=age==="c"?[2,5,10][rnd(0,2)]:0;
-  game={N,cv,ctx,cs,body:[[m,m],[m-1,m],[m-2,m]],dir:[1,0],next:[1,0],food:null,decoy:null,fruit:"🍎",score:0,running:false,loop:null,skip,val:skip};
+  const L=lvl("snake"), goal={a:4,b:6,c:8}[age||"b"]+(L-1)*2, speed=Math.max(75,Math.round(A().speed*Math.pow(0.92,L-1)));
+  const nRocks=age==="a"?Math.max(0,Math.min(L-3,4)):Math.max(0,Math.min(L-2,8));
+  game={N,cv,ctx,cs,body:[[m,m],[m-1,m],[m-2,m]],dir:[1,0],next:[1,0],food:null,decoy:null,fruit:"🍎",score:0,running:false,loop:null,skip,val:skip,goal,speed,rocks:[]};
+  for(let r=0;r<nRocks;r++){let p;do{p=[rnd(1,N-2),rnd(1,N-2)];}while(Math.abs(p[1]-m)<2||game.rocks.some(q=>q[0]===p[0]&&q[1]===p[1]));game.rocks.push(p);}
+  const sc0=document.getElementById("score"); if(sc0) sc0.textContent=`🍎 0/${goal}`;
   const hint=document.getElementById("shint"); if(hint) hint.textContent=skip?t("skip").replaceAll("{x}",skip).replace("{y}",skip):"";
   placeFood(); drawSnake();
-  let sx=0,sy=0;
-  cv.addEventListener("touchstart",e=>{const p=e.touches[0];sx=p.clientX;sy=p.clientY;},{passive:true});
-  cv.addEventListener("touchend",e=>{const p=e.changedTouches[0];const dx=p.clientX-sx,dy=p.clientY-sy;
-    if(Math.max(Math.abs(dx),Math.abs(dy))<20) return; turn(Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)]);});
+  const wrap=document.getElementById("swrap"); let sx=0,sy=0,down=false,swiped=false;
+  wrap.addEventListener("pointerdown",e=>{e.preventDefault();down=true;swiped=false;sx=e.clientX;sy=e.clientY;try{wrap.setPointerCapture(e.pointerId);}catch(err){}});
+  wrap.addEventListener("pointermove",e=>{if(!down||swiped)return;const dx=e.clientX-sx,dy=e.clientY-sy;
+    if(Math.max(Math.abs(dx),Math.abs(dy))>=24){swiped=true;turn(Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)]);}});
+  wrap.addEventListener("pointerup",e=>{if(!down)return;down=false;if(swiped)return;
+    const r=cv.getBoundingClientRect(),g=game,cell=r.width/g.N,hx=r.left+(g.body[0][0]+.5)*cell,hy=r.top+(g.body[0][1]+.5)*cell,dx=e.clientX-hx,dy=e.clientY-hy;
+    if(Math.max(Math.abs(dx),Math.abs(dy))<cell*.6){if(!g.running)turn(g.dir);return;}
+    let d=Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)];
+    if(g.running&&d[0]===-g.dir[0]&&d[1]===-g.dir[1]) d=Math.abs(dx)>Math.abs(dy)?[0,Math.sign(dy)||1]:[Math.sign(dx)||1,0];
+    turn(d);});
+  wrap.addEventListener("pointercancel",()=>{down=false;});
 }
-function freeCell(){const g=game;let p;do{p=[rnd(0,g.N-1),rnd(0,g.N-1)];}while(g.body.some(b=>b[0]===p[0]&&b[1]===p[1])||(g.food&&p[0]===g.food[0]&&p[1]===g.food[1]));return p;}
+function freeCell(){const g=game;let p;do{p=[rnd(0,g.N-1),rnd(0,g.N-1)];}while(g.body.some(b=>b[0]===p[0]&&b[1]===p[1])||(g.food&&p[0]===g.food[0]&&p[1]===g.food[1])||(g.rocks||[]).some(b=>b[0]===p[0]&&b[1]===p[1]));return p;}
 function placeFood(){const g=game;g.food=null;g.food=freeCell();g.fruit=FRUITS[rnd(0,FRUITS.length-1)];
   if(g.skip){g.decoy=freeCell();let d;do{d=g.val+rnd(-2,2)*(rnd(0,1)?1:g.skip);}while(d===g.val||d<1);g.decoyVal=d;}}
 function turn(d){
   const g=game; if(!g.cv) return;
   if(d[0]===-g.dir[0]&&d[1]===-g.dir[1]&&g.running) return;
   g.next=d;
-  if(!g.running){g.running=true;document.getElementById("sover").hidden=true;g.loop=setInterval(step,A().speed);timers.push(g.loop);}
+  if(!g.running){g.running=true;document.getElementById("sover").hidden=true;g.loop=setInterval(step,g.speed||A().speed);timers.push(g.loop);}
 }
 function step(){
   const g=game; if(!g.cv) return; g.dir=g.next;
   let h=[g.body[0][0]+g.dir[0],g.body[0][1]+g.dir[1]];
   if(A().wrap){h=[(h[0]+g.N)%g.N,(h[1]+g.N)%g.N];}
   else if(h[0]<0||h[1]<0||h[0]>=g.N||h[1]>=g.N) return snakeOver();
-  if(g.body.some(b=>b[0]===h[0]&&b[1]===h[1])) return snakeOver();
+  if(g.body.some(b=>b[0]===h[0]&&b[1]===h[1])||(g.rocks||[]).some(b=>b[0]===h[0]&&b[1]===h[1])) return snakeOver();
   g.body.unshift(h);
-  if(h[0]===g.food[0]&&h[1]===g.food[1]){g.score++;setScore(g.score);sfx("pop");
+  if(h[0]===g.food[0]&&h[1]===g.food[1]){g.score++;const sc=document.getElementById("score");if(sc)sc.textContent=`🍎 ${g.score}/${g.goal}`;sfx("pop");
     if(g.skip){speak(g.val<=100?nw(g.val):String(g.val));g.val+=g.skip;const hint=document.getElementById("shint");if(hint)hint.textContent=t("skip").replaceAll("{x}",g.skip).replace("{y}",g.val);}
     else speak(nw(Math.min(g.score,100)));
-    if(g.score%5===0)addStar();placeFood();}
+    if(g.score>=g.goal){placeFood();drawSnake();clearInterval(g.loop);g.running=false;g.won=true;levelWin("snake");return;}
+    placeFood();}
   else {g.body.pop();
     if(g.skip&&g.decoy&&h[0]===g.decoy[0]&&h[1]===g.decoy[1]){speak(t("notThat"));g.decoy=freeCell();}}
   drawSnake();
@@ -288,7 +311,7 @@ function step(){
 function snakeOver(){
   const g=game; clearInterval(g.loop); g.running=false;
   const o=document.getElementById("sover"); o.hidden=false;
-  o.innerHTML=`<b>${g.score} ${t("pts")}</b><span>${t("over")}</span><button class="go" data-again="snake">${t("again")}</button>`;
+  o.innerHTML=`<b>🍎 ${g.score}/${g.goal}</b><span>${t("over")}</span><button class="go" data-again="snake">🔄 ${t("tryLv")}</button>`;
   speak(t("over"));
 }
 function drawSnake(){
@@ -298,6 +321,7 @@ function drawSnake(){
   if(g.skip){const tag=(p,v,col)=>{c.fillStyle=col;c.beginPath();c.arc(p[0]*s+s/2,p[1]*s+s/2,s*.48,0,7);c.fill();c.fillStyle="#fff";c.font=`800 ${v>99?s*.38:s*.5}px "Baloo 2",sans-serif`;c.fillText(v,p[0]*s+s/2,p[1]*s+s/2+2);};
     tag(g.food,g.val,"#FF6B5B");tag(g.decoy,g.decoyVal,"#FF6B5B");}
   else {c.font=`${s*.85}px serif`;c.fillText(g.fruit,g.food[0]*s+s/2,g.food[1]*s+s/2+2);}
+  (g.rocks||[]).forEach(b=>{c.fillStyle="#8A8FA3";c.beginPath();c.roundRect?c.roundRect(b[0]*s+2,b[1]*s+2,s-4,s-4,s*.25):c.rect(b[0]*s+2,b[1]*s+2,s-4,s-4);c.fill();c.fillStyle="#B9BDCB";c.beginPath();c.arc(b[0]*s+s*.38,b[1]*s+s*.38,s*.12,0,7);c.fill();});
   g.body.forEach((b,i)=>{c.fillStyle=i===0?"#1C8A57":"#2DBE7E";const r=s*.3,x=b[0]*s+1,y=b[1]*s+1,w=s-2;
     c.beginPath();c.roundRect?c.roundRect(x,y,w,w,r):c.rect(x,y,w,w);c.fill();});
   const hd=g.body[0];c.fillStyle="#fff";c.beginPath();c.arc(hd[0]*s+s*.35,hd[1]*s+s*.38,s*.12,0,7);c.arc(hd[0]*s+s*.65,hd[1]*s+s*.38,s*.12,0,7);c.fill();
@@ -305,7 +329,12 @@ function drawSnake(){
 
 /* ---------- balloons ---------- */
 function balloonInit(){
-  const sky=document.getElementById("sky"); game={sky,score:0,mode:A().bal}; newBalTarget();
+  const sky=document.getElementById("sky"); const L=lvl("balloon");
+  const goal={a:8,b:10,c:10}[age||"b"]+(L-1)*2, secs={a:45,b:35,c:30}[age||"b"];
+  game={sky,score:0,mode:A().bal,goal,left:secs,L}; newBalTarget();
+  const tick=()=>{const g=game;if(!g.sky||g.done)return;const sc=document.getElementById("score");if(sc)sc.textContent=`⏱ ${g.left} · 🎈 ${g.score}/${g.goal}`;
+    if(g.left<=0){g.done=true;stopTimersOnly();levelFail("balloon",t("timeUp"));return;}g.left--;};
+  tick(); timers.push(setInterval(tick,1000));
   const spawn=()=>{
     if(!document.body.contains(sky)) return;
     const c=COLORS[rnd(0,COLORS.length-1)], b=document.createElement("button");
@@ -317,12 +346,13 @@ function balloonInit(){
     b.textContent=n||""; b.dataset.say=n?nw(n):COLORS[ci][WI[lang]];
     b.dataset.good=g.mode==="free"?"1":g.mode==="color"?(ci===g.target?"1":"0"):(n>g.target?"1":"0");
     b.setAttribute("aria-label",b.dataset.say);
-    const dur=rnd(age==="a"?7000:5000,age==="a"?10000:8000);
+    if(game.done) return;
+    const sp=Math.pow(0.93,game.L-1), dur=Math.max(2600,rnd(age==="a"?7000:5000,age==="a"?10000:8000)*sp);
     b.animate([{transform:"translateY(0)"},{transform:`translateY(-${sky.clientHeight+220}px)`}],{duration:dur,easing:"linear"}).onfinish=()=>b.remove();
     b.addEventListener("pointerdown",ev=>{ev.preventDefault();pop(b);});
     sky.appendChild(b);
   };
-  spawn(); timers.push(setInterval(spawn,age==="a"?1100:800));
+  spawn(); timers.push(setInterval(spawn,Math.max(380,(age==="a"?1100:800)*Math.pow(0.92,L-1))));
 }
 function newBalTarget(){
   const g=game,h=document.getElementById("bhint");
@@ -336,7 +366,10 @@ function pop(b){
   const p=document.createElement("span"); p.className="puff"; p.textContent="✨"; p.style.left=(r.left-sr.left+18)+"px"; p.style.top=(r.top-sr.top+20)+"px";
   g.sky.appendChild(p); setTimeout(()=>p.remove(),500);
   if(b.dataset.good!=="1"){speak(t("notThat"));b.style.opacity=".35";b.disabled=true;p.textContent="✖️";return;}
-  sfx("pop"); speak(b.dataset.say); b.remove(); g.score++; setScore(g.score); if(g.score%10===0) addStar();
+  if(g.done) return;
+  sfx("pop"); speak(b.dataset.say); b.remove(); g.score++;
+  const sc=document.getElementById("score"); if(sc) sc.textContent=`⏱ ${g.left} · 🎈 ${g.score}/${g.goal}`;
+  if(g.score>=g.goal){g.done=true;stopTimersOnly();document.querySelectorAll(".bal").forEach(x=>x.remove());levelWin("balloon");return;}
   if(g.mode!=="free"&&g.score%8===0) newBalTarget();
 }
 
@@ -357,7 +390,7 @@ const SCENES=[["#BDE3FF","#7BD389",["☀️",.78,.2,70],["🏠",.5,.6,120],["�
  ["#1F2B5B","#2E3E7A",["🌙",.75,.2,80],["⭐",.2,.2,40],["🚀",.45,.55,110],["🪐",.2,.8,70]],
  ["#FFE3B3","#F2C14E",["🦁",.5,.55,120],["🌴",.15,.45,100],["☀️",.8,.18,60],["🦒",.85,.6,90]]];
 function puzzleInit(){
-  const n={a:2,b:3,c:4}[age||"b"], S=360, cv=document.createElement("canvas"); cv.width=cv.height=S; const c=cv.getContext("2d");
+  const L=lvl("puzzle"), n={a:L<3?2:L<6?3:4,b:L<4?3:L<8?4:5,c:L<4?4:5}[age||"b"], S=360, cv=document.createElement("canvas"); cv.width=cv.height=S; const c=cv.getContext("2d");
   const sc=SCENES[rnd(0,SCENES.length-1)];
   const g=c.createLinearGradient(0,0,0,S);g.addColorStop(0,sc[0]);g.addColorStop(1,sc[1]);c.fillStyle=g;c.fillRect(0,0,S,S);
   c.textAlign="center";c.textBaseline="middle";
@@ -376,8 +409,7 @@ function drawPuzzle(){
     return `<button class="pc${g.sel===i?" sel":""}" data-pc="${i}" style="background-image:url(${g.url});background-size:${g.n*100}% ${g.n*100}%;background-position:${g.n>1?x*100/(g.n-1):0}% ${g.n>1?y*100/(g.n-1):0}%" aria-label="${i+1}"></button>`;}).join("");
   el.classList.toggle("done",solved);
   setScore2(`${g.moves} ${t("moves")}`);
-  if(solved&&!g.won){g.won=true;addStar(2);sfx("ok");confetti(150);cheer(t("win"));speak(t("win"));
-    el.insertAdjacentHTML("afterend",`<div class="nav" style="justify-content:center"><button data-again="puzzle">${t("again")}</button></div>`);}
+  if(solved&&!g.won){g.won=true;timers.push(setTimeout(()=>levelWin("puzzle"),300));}
 }
 function setScore2(x){const s=document.getElementById("score");if(s)s.textContent=x;}
 function pcTap(i){const g=game;if(g.won)return;
@@ -395,6 +427,48 @@ function note(i,dur=.5){
   const k=document.querySelector(`[data-note="${i}"]`); if(k){k.classList.add("hit");setTimeout(()=>k.classList.remove("hit"),180);}
 }
 function playSong(){let t0=0;SONG.forEach(i=>{if(i>=0)timers.push(setTimeout(()=>note(i,.45),t0));t0+=i<0?250:420;});}
+/* ---------- level win / fail ---------- */
+function levelWin(g){
+  const n=lvl(g); unlockNext(g); addStar(2); sfx("ok"); confetti(160); cheer(t("levelDone").replace("{n}",n)); speak(t("levelDone").replace("{n}",n));
+  showLvBox(`<b>🏆 ${t("levelDone").replace("{n}",n)}</b><span>⭐ +2</span><button class="go" data-nextlv="${g}">${t("nextLevel")} ▶</button><button class="go alt" data-again="${g}">${t("again")}</button><button class="go alt" data-go="home">← ${t("back")}</button>`);
+}
+function levelFail(g,msg){ sfx("no"); speak(msg);
+  showLvBox(`<b>${msg}</b><button class="go" data-again="${g}">🔄 ${t("tryLv")}</button><button class="go alt" data-go="home">← ${t("back")}</button>`);}
+function showLvBox(html){document.querySelectorAll(".lvbox").forEach(x=>x.remove());const d=document.createElement("div");d.className="lvbox";d.innerHTML=`<div class="lvin">${html}</div>`;(document.querySelector(".card")||document.body).appendChild(d);}
+/* ---------- color sort ---------- */
+const SORTCOL=["#E53935","#1E63D6","#FDD835","#2E9E4F","#FB8C00","#7E3FD0","#F06AA8","#5D4037"];
+function sortParams(){const L=lvl("sort"),b={a:2,b:3,c:4}[age||"b"],mx={a:5,b:7,c:8}[age||"b"];return {k:Math.min(mx,b+Math.floor((L-1)/2)),cap:4};}
+const sortDone=tb=>tb.every(x=>x.length===0||(x.length===4&&x.every(v=>v===x[0])));
+function canPour(tb,i,j,cap){if(i===j)return false;const a=tb[i],b=tb[j];if(!a.length||b.length>=cap)return false;const top=a[a.length-1];return !b.length||b[b.length-1]===top;}
+function pour(tb,i,j,cap){const a=tb[i],b=tb[j],top=a[a.length-1];let n=0;while(a.length&&a[a.length-1]===top&&b.length<cap){b.push(a.pop());n++;}return n;}
+function solvable(tb0,cap){const seen=new Set();let nodes=0;
+  const key=tb=>tb.map(x=>x.join(",")).sort().join("|");
+  const dfs=tb=>{if(sortDone(tb))return true;if(++nodes>40000)return false;const k=key(tb);if(seen.has(k))return false;seen.add(k);
+    for(let i=0;i<tb.length;i++)for(let j=0;j<tb.length;j++){if(!canPour(tb,i,j,cap))continue;const a=tb[i];
+      if(a.every(v=>v===a[0])&&(tb[j].length===0||a.length===cap))continue;
+      const nt=tb.map(x=>x.slice());pour(nt,i,j,cap);if(dfs(nt))return true;}return false;};
+  return dfs(tb0.map(x=>x.slice()));}
+function sortInit(){
+  const {k,cap}=sortParams(); let tb,tries=0;
+  do{const seg=shuffle([].concat(...Array.from({length:k},(_,c)=>Array(cap).fill(c))));tb=Array.from({length:k},(_,i)=>seg.slice(i*cap,i*cap+cap));tb.push([],[]);tries++;}
+  while((sortDone(tb)||tb.some(x=>x.length===cap&&x.every(v=>v===x[0]))||!solvable(tb,cap))&&tries<40);
+  game={tb,start:tb.map(x=>x.slice()),cap,sel:-1,hist:[],moves:0,won:false}; drawSort();
+}
+function drawSort(){
+  const g=game,el=document.getElementById("sortbox"); if(!el)return;
+  const per=g.tb.length>5?Math.ceil(g.tb.length/2):g.tb.length;
+  el.style.gridTemplateColumns=`repeat(${per},minmax(0,1fr))`;
+  el.innerHTML=g.tb.map((x,i)=>`<button class="tube${g.sel===i?" sel":""}${x.length===g.cap&&x.every(v=>v===x[0])?" full":""}" data-tube="${i}" aria-label="${i+1}">${x.map(v=>`<i style="background:${SORTCOL[v]}"></i>`).join("")}</button>`).join("");
+  setScore2(`${g.moves} ${t("moves")}`);
+  const u=document.getElementById("sundo"); if(u) u.disabled=!g.hist.length;
+}
+function tubeTap(i){const g=game;if(g.won)return;
+  if(g.sel<0){if(!g.tb[i].length)return;g.sel=i;sfx("pop");const v=g.tb[i][g.tb[i].length-1];speak(COLORS[v][WI[lang]]);drawSort();return;}
+  if(g.sel===i){g.sel=-1;drawSort();return;}
+  if(canPour(g.tb,g.sel,i,g.cap)){g.hist.push(g.tb.map(x=>x.slice()));pour(g.tb,g.sel,i,g.cap);g.moves++;g.sel=-1;sfx("pop");drawSort();
+    if(sortDone(g.tb)){g.won=true;timers.push(setTimeout(()=>levelWin("sort"),400));}}
+  else{const b=document.querySelector(`[data-tube="${i}"]`);sfx("no");if(b){b.classList.remove("no");void b.offsetWidth;b.classList.add("no");}g.sel=-1;timers.push(setTimeout(drawSort,350));}
+}
 /* ---------- events ---------- */
 document.addEventListener("click",e=>{
   const g=e.target.closest("[data-go]");
@@ -408,6 +482,10 @@ document.addEventListener("click",e=>{
   const a=e.target.closest("[data-a]"); if(a){answer(a);return;}
   const mc=e.target.closest("[data-mc]"); if(mc){memFlip(+mc.dataset.mc);return;}
   const ag2=e.target.closest("[data-again]"); if(ag2){stopAll(); screen=ag2.dataset.again; render(); return;}
+  const lvb=e.target.closest("[data-lv]"); if(lvb&&!lvb.disabled){stopAll();setLv(screen,lvl(screen)+ +lvb.dataset.lv);render();return;}
+  const nx=e.target.closest("[data-nextlv]"); if(nx){const g=nx.dataset.nextlv;stopAll();setLv(g,lvl(g)+1);screen=g;render();return;}
+  const tbb=e.target.closest("[data-tube]"); if(tbb){tubeTap(+tbb.dataset.tube);return;}
+  if(e.target.closest("[data-sundo]")){const g=game;if(g.hist&&g.hist.length){g.tb=g.hist.pop();g.sel=-1;g.moves++;drawSort();}return;}
   const ct=e.target.closest("[data-cat]"); if(ct){homeCat=ct.dataset.cat;render();return;}
   const th=e.target.closest("[data-theme]"); if(th){theme=th.dataset.theme;wIdx=0;render();speak(word(themeList(theme)[0]));return;}
   const pm=e.target.closest("[data-pmode]"); if(pm){pMode=pm.dataset.pmode;if(pMode==="test"){newQ();render();speak(q.say);}else render();return;}
