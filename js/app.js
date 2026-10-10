@@ -1,5 +1,6 @@
-const APP_VERSION="1.2.0";
+const APP_VERSION="1.3.0";
 /* ---------- state ---------- */
+let pvIdx=0, hIdx=0, trIdx=0;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
 if(lang&&age) screen="home"; else if(lang) screen="age";
@@ -8,16 +9,16 @@ const LVGAMES=["mem","snake","balloon","puzzle","sort"];
 const lvKey=g=>`${age||"b"}-${g}`;
 const lvl=g=>(LV[lvKey(g)]||{cur:1}).cur;
 const lvMax=g=>(LV[lvKey(g)]||{max:1}).max||1;
-function setLv(g,cur){const k=lvKey(g);const o=LV[k]||{cur:1,max:1};o.cur=Math.max(1,Math.min(cur,o.max||1));LV[k]=o;try{localStorage.setItem("tk-lv",JSON.stringify(LV));}catch(e){}}
-function unlockNext(g){const k=lvKey(g);const o=LV[k]||{cur:1,max:1};o.max=Math.max(o.max||1,o.cur+1);LV[k]=o;try{localStorage.setItem("tk-lv",JSON.stringify(LV));}catch(e){}}
-const save=()=>{try{localStorage.setItem("tk-lang",lang||"");localStorage.setItem("tk-age",age||"");localStorage.setItem("tk-stars",stars);}catch(e){}};
+function setLv(g,cur){const k=lvKey(g);const o=LV[k]||{cur:1,max:1};o.cur=Math.max(1,Math.min(cur,o.max||1));LV[k]=o;try{localStorage.setItem(K("lv"),JSON.stringify(LV));}catch(e){}}
+function unlockNext(g){const k=lvKey(g);const o=LV[k]||{cur:1,max:1};o.max=Math.max(o.max||1,o.cur+1);LV[k]=o;try{localStorage.setItem(K("lv"),JSON.stringify(LV));}catch(e){}}
+const save=()=>{try{localStorage.setItem("tk-lang",lang||"");localStorage.setItem(K("age"),age||"");localStorage.setItem(K("stars"),stars);}catch(e){}};
 const t=k=>UI[lang||"ht"][k];
 const A=()=>AGES[age||"b"];
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,r)=>p[0]-r[0]).map(x=>x[1]);
 const word=w=>w[WI[lang]];
 const nw=n=>numWord(n,lang);
-const addStar=(k=1)=>{const before=Math.floor(stars/10);stars+=k;save();if(Math.floor(stars/10)>before){setTimeout(()=>{confetti(140);cheer("🏆");},300);}const s=document.querySelector(".pill span");if(s)s.textContent=stars;};
+const addStar=(k=1)=>{const before=Math.floor(stars/10),sb=Math.min(STICKERS.length,Math.floor(stars/5));stars+=k;save();if(Math.min(STICKERS.length,Math.floor(stars/5))>sb){setTimeout(()=>{sfx("star");cheer(t("newSticker")+" "+STICKERS[Math.floor(stars/5)-1]);},700);}if(Math.floor(stars/10)>before){setTimeout(()=>{confetti(140);cheer("🏆");},300);}const s=document.querySelector(".pill span");if(s)s.textContent=stars;};
 function stopTimersOnly(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];}
 function stopAll(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};clearTimeout(sayT);try{if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();}catch(e){}}
 
@@ -98,6 +99,7 @@ const $app=document.getElementById("app");
 const logo=`<div class="logo" aria-label="Mundiko">${"Mundiko".split("").map(c=>`<i>${c}</i>`).join("")}</div>`;
 function bar(){
   return `<div class="bar">${logo}<div class="bar-r">
+   ${CURP&&PROFILES.length>1?`<button class="chip" data-go="who">${CURP.av} ${esc(CURP.name)}</button>`:""}
    ${lang?`<button class="chip" data-go="lang">${LANGS[lang].name}</button>`:""}
    ${age?`<button class="chip" data-go="age">${A().e} ${A().label} ${t("yrs")}</button>`:""}
    <button class="chip${sound?"":" off"}" data-snd="1" aria-label="${t("snd")}" aria-pressed="${sound}">${sound?"🔊":"🔇 "+t("snd")}</button>
@@ -107,9 +109,9 @@ function bar(){
 const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>`;
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
-const PLAYS=["mem","snake","balloon","sort","puzzle","draw","music"];
-const CATOF={phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
-const GAMEINFO={daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
+const PLAYS=["mem","snake","balloon","sort","puzzle","draw","music","album"];
+const CATOF={proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
+const GAMEINFO={proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
   mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
 const tile=k=>`<button class="game ${GAMEINFO[k][1]}" data-go="${k}"><span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
@@ -130,6 +132,8 @@ function render(){
       <div class="cats" role="group">${Object.keys(CATS).map(k=>`<button class="cat" data-cat="${k}" aria-pressed="${homeCat===k}">${CATS[k][0]} ${t(CATS[k][1])}</button>`).join("")}</div>
       ${["play","lang","math","world"].filter(k=>homeCat==="all"||homeCat===k).map(k=>{const items=k==="play"?PLAYS:A().learn.filter(g=>CATOF[g]===k);
         return items.length?`<h3>${CATS[k][0]} ${t(CATS[k][1])}</h3><div class="games">${items.map(tile).join("")}</div>`:"";}).join("")}</section>`;
+  } else if(screen==="who"){
+    h+=`<section class="card"><h1>${t("who")}</h1><div class="kids">${PROFILES.map(p=>`<button class="kid" data-prof="${p.id}"><span>${p.av}</span><b>${esc(p.name)||"—"}</b><small>${AGES[p.age||"b"].label} ${t("yrs")}</small></button>`).join("")}</div></section>`;
   } else if(screen==="parent"){
     h+=`<section class="card"><div class="top"><button class="back" data-go="home">← ${t("back")}</button></div>${parentView()}</section>`;
   } else if(screen==="gate"){
@@ -146,6 +150,7 @@ function render(){
   if(screen==="draw") drawInit();
   if(screen==="puzzle") puzzleInit();
   if(screen==="sort") sortInit();
+  if(screen==="trace") traceInit();
 }
 function playTop(){
   const right=["puzzle","music"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
@@ -226,6 +231,23 @@ function play(){
       <details><summary>${t("otherL")}</summary><div class="others" style="margin-top:8px">${Object.keys(WI).filter(k=>k!==lang).map(k=>`<span>${LANGS[k].name}: ${pg[WI[k]]}</span>`).join("")}</div></details></div>
       <div class="dots">${st.p.map((_,i)=>`<i class="${i===sPage?"on":""}"></i>`).join("")}</div>
       <div class="nav"><button data-sp="-1" ${sPage===0?"disabled":""}>← ${t("prev")}</button>${last?`<button data-story="-1" style="background:var(--leaf)">⭐ ${t("theEnd")}</button>`:`<button data-sp="1">${t("next")} →</button>`}</div>`;}
+  if(scr==="proverbs"){const p=PROVERBS[pvIdx];
+    return `<div class="book"><div class="pic">${p[5]}</div><p class="line">${p[0]}</p><p class="hint" style="font-weight:800;margin:0">${t("meaning")}</p><p style="margin:0;text-align:center;font-size:18px">${p[WI[lang]]}</p></div>
+      <div class="nav"><button data-pv="-1">← ${t("prev")}</button><output>${pvIdx+1} / ${PROVERBS.length}</output><button data-pv="1">${t("next")} →</button></div>`;}
+  if(scr==="haiti"){const h=HAITI[hIdx];
+    const vis=h[0]==="flag"?`<svg viewBox="0 0 150 90" width="210" role="img" aria-label="flag"><rect width="150" height="45" fill="#00209F"/><rect y="45" width="150" height="45" fill="#D21034"/><rect x="55" y="30" width="40" height="30" fill="#fff"/><path d="M75 36v18M67 54h16" stroke="#016A16" stroke-width="3"/><circle cx="75" cy="38" r="4" fill="#016A16"/></svg>`
+      :h[0]==="deps"?`<ol class="deps">${DEPS[lang].map(d=>`<li>${d}</li>`).join("")}</ol>`:`<div class="pic">${h[0]}</div>`;
+    const last=hIdx===HAITI.length-1;
+    return `<div class="book"><h2>${h[1][LI[lang]]}</h2>${vis}<p class="line">${h[2][LI[lang]]}</p></div>
+      <div class="dots">${HAITI.map((_,i)=>`<i class="${i===hIdx?"on":""}"></i>`).join("")}</div>
+      <div class="nav"><button data-hx="-1" ${hIdx===0?"disabled":""}>← ${t("prev")}</button>${last?`<button data-hdone="1" style="background:var(--leaf)">⭐ ${t("theEnd")}</button>`:`<button data-hx="1">${t("next")} →</button>`}</div>`;}
+  if(scr==="album"){const n=Math.min(STICKERS.length,Math.floor(stars/5)), need=5-(stars%5);
+    return `<h2>📒 ${n} / ${STICKERS.length}</h2><p class="hint" style="text-align:center">${n>=STICKERS.length?t("allStickers"):t("nextSticker").replace("{n}",need)}</p>
+      <div class="album">${STICKERS.map((e,i)=>`<div class="stk${i<n?" got":""}">${i<n?e:"?"}</div>`).join("")}</div>`;}
+  if(scr==="trace"){const L=ALPHA[lang], cur=L[trIdx%L.length];
+    return `<h2>${t("traceHint")}</h2><div class="tracewrap" id="trwrap"><canvas id="trg" width="360" height="360"></canvas><canvas id="tri" width="360" height="360"></canvas></div>
+      <p class="fb" id="trfb" aria-live="polite"></p>
+      <div class="nav"><button data-tr="-1">← ${t("prev")}</button><button data-trclear="1" style="background:var(--coral)">🧽</button><button data-tr="1">${t("next")} →</button></div>`;}
   if(scr==="animals") return `<h2>${q.say}</h2><div class="opts ${q.an.length===4?"four":""}">${q.an.map((x,i)=>`<button class="opt" data-a="${i}" aria-label="${x[WI[lang]]}"><span class="big">${x[0]}</span><span class="w">${x[WI[lang]]}</span></button>`).join("")}</div>${fb}`;
   if(scr==="days"){const today=(new Date().getDay()+6)%7;
     const DC=["#E53935","#FB8C00","#F2B705","#2E9E4F","#13A3A3","#1E63D6","#7E3FD0"];
@@ -489,7 +511,7 @@ function dailyNext(){
   daily.i++;
   if(daily.i<3){newQ();render();speak(q.say);return;}
   const y=new Date();y.setDate(y.getDate()-1);
-  if(!dailyDoneToday()){DAILY.streak=(DAILY.last===todayKey(y))?(DAILY.streak||0)+1:1;DAILY.last=todayKey();try{localStorage.setItem("tk-daily",JSON.stringify(DAILY));}catch(e){}}
+  if(!dailyDoneToday()){DAILY.streak=(DAILY.last===todayKey(y))?(DAILY.streak||0)+1:1;DAILY.last=todayKey();try{localStorage.setItem(K("daily"),JSON.stringify(DAILY));}catch(e){}}
   addStar(3);sfx("ok");confetti(180);cheer(t("dailyDone"));speak(t("dailyDone"));
   showLvBox(`<b>🔥 ${t("dailyDone")}</b><span>⭐ +3 · 🔥 ${DAILY.streak} ${t("streakL")}</span><p class="hint" style="margin:0">${t("comeBack")}</p><button class="go alt" data-go="home">← ${t("back")}</button>`);
 }
@@ -497,10 +519,10 @@ function dailyNext(){
 let STATS={}; try{STATS=JSON.parse(localStorage.getItem("tk-stats")||"{}")||{};}catch(e){STATS={};}
 STATS.d=STATS.d||{}; STATS.limit=STATS.limit||0;
 function day(k=todayKey()){return STATS.d[k]=STATS.d[k]||{m:0,a:{},ok:0};}
-function saveStats(){try{const keys=Object.keys(STATS.d).sort();while(keys.length>60)delete STATS.d[keys.shift()];localStorage.setItem("tk-stats",JSON.stringify(STATS));}catch(e){}}
+function saveStats(){try{const keys=Object.keys(STATS.d).sort();while(keys.length>60)delete STATS.d[keys.shift()];localStorage.setItem(K("stats"),JSON.stringify(STATS));}catch(e){}}
 function statAct(k){const d=day();d.a[k]=(d.a[k]||0)+1;saveStats();}
 function statOk(){day().ok++;saveStats();}
-const NOTIME=["lang","age","parent","gate","limit"];
+const NOTIME=["lang","age","parent","gate","limit","who"];
 setInterval(()=>{if(document.visibilityState==="hidden"||NOTIME.includes(screen))return;const d=day();d.m=Math.round((d.m+0.5)*10)/10;saveStats();
   if(STATS.limit&&d.m>=STATS.limit&&screen!=="home"){stopAll();screen="limit";render();}},30000);
 const overLimit=()=>STATS.limit&&day().m>=STATS.limit;
@@ -525,13 +547,79 @@ function parentView(){
     <h3>${t("topAct")}</h3>
     ${top.length?`<ol class="ptop">${top.map(([k,v])=>`<li><span>${(GAMEINFO[k]||["•"])[0]} ${t(k)||k}</span><b>${v}×</b></li>`).join("")}</ol>`:`<p class="hint">${t("nothingYet")}</p>`}
     <h3>${t("limitL")}</h3>
-    <div class="cats">${lims.map(m=>`<button class="cat" data-limit="${m}" aria-pressed="${STATS.limit===m}">${m?m+" "+t("minU"):t("noLimit")}</button>`).join("")}</div>`;
+    <div class="cats">${lims.map(m=>`<button class="cat" data-limit="${m}" aria-pressed="${STATS.limit===m}">${m?m+" "+t("minU"):t("noLimit")}</button>`).join("")}</div>
+    ${kidsView()}`;
 }
 function gateView(){return `<h2>🔒 ${t("gateQ").replace("{a}",gate.a).replace("{b}",gate.b)}</h2>
   <div class="gaterow"><input id="pgate" type="number" inputmode="numeric" autocomplete="off" aria-label="answer"><button class="go" data-pgate="1">${t("enter")}</button></div>
   ${gate.err?`<p class="fb no">${t("wrongGate")}</p>`:""}`;}
 function limitView(){return `<div class="hello" style="flex-direction:column;text-align:center">${tiki("happy")}<h2>${t("limitHit")}</h2><p class="hint">${t("seeTomorrow")}</p></div>
   <button class="go alt" data-go="home">← ${t("back")}</button><button class="go alt" data-parentgo="1">👪 ${t("parent")}</button>`;}
+/* ---------- child profiles (each child keeps its own stars, levels, challenge and stats) ---------- */
+let PROFILES=[], CURP=null;
+const esc=x=>String(x||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function K(name){return (!CURP||CURP.id==="p0")?"tk-"+name:"tk-"+CURP.id+"-"+name;}
+function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsj(k){try{return JSON.parse(localStorage.getItem(k)||"{}")||{};}catch(e){return {};}}
+function saveProfiles(){try{localStorage.setItem("tk-profiles",JSON.stringify(PROFILES));localStorage.setItem("tk-cur",CURP?CURP.id:"p0");}catch(e){}}
+function loadProfile(){
+  age=ls(K("age"))||(CURP&&CURP.age)||null; stars=+ls(K("stars"))||0;
+  LV=lsj(K("lv")); DAILY=lsj(K("daily")); STATS=lsj(K("stats")); STATS.d=STATS.d||{}; STATS.limit=STATS.limit||0;
+}
+function initProfiles(){
+  try{PROFILES=JSON.parse(localStorage.getItem("tk-profiles")||"[]")||[];}catch(e){PROFILES=[];}
+  if(!PROFILES.length) PROFILES=[{id:"p0",name:"",av:AVATARS[0],age:age||null}];
+  const cid=ls("tk-cur"); CURP=PROFILES.find(p=>p.id===cid)||PROFILES[0];
+  loadProfile();
+  if(lang&&PROFILES.length>1) screen="who"; else if(lang&&age) screen="home"; else if(lang) screen="age";
+}
+function switchProfile(id){const p=PROFILES.find(x=>x.id===id);if(!p)return;CURP=p;saveProfiles();loadProfile();screen=age?"home":"age";}
+let newKid={name:"",av:AVATARS[1],age:"b"};
+function kidsView(){
+  return `<h3>👧🏾 ${t("children")}</h3><div class="kidlist">${PROFILES.map(p=>`<div class="kidrow"><span class="av">${p.av}</span><b>${esc(p.name)||"—"}</b><small>${AGES[(p.id===CURP.id?age:p.age)||"b"].label}</small>${PROFILES.length>1?`<button class="mini" data-delprof="${p.id}">${t("removeP")}</button>`:""}</div>`).join("")}</div>
+    <h3>＋ ${t("addChild")}</h3>
+    <input id="kidname" class="txt" maxlength="20" placeholder="${t("childName")}" value="${esc(newKid.name)}">
+    <p class="hint" style="margin:0">${t("pickAv")}</p><div class="avs">${AVATARS.map(a=>`<button class="avb" data-av="${a}" aria-pressed="${newKid.av===a}">${a}</button>`).join("")}</div>
+    <p class="hint" style="margin:0">${t("ageGroup")}</p><div class="cats">${Object.entries(AGES).map(([k,v])=>`<button class="cat" data-kage="${k}" aria-pressed="${newKid.age===k}">${v.e} ${v.label}</button>`).join("")}</div>
+    <button class="go" data-addprof="1">${t("saveP")}</button>`;
+}
+/* ---------- letter tracing ---------- */
+function traceInit(){
+  const g=document.getElementById("trg"), ink=document.getElementById("tri"); if(!g||!ink) return;
+  const L=ALPHA[lang], letter=L[trIdx%L.length], S=360, gc=g.getContext("2d"), ic=ink.getContext("2d");
+  const fs=letter.length>1?190:270;
+  const drawLetter=(ctx,fill,stroke)=>{ctx.font=`800 ${fs}px "Baloo 2","Arial Rounded MT Bold",Arial,sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+    if(fill){ctx.fillStyle=fill;ctx.fillText(letter,S/2,S/2+12);} if(stroke){ctx.setLineDash([10,10]);ctx.lineWidth=4;ctx.strokeStyle=stroke;ctx.strokeText(letter,S/2,S/2+12);ctx.setLineDash([]);}};
+  gc.clearRect(0,0,S,S); drawLetter(gc,"#EFE6D3","#C9B99A");
+  const m=document.createElement("canvas"); m.width=m.height=S; const mc=m.getContext("2d"); drawLetter(mc,"#000");
+  const md=mc.getImageData(0,0,S,S).data; const target=[]; for(let y=0;y<S;y+=6)for(let x=0;x<S;x+=6){if(md[(y*S+x)*4+3]>100)target.push([x,y]);}
+  ic.clearRect(0,0,S,S); ic.lineCap="round"; ic.lineJoin="round"; ic.lineWidth=30; ic.strokeStyle="#2F80ED";
+  game={tr:true,letter,target,ic,S,done:false,last:null};
+  speak(letter);
+  const pos=(x,y)=>{const r=ink.getBoundingClientRect();return [(x-r.left)*S/r.width,(y-r.top)*S/r.height];};
+  let down=false,lastTouch=0;
+  const start=(x,y)=>{if(game.done)return;down=true;game.last=pos(x,y);ic.beginPath();ic.arc(game.last[0],game.last[1],15,0,7);ic.fillStyle="#2F80ED";ic.fill();};
+  const mv=(x,y)=>{if(!down)return;const p=pos(x,y);ic.beginPath();ic.moveTo(...game.last);ic.lineTo(...p);ic.stroke();game.last=p;};
+  const end=()=>{if(!down)return;down=false;traceCheck();};
+  const w=document.getElementById("trwrap");
+  w.addEventListener("touchstart",e=>{lastTouch=Date.now();const p=pt(e,"touches");if(!p)return;start(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
+  w.addEventListener("touchmove",e=>{const p=pt(e,"touches");if(!p)return;mv(p.clientX,p.clientY);if(e.cancelable)e.preventDefault();},{passive:false});
+  w.addEventListener("touchend",e=>{end();if(e.cancelable)e.preventDefault();},{passive:false});
+  w.addEventListener("pointerdown",e=>{if(e.pointerType==="touch"||Date.now()-lastTouch<800)return;start(e.clientX,e.clientY);});
+  w.addEventListener("pointermove",e=>{if(e.pointerType==="touch"||Date.now()-lastTouch<800)return;mv(e.clientX,e.clientY);});
+  w.addEventListener("pointerup",e=>{if(e.pointerType==="touch"||Date.now()-lastTouch<800)return;end();});
+}
+function traceCheck(){
+  const g=game; if(!g.tr||g.done) return; const d=g.ic.getImageData(0,0,g.S,g.S).data;
+  let hit=0; g.target.forEach(([x,y])=>{if(d[(y*g.S+x)*4+3]>100)hit++;});
+  let inkAll=0,inkOut=0; const mset=new Set(g.target.map(([x,y])=>x+","+y));
+  for(let y=0;y<g.S;y+=6)for(let x=0;x<g.S;x+=6){if(d[(y*g.S+x)*4+3]>100){inkAll++;if(!mset.has(x+","+y))inkOut++;}}
+  const cov=hit/Math.max(1,g.target.length), out=inkOut/Math.max(1,inkAll);
+  const fbx=document.getElementById("trfb");
+  if(cov>=0.6&&out<=0.55){g.done=true;fbx.className="fb ok";fbx.textContent="⭐ "+t("ok");addStar();statOk();sfx("ok");confetti();cheer(t("ok"));speak(g.letter+". "+t("ok"));
+    timers.push(setTimeout(()=>{trIdx++;render();},1600));}
+  else if(cov>=0.25){fbx.className="fb";fbx.textContent=t("traceMore");}
+}
 /* ---------- level win / fail ---------- */
 function levelWin(g){ statOk();
   const n=lvl(g); unlockNext(g); addStar(2); sfx("ok"); confetti(160); cheer(t("levelDone").replace("{n}",n)); speak(t("levelDone").replace("{n}",n));
@@ -602,7 +690,7 @@ function onTap(e){
     return;}
   const l=e.target.closest("[data-lang]");
   if(l){lang=l.dataset.lang; save(); screen=age?"home":"age"; render(); speak(screen==="age"?t("ageQ"):""); return;}
-  const ag=e.target.closest("[data-age]"); if(ag){age=ag.dataset.age; save(); screen="home"; render(); return;}
+  const ag=e.target.closest("[data-age]"); if(ag){age=ag.dataset.age; if(CURP){CURP.age=age;saveProfiles();} save(); screen="home"; render(); return;}
   const a=e.target.closest("[data-a]"); if(a){answer(a);return;}
   const mc=e.target.closest("[data-mc]"); if(mc){memFlip(+mc.dataset.mc);return;}
   const ag2=e.target.closest("[data-again]"); if(ag2){stopAll(); screen=ag2.dataset.again; render(); return;}
@@ -613,6 +701,21 @@ function onTap(e){
   const pg=e.target.closest("[data-parentgo]"); if(pg){stopAll();gateNew("parent");screen="gate";render();return;}
   if(e.target.closest("[data-pgate]")){const v=+(document.getElementById("pgate")||{}).value;if(v===gate.a+gate.b){screen=gate.next;render();}else{gate.err=true;render();}return;}
   const lm=e.target.closest("[data-limit]"); if(lm){STATS.limit=+lm.dataset.limit;saveStats();render();return;}
+  const pv=e.target.closest("[data-pv]"); if(pv){pvIdx=(pvIdx+ +pv.dataset.pv+PROVERBS.length)%PROVERBS.length;render();return;}
+  const hx=e.target.closest("[data-hx]"); if(hx&&!hx.disabled){hIdx=Math.max(0,Math.min(HAITI.length-1,hIdx+ +hx.dataset.hx));render();sfx("pop");return;}
+  if(e.target.closest("[data-hdone]")){addStar();statOk();sfx("ok");confetti();cheer(t("theEnd")+"!");hIdx=0;screen="home";render();return;}
+  const tr=e.target.closest("[data-tr]"); if(tr){stopAll();trIdx=(trIdx+ +tr.dataset.tr+ALPHA[lang].length)%ALPHA[lang].length;render();return;}
+  if(e.target.closest("[data-trclear]")){if(game.ic){game.ic.clearRect(0,0,game.S,game.S);game.done=false;const f=document.getElementById("trfb");if(f){f.textContent="";f.className="fb";}}return;}
+  const pf=e.target.closest("[data-prof]"); if(pf){switchProfile(pf.dataset.prof);render();return;}
+  const avb=e.target.closest("[data-av]"); if(avb){newKid.name=(document.getElementById("kidname")||{}).value||newKid.name;newKid.av=avb.dataset.av;render();return;}
+  const kag=e.target.closest("[data-kage]"); if(kag){newKid.name=(document.getElementById("kidname")||{}).value||newKid.name;newKid.age=kag.dataset.kage;render();return;}
+  if(e.target.closest("[data-addprof]")){const nm=((document.getElementById("kidname")||{}).value||"").trim().slice(0,20);if(!nm){const i=document.getElementById("kidname");if(i)i.focus();return;}
+    const id="p"+Date.now().toString(36);PROFILES.push({id,name:nm,av:newKid.av,age:newKid.age});
+    try{localStorage.setItem("tk-"+id+"-age",newKid.age);}catch(err){}
+    newKid={name:"",av:AVATARS[(PROFILES.length)%AVATARS.length],age:"b"};saveProfiles();sfx("star");render();return;}
+  const dp=e.target.closest("[data-delprof]"); if(dp){const id=dp.dataset.delprof;if(PROFILES.length<2)return;PROFILES=PROFILES.filter(p=>p.id!==id);
+    ["age","stars","lv","daily","stats"].forEach(n=>{try{localStorage.removeItem(id==="p0"?"tk-"+n:"tk-"+id+"-"+n);}catch(err){}});
+    if(CURP.id===id){CURP=PROFILES[0];loadProfile();} saveProfiles();render();return;}
   const ct=e.target.closest("[data-cat]"); if(ct){homeCat=ct.dataset.cat;render();return;}
   const th=e.target.closest("[data-theme]"); if(th){theme=th.dataset.theme;wIdx=0;render();speak(word(themeList(theme)[0]));return;}
   const pm=e.target.closest("[data-pmode]"); if(pm){pMode=pm.dataset.pmode;if(pMode==="test"){newQ();render();speak(q.say);}else render();return;}
@@ -656,6 +759,7 @@ document.addEventListener("keydown",e=>{
   if(m){e.preventDefault();turn(m);}
 });
 
+initProfiles();
 render();
 
 /* ---------- offline + updates ---------- */
