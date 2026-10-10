@@ -1,4 +1,4 @@
-const APP_VERSION="1.1.0";
+const APP_VERSION="1.1.1";
 /* ---------- state ---------- */
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
@@ -264,7 +264,7 @@ function setScore(n){const s=document.getElementById("score");if(!s)return;if(sc
 function snakeInit(){
   const N=A().grid, cv=document.getElementById("cv"), ctx=cv.getContext("2d"), cs=cv.width/N, m=Math.floor(N/2);
   const skip=age==="c"?[2,5,10][rnd(0,2)]:0;
-  const L=lvl("snake"), goal={a:4,b:6,c:8}[age||"b"]+(L-1)*2, speed=Math.max(75,Math.round(A().speed*Math.pow(0.92,L-1)));
+  const L=lvl("snake"), goal={a:4,b:6,c:8}[age||"b"]+(L-1)*2, speed=Math.max(170,Math.round(A().speed*Math.pow(0.96,L-1)));
   const nRocks=age==="a"?Math.max(0,Math.min(L-3,4)):Math.max(0,Math.min(L-2,8));
   game={N,cv,ctx,cs,body:[[m,m],[m-1,m],[m-2,m]],dir:[1,0],next:[1,0],food:null,decoy:null,fruit:"🍎",score:0,running:false,loop:null,skip,val:skip,goal,speed,rocks:[]};
   for(let r=0;r<nRocks;r++){let p;do{p=[rnd(1,N-2),rnd(1,N-2)];}while(Math.abs(p[1]-m)<2||game.rocks.some(q=>q[0]===p[0]&&q[1]===p[1]));game.rocks.push(p);}

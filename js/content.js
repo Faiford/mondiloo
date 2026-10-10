@@ -36,9 +36,9 @@ const UI={
 };
 /* age groups: a = 3–4, b = 5–6, c = 7–8 */
 const AGES={
- a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:300,wrap:true,bal:"free",learn:["words","phrases","stories","abc","find","count","add","nums","colors","shapes","body","animals","days"]},
- b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:200,wrap:true,bal:"color",learn:["words","phrases","stories","abc","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock"]},
- c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:150,wrap:false,bal:"bigger",learn:["words","phrases","stories","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock"]}
+ a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","find","count","add","nums","colors","shapes","body","animals","days"]},
+ b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","abc","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock"]},
+ c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock"]}
 };
 const BASE={
  ht:["zewo","en","de","twa","kat","senk","sis","sèt","uit","nèf","dis","onz","douz","trèz","katòz","kenz","sèz","disèt","dizuit","diznèf"],
