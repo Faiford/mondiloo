@@ -1,4 +1,4 @@
-const APP_VERSION="1.1.1";
+const APP_VERSION="1.1.2";
 /* ---------- state ---------- */
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
@@ -76,7 +76,7 @@ function bar(){
   return `<div class="bar">${logo}<div class="bar-r">
    ${lang?`<button class="chip" data-go="lang">${LANGS[lang].name}</button>`:""}
    ${age?`<button class="chip" data-go="age">${A().e} ${A().label} ${t("yrs")}</button>`:""}
-   <button class="chip" data-snd="1" aria-label="${t("snd")}" aria-pressed="${sound}">${sound?"🔊":"🔇"}</button>
+   <button class="chip${sound?"":" off"}" data-snd="1" aria-label="${t("snd")}" aria-pressed="${sound}">${sound?"🔊":"🔇 "+t("snd")}</button>
    <div class="chip pill">⭐ <span>${stars}</span></div></div></div>`;
 }
 const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>`;
@@ -116,7 +116,7 @@ function render(){
   if(screen==="sort") sortInit();
 }
 function playTop(){
-  const right=["puzzle","music"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?"<span></span>":`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
+  const right=["puzzle","music"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
   return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}`;
 }
@@ -501,7 +501,7 @@ document.addEventListener("click",e=>{
   const nt=e.target.closest("[data-note]"); if(nt){note(+nt.dataset.note);return;}
   if(e.target.closest("[data-song]")){playSong();return;}
   const sn=e.target.closest("[data-snd]");
-  if(sn){sound=!sound;try{localStorage.setItem("tk-snd",sound?"1":"0");}catch(err){}sn.textContent=sound?"🔊":"🔇";sn.setAttribute("aria-pressed",sound);if(!sound)try{speechSynthesis.cancel();}catch(err){}sfx("pop");return;}
+  if(sn){sound=!sound;try{localStorage.setItem("tk-snd",sound?"1":"0");}catch(err){}sn.textContent=sound?"🔊":"🔇 "+t("snd");sn.classList.toggle("off",!sound);sn.setAttribute("aria-pressed",sound);if(!sound)try{speechSynthesis.cancel();}catch(err){}sfx("pop");return;}
   const col=e.target.closest("[data-col]");
   if(col&&game.cv){const c=COLORS[+col.dataset.col];game.col=c[0];document.querySelectorAll(".dot").forEach(b=>b.classList.toggle("on",b===col));speak(c[WI[lang]]);return;}
   const sz=e.target.closest("[data-sz]");

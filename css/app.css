@@ -227,3 +227,6 @@ canvas{display:block;width:100%;aspect-ratio:1;border-radius:18px;background:#E9
 .tube.full{border-color:var(--leaf)}
 .tube.no{animation:shake .35s}
 @media (max-width:420px){.tube{height:162px}.tube i{height:36px;flex-basis:36px}}
+
+.chip.off{background:#FFE3DF;border-color:var(--coral);color:#B3261E}
+.soon{background:var(--bg);border:2px dashed var(--line);border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px;color:var(--muted)}

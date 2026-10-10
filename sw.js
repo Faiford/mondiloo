@@ -1,6 +1,6 @@
 /* Mundiko service worker: works offline and picks up updates.
    When you publish an update, change VERSION below so phones download the new files. */
-const VERSION = "mundiko-1.1.1";
+const VERSION = "mundiko-1.1.2";
 const CORE = ["./", "index.html", "css/app.css", "js/content.js", "js/app.js", "manifest.webmanifest",
   "privacy.html", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
