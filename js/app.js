@@ -1,4 +1,4 @@
-const APP_VERSION="1.1.3";
+const APP_VERSION="1.1.4";
 /* ---------- state ---------- */
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
@@ -19,7 +19,7 @@ const word=w=>w[WI[lang]];
 const nw=n=>numWord(n,lang);
 const addStar=(k=1)=>{const before=Math.floor(stars/10);stars+=k;save();if(Math.floor(stars/10)>before){setTimeout(()=>{confetti(140);cheer("🏆");},300);}const s=document.querySelector(".pill span");if(s)s.textContent=stars;};
 function stopTimersOnly(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];}
-function stopAll(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};try{speechSynthesis.cancel();}catch(e){}}
+function stopAll(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};clearTimeout(sayT);try{if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();}catch(e){}}
 
 let sound=true; try{sound=localStorage.getItem("tk-snd")!=="0";}catch(e){}
 function tiki(mood){
@@ -59,14 +59,27 @@ function cheer(text){
   const d=document.createElement("div");d.className="mpop";d.innerHTML=`<span>${text}</span>${tiki("happy")}`;document.body.appendChild(d);
   mpopT=setTimeout(()=>d.remove(),1400);
 }
+/* Speech never blocks the screen: it runs after the page has painted, only when the device
+   reports real voices, and it switches itself off if a call ever stalls (some in-app browsers do). */
+let ttsOK=null, sayT=null;
+function ttsVoices(){try{return window.speechSynthesis?speechSynthesis.getVoices():[];}catch(e){return [];}}
+try{if(window.speechSynthesis){speechSynthesis.onvoiceschanged=()=>{if(ttsOK===null&&ttsVoices().length)ttsOK=true;};if(ttsVoices().length)ttsOK=true;}}catch(e){}
 function speak(text){
-  try{
-    const s=window.speechSynthesis; if(!s||!text||lang==="ht"||!sound) return; s.cancel();
-    const u=new SpeechSynthesisUtterance(text); const pref=LANGS[lang].voice; const vs=s.getVoices(); let v=null;
-    for(const p of pref){v=vs.find(x=>x.lang&&x.lang.toLowerCase().startsWith(p.toLowerCase())); if(v)break;}
-    if(v){u.voice=v;u.lang=v.lang;} else u.lang=pref[0];
-    u.rate=.85; s.speak(u);
-  }catch(e){}
+  if(!text||lang==="ht"||!sound||ttsOK===false) return;
+  const s=window.speechSynthesis; if(!s||typeof SpeechSynthesisUtterance==="undefined") return;
+  clearTimeout(sayT);
+  sayT=setTimeout(()=>{
+    const vs=ttsVoices(); if(!vs.length) return;
+    const t0=performance.now();
+    try{
+      if(s.speaking||s.pending) s.cancel();
+      const u=new SpeechSynthesisUtterance(text); const pref=LANGS[lang].voice; let v=null;
+      for(const p of pref){v=vs.find(x=>x.lang&&x.lang.toLowerCase().startsWith(p.toLowerCase())); if(v)break;}
+      if(v){u.voice=v;u.lang=v.lang;} else u.lang=pref[0];
+      u.rate=.85; s.speak(u); ttsOK=true;
+    }catch(e){ttsOK=false;}
+    if(performance.now()-t0>250) ttsOK=false;
+  },60);
 }
 
 /* ---------- views ---------- */
@@ -510,7 +523,7 @@ document.addEventListener("click",e=>{
   const nt=e.target.closest("[data-note]"); if(nt){note(+nt.dataset.note);return;}
   if(e.target.closest("[data-song]")){playSong();return;}
   const sn=e.target.closest("[data-snd]");
-  if(sn){sound=!sound;try{localStorage.setItem("tk-snd",sound?"1":"0");}catch(err){}sn.textContent=sound?"🔊":"🔇 "+t("snd");sn.classList.toggle("off",!sound);sn.setAttribute("aria-pressed",sound);if(!sound)try{speechSynthesis.cancel();}catch(err){}sfx("pop");return;}
+  if(sn){sound=!sound;try{localStorage.setItem("tk-snd",sound?"1":"0");}catch(err){}sn.textContent=sound?"🔊":"🔇 "+t("snd");sn.classList.toggle("off",!sound);sn.setAttribute("aria-pressed",sound);if(!sound)try{clearTimeout(sayT);if(speechSynthesis.speaking)speechSynthesis.cancel();}catch(err){}sfx("pop");return;}
   const col=e.target.closest("[data-col]");
   if(col&&game.cv){const c=COLORS[+col.dataset.col];game.col=c[0];document.querySelectorAll(".dot").forEach(b=>b.classList.toggle("on",b===col));speak(c[WI[lang]]);return;}
   const sz=e.target.closest("[data-sz]");
@@ -537,7 +550,7 @@ document.addEventListener("keydown",e=>{
   const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];
   if(m){e.preventDefault();turn(m);}
 });
-try{speechSynthesis.onvoiceschanged=()=>{};}catch(e){}
+
 render();
 
 /* ---------- offline + updates ---------- */
