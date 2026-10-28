@@ -279,3 +279,18 @@ canvas{display:block;width:100%;aspect-ratio:1;border-radius:18px;background:#E9
 .avs{display:flex;flex-wrap:wrap;gap:8px}
 .avb{font-size:28px;width:52px;height:52px;border-radius:50%;border:3px solid var(--line);background:var(--bg)}
 .avb[aria-pressed="true"]{border-color:var(--ink);background:#EAF2FF}
+
+.game{position:relative}
+.game .lock{position:absolute;top:10px;right:10px;font-size:18px;background:rgba(255,255,255,.9);border-radius:999px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;z-index:1}
+.game.locked{filter:saturate(.75)}
+.prices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prices div{border:3px solid var(--line);border-radius:18px;padding:12px;text-align:center;display:flex;flex-direction:column;background:var(--bg)}
+.prices b{font-family:var(--display);font-size:30px}.prices small{color:var(--muted);font-weight:800}
+.prices .best{border-color:var(--leaf);background:#E3F8EE}
+.linkbtn{display:flex;justify-content:center;align-items:center;text-decoration:none;background:var(--sky)!important}
+a.cat{text-decoration:none;color:var(--ink)}
+.songs{display:grid;gap:12px}
+.song{display:flex;flex-direction:column;gap:8px;background:var(--bg);border:2px solid var(--line);border-radius:18px;padding:12px}
+.song .e{font-size:34px}.song b{font-family:var(--display);font-size:20px}.song audio{width:100%}
+
+#pcode{font-size:17px;letter-spacing:.04em}

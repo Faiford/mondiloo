@@ -47,3 +47,22 @@ If you forget step 2, phones keep the old version they saved for offline use.
 - Fill in `[CONTACT EMAIL]` in `privacy.html`.
 - Check the name "Mundiko" at tmsearch.uspto.gov and on Google Play before buying a domain.
 - Have a native speaker review the Kreyòl numbers above 20 and the phrases.
+
+## Free + Premium (in `js/content.js`)
+
+- `SHOP.enabled:false` makes everything free (use it during a test period with families).
+- `SHOP.priceMonth` / `SHOP.priceYear` set the prices shown on the Premium page.
+- `SHOP.payUrl`: paste your Stripe Payment Link here when it is ready.
+- `FREE`: the list of activities anyone can use without Premium.
+- Families can start a 7-day free trial once per device (behind the parent question).
+- After a family pays, give them one activation code (format `MDK-XXXX-XXXX`) from your private code list.
+  Codes are checked on the device, so this is a simple first step; real accounts with Stripe come later.
+
+## Songs
+
+Put MP3 files in `songs/` and list them in `SONGS` in `js/content.js`, for example:
+`{e:"🎵", t:["Count with me","Ann konte","Comptons","Contemos"], file:"songs/ann-konte.mp3"}`
+
+## Worksheets
+
+Printable PDF packs are in `worksheets/` (one per language). Parents open them from the Parent area.

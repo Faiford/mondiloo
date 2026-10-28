@@ -1,4 +1,4 @@
-const APP_VERSION="1.3.0";
+const APP_VERSION="1.4.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -109,11 +109,11 @@ function bar(){
 const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>`;
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
-const PLAYS=["mem","snake","balloon","sort","puzzle","draw","music","album"];
+const PLAYS=["mem","snake","balloon","sort","puzzle","draw","music","songs","album"];
 const CATOF={proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
-const GAMEINFO={proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
+const GAMEINFO={songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
   mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
-const tile=k=>`<button class="game ${GAMEINFO[k][1]}" data-go="${k}"><span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
+const tile=k=>`<button class="game ${GAMEINFO[k][1]}${isLocked(k)?" locked":""}" data-go="${k}">${isLocked(k)?`<span class="lock" aria-label="Premium">🔒</span>`:""}<span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
 function render(){
   let h=bar();
@@ -134,6 +134,8 @@ function render(){
         return items.length?`<h3>${CATS[k][0]} ${t(CATS[k][1])}</h3><div class="games">${items.map(tile).join("")}</div>`:"";}).join("")}</section>`;
   } else if(screen==="who"){
     h+=`<section class="card"><h1>${t("who")}</h1><div class="kids">${PROFILES.map(p=>`<button class="kid" data-prof="${p.id}"><span>${p.av}</span><b>${esc(p.name)||"—"}</b><small>${AGES[p.age||"b"].label} ${t("yrs")}</small></button>`).join("")}</div></section>`;
+  } else if(screen==="paywall"){
+    h+=`<section class="card"><div class="top"><button class="back" data-go="home">← ${t("back")}</button></div>${paywallView()}</section>`;
   } else if(screen==="parent"){
     h+=`<section class="card"><div class="top"><button class="back" data-go="home">← ${t("back")}</button></div>${parentView()}</section>`;
   } else if(screen==="gate"){
@@ -231,6 +233,9 @@ function play(){
       <details><summary>${t("otherL")}</summary><div class="others" style="margin-top:8px">${Object.keys(WI).filter(k=>k!==lang).map(k=>`<span>${LANGS[k].name}: ${pg[WI[k]]}</span>`).join("")}</div></details></div>
       <div class="dots">${st.p.map((_,i)=>`<i class="${i===sPage?"on":""}"></i>`).join("")}</div>
       <div class="nav"><button data-sp="-1" ${sPage===0?"disabled":""}>← ${t("prev")}</button>${last?`<button data-story="-1" style="background:var(--leaf)">⭐ ${t("theEnd")}</button>`:`<button data-sp="1">${t("next")} →</button>`}</div>`;}
+  if(scr==="songs"){
+    if(!SONGS.length) return `<div class="hello" style="flex-direction:column;text-align:center">${tiki("happy")}<h2>${t("songsSoon")}</h2></div>`;
+    return `<div class="songs">${SONGS.map(sg=>`<div class="song"><span class="e">${sg.e||"🎵"}</span><b>${esc(Array.isArray(sg.t)?sg.t[LI[lang]]:sg.t)}</b><audio controls preload="none" src="${sg.file}"></audio></div>`).join("")}</div>`;}
   if(scr==="proverbs"){const p=PROVERBS[pvIdx];
     return `<div class="book"><div class="pic">${p[5]}</div><p class="line">${p[0]}</p><p class="hint" style="font-weight:800;margin:0">${t("meaning")}</p><p style="margin:0;text-align:center;font-size:18px">${p[WI[lang]]}</p></div>
       <div class="nav"><button data-pv="-1">← ${t("prev")}</button><output>${pvIdx+1} / ${PROVERBS.length}</output><button data-pv="1">${t("next")} →</button></div>`;}
@@ -522,7 +527,7 @@ function day(k=todayKey()){return STATS.d[k]=STATS.d[k]||{m:0,a:{},ok:0};}
 function saveStats(){try{const keys=Object.keys(STATS.d).sort();while(keys.length>60)delete STATS.d[keys.shift()];localStorage.setItem(K("stats"),JSON.stringify(STATS));}catch(e){}}
 function statAct(k){const d=day();d.a[k]=(d.a[k]||0)+1;saveStats();}
 function statOk(){day().ok++;saveStats();}
-const NOTIME=["lang","age","parent","gate","limit","who"];
+const NOTIME=["lang","age","parent","gate","limit","who","paywall"];
 setInterval(()=>{if(document.visibilityState==="hidden"||NOTIME.includes(screen))return;const d=day();d.m=Math.round((d.m+0.5)*10)/10;saveStats();
   if(STATS.limit&&d.m>=STATS.limit&&screen!=="home"){stopAll();screen="limit";render();}},30000);
 const overLimit=()=>STATS.limit&&day().m>=STATS.limit;
@@ -548,6 +553,10 @@ function parentView(){
     ${top.length?`<ol class="ptop">${top.map(([k,v])=>`<li><span>${(GAMEINFO[k]||["•"])[0]} ${t(k)||k}</span><b>${v}×</b></li>`).join("")}</ol>`:`<p class="hint">${t("nothingYet")}</p>`}
     <h3>${t("limitL")}</h3>
     <div class="cats">${lims.map(m=>`<button class="cat" data-limit="${m}" aria-pressed="${STATS.limit===m}">${m?m+" "+t("minU"):t("noLimit")}</button>`).join("")}</div>
+    <h3>⭐ ${t("planL")}: ${planLine()}</h3>
+    ${SHOP.enabled&&!codeOk(PREM.code)?`<button class="go alt" data-go="paywall">⭐ ${t("unlockAll")}</button>`:""}
+    <h3>🖨️ ${t("worksheetsL")}</h3>
+    <div class="cats">${Object.keys(LANGS).map(k=>`<a class="cat" href="${WORKSHEETS[k]}" target="_blank" rel="noopener">📄 ${LANGS[k].name}</a>`).join("")}</div>
     ${kidsView()}`;
 }
 function gateView(){return `<h2>🔒 ${t("gateQ").replace("{a}",gate.a).replace("{b}",gate.b)}</h2>
@@ -620,6 +629,27 @@ function traceCheck(){
     timers.push(setTimeout(()=>{trIdx++;render();},1600));}
   else if(cov>=0.25){fbx.className="fb";fbx.textContent=t("traceMore");}
 }
+/* ---------- Free + Premium ---------- */
+let PREM={}; try{PREM=JSON.parse(localStorage.getItem("tk-prem")||"{}")||{};}catch(e){PREM={};}
+const savePrem=()=>{try{localStorage.setItem("tk-prem",JSON.stringify(PREM));}catch(e){}};
+const DAYMS=86400000;
+function codeOk(code){const m=/^MDK-([A-Z0-9]{4})-([A-Z0-9]{4})$/.exec(String(code||"").trim().toUpperCase());if(!m)return false;
+  let h=2166136261;for(const ch of "mundiko509:"+m[1]){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}
+  const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let x=h,out="";for(let i=0;i<4;i++){out+=A[x%32];x=Math.floor(x/32);}return out===m[2];}
+const trialDaysLeft=()=>PREM.trial?Math.max(0,Math.ceil((PREM.trial+SHOP.trialDays*DAYMS-Date.now())/DAYMS)):0;
+const isPremium=()=>!SHOP.enabled||codeOk(PREM.code)||trialDaysLeft()>0;
+const isLocked=k=>!!(SHOP.enabled&&GAMEINFO[k]&&!FREE.includes(k)&&!isPremium());
+let payErr=false, wantedK=null;
+function paywallView(){
+  return `<div class="hello" style="flex-direction:column;text-align:center">${tiki("happy")}<h1>⭐ ${t("unlockAll")}</h1><p class="hint">${t("premBenefits")}</p></div>
+   <div class="prices"><div><b>${SHOP.priceMonth}</b><small>${t("perMonth")}</small></div><div class="best"><b>${SHOP.priceYear}</b><small>${t("perYear")}</small></div></div>
+   ${PREM.trialUsed?`<p class="hint" style="text-align:center">${t("trialUsed")}</p>`:`<button class="go" data-trial="1">🎁 ${t("tryFree")}</button>`}
+   ${SHOP.payUrl?`<a class="go linkbtn" href="${SHOP.payUrl}" target="_blank" rel="noopener">💳 ${t("buy")}</a>`:`<p class="hint" style="text-align:center">${t("payLater")}${SHOP.contact?" "+esc(SHOP.contact):""}</p>`}
+   <h3>🔑 ${t("haveCode")}</h3>
+   <div class="gaterow"><input id="pcode" class="txt" autocomplete="off" autocapitalize="characters" placeholder="MDK-XXXX-XXXX"><button class="go" data-code="1">${t("activate")}</button></div>
+   ${payErr?`<p class="fb no">${t("badCode")}</p>`:""}`;
+}
+function planLine(){return codeOk(PREM.code)?t("premOn"):trialDaysLeft()>0?t("trialLeft").replace("{n}",trialDaysLeft()):t("freePlan");}
 /* ---------- level win / fail ---------- */
 function levelWin(g){ statOk();
   const n=lvl(g); unlockNext(g); addStar(2); sfx("ok"); confetti(160); cheer(t("levelDone").replace("{n}",n)); speak(t("levelDone").replace("{n}",n));
@@ -683,6 +713,7 @@ function onTap(e){
   const g=e.target.closest("[data-go]");
   if(g){stopAll(); const dest=g.dataset.go;
     if(!["home","lang","age"].includes(dest)&&overLimit()){screen="limit";render();return;}
+    if(isLocked(dest)){wantedK=dest;payErr=false;screen="paywall";render();return;}
     screen=dest; if(!["home","lang","age"].includes(dest)) statAct(dest);
     if(screen==="daily"){dailyStart();render();speak(q.say);return;}
     if((["count","add","sub","colors","find","shapes","body","cmp","mul","animals","clock"].includes(screen)||(screen==="days"&&age!=="a"))){newQ();render();speak(q.say);}
@@ -699,7 +730,9 @@ function onTap(e){
   const tbb=e.target.closest("[data-tube]"); if(tbb){tubeTap(+tbb.dataset.tube);return;}
   if(e.target.closest("[data-sundo]")){const g=game;if(g.hist&&g.hist.length){g.tb=g.hist.pop();g.sel=-1;g.moves++;drawSort();}return;}
   const pg=e.target.closest("[data-parentgo]"); if(pg){stopAll();gateNew("parent");screen="gate";render();return;}
-  if(e.target.closest("[data-pgate]")){const v=+(document.getElementById("pgate")||{}).value;if(v===gate.a+gate.b){screen=gate.next;render();}else{gate.err=true;render();}return;}
+  if(e.target.closest("[data-pgate]")){const v=+(document.getElementById("pgate")||{}).value;if(v===gate.a+gate.b){if(gate.next==="trial"){if(!PREM.trialUsed){PREM.trial=Date.now();PREM.trialUsed=true;savePrem();confetti(120);cheer(t("tryFree")+" ✓");}screen=wantedK&&!isLocked(wantedK)?wantedK:"home";wantedK=null;}else screen=gate.next;render();}else{gate.err=true;render();}return;}
+  if(e.target.closest("[data-trial]")){gateNew("trial");screen="gate";render();return;}
+  if(e.target.closest("[data-code]")){const v=(document.getElementById("pcode")||{}).value||"";if(codeOk(v)){PREM.code=v.trim().toUpperCase();savePrem();sfx("ok");confetti(160);cheer(t("premOn"));screen=wantedK||"home";wantedK=null;render();}else{payErr=true;render();}return;}
   const lm=e.target.closest("[data-limit]"); if(lm){STATS.limit=+lm.dataset.limit;saveStats();render();return;}
   const pv=e.target.closest("[data-pv]"); if(pv){pvIdx=(pvIdx+ +pv.dataset.pv+PROVERBS.length)%PROVERBS.length;render();return;}
   const hx=e.target.closest("[data-hx]"); if(hx&&!hx.disabled){hIdx=Math.max(0,Math.min(HAITI.length-1,hIdx+ +hx.dataset.hx));render();sfx("pop");return;}
