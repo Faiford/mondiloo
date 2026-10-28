@@ -1,11 +1,11 @@
-const APP_VERSION="1.4.0";
+const APP_VERSION="1.5.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
 if(lang&&age) screen="home"; else if(lang) screen="age";
 let LV={}; try{LV=JSON.parse(localStorage.getItem("tk-lv")||"{}")||{};}catch(e){LV={};}
-const LVGAMES=["mem","snake","balloon","puzzle","sort"];
+const LVGAMES=["mem","snake","balloon","puzzle","sort","paint","maze","dots","shadow","diff","cook","habits","order"];
 const lvKey=g=>`${age||"b"}-${g}`;
 const lvl=g=>(LV[lvKey(g)]||{cur:1}).cur;
 const lvMax=g=>(LV[lvKey(g)]||{max:1}).max||1;
@@ -109,9 +109,9 @@ function bar(){
 const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>`;
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
-const PLAYS=["mem","snake","balloon","sort","puzzle","draw","music","songs","album"];
-const CATOF={proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
-const GAMEINFO={songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
+const PLAYS=["mem","snake","balloon","sort","puzzle","paint","maze","dots","shadow","diff","draw","music","songs","album"];
+const CATOF={cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
+const GAMEINFO={paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
   mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
 const tile=k=>`<button class="game ${GAMEINFO[k][1]}${isLocked(k)?" locked":""}" data-go="${k}">${isLocked(k)?`<span class="lock" aria-label="Premium">🔒</span>`:""}<span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
@@ -153,9 +153,16 @@ function render(){
   if(screen==="puzzle") puzzleInit();
   if(screen==="sort") sortInit();
   if(screen==="trace") traceInit();
+  if(screen==="paint") paintInit();
+  if(screen==="maze") mazeInit();
+  if(screen==="dots") dotsInit();
+  if(screen==="shadow") shadowInit();
+  if(screen==="diff") diffInit();
+  if(screen==="cook") cookInit();
+  if(screen==="habits"||screen==="order") seqInit(screen);
 }
 function playTop(){
-  const right=["puzzle","music"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
+  const right=["puzzle","music",...NEWG].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
   const dHead=screen==="daily"?`<div class="dhead">🔥 ${t("daily")} · ${Math.min(daily.i+1,3)}/3</div>`:"";
   return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}${dHead}`;
@@ -276,6 +283,15 @@ function play(){
   if(scr==="snake") return `<h2 id="shint" style="font-size:22px"></h2><div class="snakewrap" id="swrap"><canvas id="cv" width="480" height="480"></canvas><div class="over" id="sover"><b>🐍</b><button class="go big" data-sstart="1">▶ ${t("start")}</button><span>${t("swipeHint")}</span></div></div>
     <div class="pad"><button class="u" data-dir="0,-1" aria-label="Up">▲</button><button class="l" data-dir="-1,0" aria-label="Left">◀</button><button class="d" data-dir="0,1" aria-label="Down">▼</button><button class="r" data-dir="1,0" aria-label="Right">▶</button></div>`;
   if(scr==="balloon") return `<h2 id="bhint" style="font-size:22px"></h2><div class="sky" id="sky"></div>`;
+  if(scr==="paint") return `<p class="hint" style="text-align:center">${t("paintHint")}</p><button class="paintbox" aria-label="${t("paint")}"><svg id="paintsvg" viewBox="0 0 200 200"></svg></button>
+    <div class="pal">${PAINTCOL.map((c,i)=>`<button class="dot${i===0?" on":""}" data-pcol="${i}" style="background:${c}" aria-label="${(COLORS[i]||[c])[WI[lang]]||c}"></button>`).join("")}</div>`;
+  if(scr==="maze") return `<p class="hint" style="text-align:center">${t("mazeHint")}</p><div class="maze" id="maze"></div>
+    <div class="pad"><button class="u" data-mz="0,-1" aria-label="Up">▲</button><button class="l" data-mz="-1,0" aria-label="Left">◀</button><button class="d" data-mz="0,1" aria-label="Down">▼</button><button class="r" data-mz="1,0" aria-label="Right">▶</button></div>`;
+  if(scr==="dots") return `<p class="hint" style="text-align:center">${t("dotsHint")}</p><div class="dotsbox" id="dotsbox"></div>`;
+  if(scr==="shadow") return `<h2>${t("shadowQ")}</h2><div class="shbox" id="shbox"></div>`;
+  if(scr==="diff") return `<div class="diffbox" id="diffbox"></div>`;
+  if(scr==="cook") return `<div class="cookbox" id="cookbox"></div>`;
+  if(scr==="habits"||scr==="order") return `<p class="hint" style="text-align:center">${t("orderHint")}</p><div class="seqbox" id="seqbox"></div>`;
   return "";
 }
 function answer(btn){
@@ -692,6 +708,127 @@ function tubeTap(i){const g=game;if(g.won)return;
     if(sortDone(g.tb)){g.won=true;timers.push(setTimeout(()=>levelWin("sort"),400));}}
   else{const b=document.querySelector(`[data-tube="${i}"]`);sfx("no");if(b){b.classList.remove("no");void b.offsetWidth;b.classList.add("no");}g.sel=-1;timers.push(setTimeout(drawSort,350));}
 }
+/* ---------- 1.5.0 games: shared helpers ---------- */
+const LW=x=>x[WI[lang]];                       // label of a [emoji,en,ht,fr,es] row
+const shakeEl=el=>{if(!el)return;el.classList.remove("no");void el.offsetWidth;el.classList.add("no");};
+const NEWG=["paint","maze","dots","shadow","diff","cook","habits","order"];
+/* ---------- coloring pages (SVG, viewBox 200x200). Regions are filled by tapping; deco is just lines ---------- */
+const S_=(t,a)=>`<${t} ${a}/>`;
+const PAINT=[
+ {e:"🏠",r:[S_("rect",'x="0" y="0" width="200" height="150"'),S_("rect",'x="0" y="150" width="200" height="50"'),S_("circle",'cx="165" cy="35" r="18"'),S_("rect",'x="45" y="85" width="110" height="70"'),S_("polygon",'points="35,88 100,40 165,88"'),S_("rect",'x="88" y="115" width="26" height="40"'),S_("rect",'x="57" y="100" width="22" height="22"'),S_("rect",'x="121" y="100" width="22" height="22"')],d:""},
+ {e:"🐟",r:[S_("rect",'x="0" y="0" width="200" height="200"'),S_("rect",'x="0" y="175" width="200" height="25"'),S_("polygon",'points="45,100 12,68 12,132"'),S_("ellipse",'cx="95" cy="100" rx="58" ry="38"'),S_("polygon",'points="80,66 102,38 122,68"'),S_("ellipse",'cx="108" cy="100" rx="9" ry="34"'),S_("circle",'cx="132" cy="92" r="8"'),S_("circle",'cx="168" cy="55" r="9"'),S_("circle",'cx="182" cy="30" r="6"')],d:'<circle cx="134" cy="92" r="3" fill="#24305E"/>'},
+ {e:"🌺",r:[S_("rect",'x="0" y="0" width="200" height="200"'),S_("rect",'x="96" y="95" width="8" height="75"'),S_("ellipse",'cx="78" cy="140" rx="20" ry="8" transform="rotate(-30 78 140)"'),S_("ellipse",'cx="122" cy="128" rx="20" ry="8" transform="rotate(30 122 128)"'),
+   ...[0,72,144,216,288].map(a=>S_("ellipse",`cx="100" cy="50" rx="15" ry="24" transform="rotate(${a} 100 75)"`)),S_("circle",'cx="100" cy="75" r="14"'),S_("polygon",'points="68,165 132,165 123,196 77,196"')],d:""},
+ {e:"🚌",r:[S_("rect",'x="0" y="0" width="200" height="150"'),S_("rect",'x="0" y="150" width="200" height="50"'),S_("rect",'x="30" y="52" width="140" height="18" rx="6"'),S_("rect",'x="18" y="68" width="166" height="72" rx="12"'),S_("rect",'x="18" y="114" width="166" height="9"'),
+   S_("rect",'x="32" y="80" width="32" height="26" rx="4"'),S_("rect",'x="72" y="80" width="32" height="26" rx="4"'),S_("rect",'x="112" y="80" width="32" height="26" rx="4"'),S_("circle",'cx="172" cy="96" r="7"'),S_("circle",'cx="55" cy="142" r="17"'),S_("circle",'cx="147" cy="142" r="17"'),S_("circle",'cx="55" cy="142" r="6"'),S_("circle",'cx="147" cy="142" r="6"')],d:""},
+ {e:"🦋",r:[S_("rect",'x="0" y="0" width="200" height="200"'),S_("ellipse",'cx="66" cy="72" rx="42" ry="32" transform="rotate(-25 66 72)"'),S_("ellipse",'cx="134" cy="72" rx="42" ry="32" transform="rotate(25 134 72)"'),S_("ellipse",'cx="72" cy="132" rx="30" ry="24" transform="rotate(20 72 132)"'),S_("ellipse",'cx="128" cy="132" rx="30" ry="24" transform="rotate(-20 128 132)"'),
+   S_("circle",'cx="62" cy="70" r="11"'),S_("circle",'cx="138" cy="70" r="11"'),S_("ellipse",'cx="100" cy="105" rx="8" ry="46"'),S_("circle",'cx="100" cy="55" r="11"')],d:'<path d="M96 46 Q86 22 74 18 M104 46 Q114 22 126 18" stroke="#24305E" stroke-width="3" fill="none" stroke-linecap="round"/>'},
+ {e:"🇭🇹",r:[S_("rect",'x="0" y="0" width="200" height="200"'),S_("rect",'x="0" y="182" width="200" height="18"'),S_("rect",'x="18" y="18" width="9" height="168"'),S_("rect",'x="27" y="30" width="152" height="50"'),S_("rect",'x="27" y="80" width="152" height="50"'),S_("rect",'x="82" y="62" width="42" height="36"'),S_("circle",'cx="22" cy="14" r="7"')],d:'<path d="M103 90v-18M95 90h16" stroke="#24305E" stroke-width="3" stroke-linecap="round"/>'},
+ {e:"🌈",r:[S_("rect",'x="0" y="0" width="200" height="200"'),...[0,1,2,3,4].map(i=>{const R=92-13*i,r=R-13;return S_("path",`d="M${100-R} 160 A${R} ${R} 0 0 1 ${100+R} 160 L${100+r} 160 A${r} ${r} 0 0 0 ${100-r} 160 Z"`);}),S_("ellipse",'cx="30" cy="160" rx="30" ry="16"'),S_("ellipse",'cx="170" cy="160" rx="30" ry="16"'),S_("circle",'cx="170" cy="32" r="17"')],d:""},
+ {e:"🥭",r:[S_("rect",'x="0" y="0" width="200" height="160"'),S_("rect",'x="0" y="160" width="200" height="40"'),S_("rect",'x="90" y="105" width="20" height="62"'),S_("ellipse",'cx="100" cy="82" rx="68" ry="50"'),S_("ellipse",'cx="72" cy="92" rx="9" ry="12"'),S_("ellipse",'cx="122" cy="74" rx="9" ry="12"'),S_("ellipse",'cx="108" cy="108" rx="9" ry="12"'),S_("circle",'cx="28" cy="28" r="15"')],d:""}];
+const PAINTCOL=[...COLORS.map(c=>c[0]),"#8D5524","#7CC8F8","#FFFFFF"];
+function paintInit(){const L=lvl("paint"),pg=PAINT[(L-1)%PAINT.length];game={pt:true,pg,fill:pg.r.map(()=>"#FFFFFF"),col:PAINTCOL[0],won:false};drawPaint();}
+function drawPaint(){const g=game,el=document.getElementById("paintsvg");if(!el)return;
+  el.innerHTML=g.pg.r.map((s,i)=>s.replace("/>",` data-rg="${i}" fill="${g.fill[i]}" stroke="#24305E" stroke-width="3" stroke-linejoin="round"/>`)).join("")+`<g pointer-events="none">${g.pg.d}</g>`;
+  const n=g.fill.filter(f=>f!=="#FFFFFF").length;setScore2(`${n}/${g.fill.length}`);
+  if(n===g.fill.length&&!g.won){g.won=true;timers.push(setTimeout(()=>levelWin("paint"),500));}}
+function paintTap(i){const g=game;if(!g.pt||g.won)return;g.fill[i]=g.col;sfx("pop");drawPaint();}
+/* ---------- maze ---------- */
+function mazeInit(){
+  const L=lvl("maze"),n=Math.min({a:7,b:9,c:11}[age||"b"],{a:4,b:5,c:6}[age||"b"]+L-1),w=Array.from({length:n*n},()=>[1,1,1,1]);
+  const seen=new Set([0]),st=[0],D=[[0,-1,0,2],[1,0,1,3],[0,1,2,0],[-1,0,3,1]];
+  while(st.length){const c=st[st.length-1],x=c%n,y=Math.floor(c/n);
+    const nb=shuffle(D).filter(([dx,dy])=>{const X=x+dx,Y=y+dy;return X>=0&&Y>=0&&X<n&&Y<n&&!seen.has(Y*n+X);});
+    if(!nb.length){st.pop();continue;}const [dx,dy,a,b]=nb[0],m=(y+dy)*n+x+dx;w[c][a]=0;w[m][b]=0;seen.add(m);st.push(m);}
+  game={mz:true,n,w,p:0,moves:0,won:false,seen:new Set([0])};drawMaze();}
+function drawMaze(){const g=game,el=document.getElementById("maze");if(!el)return;
+  el.style.gridTemplateColumns=`repeat(${g.n},minmax(0,1fr))`;el.style.fontSize=`${Math.max(14,Math.round(200/g.n))}px`;
+  el.innerHTML=g.w.map((w,i)=>`<button class="mzc${g.seen.has(i)?" seen":""}" data-mzc="${i}" style="border-width:${w.map(v=>v?"3px":"0").join(" ")}" aria-label="${i+1}">${i===g.p?"🐥":i===g.n*g.n-1?"🏠":""}</button>`).join("");
+  setScore2(`${g.moves} ${t("moves")}`);}
+function mazeStep(dx,dy){const g=game;if(!g.mz||g.won)return false;const x=g.p%g.n,y=Math.floor(g.p/g.n),d=dy<0?0:dx>0?1:dy>0?2:3;
+  if(g.w[g.p][d])return false;g.p=(y+dy)*g.n+x+dx;g.seen.add(g.p);return true;}
+function mazeMove(dx,dy,many){const g=game;if(!g.mz||g.won)return;let k=0;while(mazeStep(dx,dy)){k++;if(!many||g.p===g.n*g.n-1)break;}
+  if(!k){sfx("no");return;}g.moves++;sfx("pop");drawMaze();
+  if(g.p===g.n*g.n-1){g.won=true;timers.push(setTimeout(()=>levelWin("maze"),350));}}
+function mazeTap(i){const g=game;if(!g.mz)return;const x=g.p%g.n,y=Math.floor(g.p/g.n),X=i%g.n,Y=Math.floor(i/g.n);
+  if(i===g.p)return;if(X!==x&&Y!==y){sfx("no");return;}
+  const dx=Math.sign(X-x),dy=Math.sign(Y-y);let k=0;while(g.p!==i&&mazeStep(dx,dy))k++;
+  if(!k){sfx("no");return;}g.moves++;sfx("pop");drawMaze();if(g.p===g.n*g.n-1){g.won=true;timers.push(setTimeout(()=>levelWin("maze"),350));}}
+/* ---------- connect the dots (points in 0..100) ---------- */
+const DOTS=[
+ {e:"🪁",p:[[50,6],[86,44],[50,94],[14,44]]},
+ {e:"🏠",p:[[20,90],[20,45],[50,14],[80,45],[80,90]]},
+ {e:"⛰️",p:[[6,88],[34,30],[50,56],[66,34],[94,88]]},
+ {e:"🐟",p:[[10,50],[30,30],[58,24],[80,38],[95,22],[95,78],[80,62],[58,76],[30,70]]},
+ {e:"⛵",p:[[10,68],[47,68],[47,10],[84,60],[53,60],[53,68],[92,68],[76,88],[24,88]]},
+ {e:"🚀",p:[[50,5],[66,26],[66,64],[82,88],[60,80],[40,80],[18,88],[34,64],[34,26]]},
+ {e:"⭐",p:Array.from({length:10},(_,i)=>{const a=(i*36-90)*Math.PI/180,r=i%2?19:44;return [Math.round(50+r*Math.cos(a)),Math.round(53+r*Math.sin(a))];})},
+ {e:"❤️",p:[[50,90],[16,56],[9,36],[19,18],[35,14],[50,28],[65,14],[81,18],[91,36],[84,56]]},
+ {e:"🌲",p:[[50,5],[70,35],[61,35],[80,60],[58,60],[58,92],[42,92],[42,60],[20,60],[39,35],[30,35]]}];
+function dotsInit(){const L=lvl("dots"),list=age==="a"?DOTS.slice(0,6):DOTS,sh=list[(L-1)%list.length],step=age==="c"&&L>2?(L>5?5:2):1;
+  game={dt:true,sh,step,i:0,won:false};drawDots();}
+function drawDots(){const g=game,el=document.getElementById("dotsbox");if(!el)return;const P=g.sh.p,done=g.i>=P.length;
+  const line=P.slice(0,g.i).map(p=>p.join(",")).join(" ")+(done?" "+P[0].join(","):"");
+  el.innerHTML=`<svg viewBox="0 0 100 100" preserveAspectRatio="none">${done?`<polygon points="${line}" fill="#FFE08A" stroke="#2F80ED" stroke-width="1.6" stroke-linejoin="round"/>`:`<polyline points="${line}" fill="none" stroke="#2F80ED" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`}</svg>
+    ${done?`<span class="dreveal">${g.sh.e}</span>`:""}
+    ${P.map((p,i)=>`<button class="dot2${i<g.i?" on":""}${i===g.i?" next":""}" data-dt="${i}" style="left:${(6+p[0]*.88).toFixed(1)}%;top:${(6+p[1]*.88).toFixed(1)}%">${(i+1)*g.step}</button>`).join("")}`;
+  setScore2(`${g.i}/${P.length}`);}
+function dotTap(i,btn){const g=game;if(!g.dt||g.won)return;
+  if(i!==g.i){if(i>g.i){sfx("no");shakeEl(btn);}return;}
+  g.i++;sfx("pop");speak(String((i+1)*g.step));drawDots();
+  if(g.i>=g.sh.p.length){g.won=true;timers.push(setTimeout(()=>levelWin("dots"),600));}}
+/* ---------- shadows ---------- */
+function shadowInit(){const L=lvl("shadow");game={sh:true,L,round:0,rounds:5,n:Math.min(6,{a:3,b:4,c:4}[age||"b"]+Math.floor((L-1)/2))};shadowRound();}
+function shadowRound(){const g=game;let pool=WORDS;
+  if(g.L>=3){const ks=Object.keys(THEMES).filter(k=>THEMES[k].length>=g.n+2);if(ks.length)pool=THEMES[ks[rnd(0,ks.length-1)]];}
+  const seen=new Set(),pick=[];for(const w of shuffle(pool)){if(!seen.has(w[0])){seen.add(w[0]);pick.push(w);}if(pick.length===g.n)break;}
+  g.items=pick;g.ans=rnd(0,pick.length-1);g.busy=false;drawShadow();}
+function drawShadow(){const g=game,el=document.getElementById("shbox");if(!el)return;
+  el.innerHTML=`<div class="shbig" aria-label="?">${g.items[g.ans][0]}</div><div class="opts ${g.items.length===4?"four":""}">${g.items.map((w,i)=>`<button class="opt" data-shi="${i}" aria-label="${word(w)}"><span class="big">${w[0]}</span></button>`).join("")}</div>`;
+  setScore2(`${g.round}/${g.rounds}`);}
+function shadowTap(i,btn){const g=game;if(!g.sh||g.busy)return;
+  if(i!==g.ans){sfx("no");shakeEl(btn);speak(t("notThat"));return;}
+  g.busy=true;btn.classList.add("ok");const big=document.querySelector(".shbig");if(big)big.classList.add("lit");sfx("ok");speak(word(g.items[i]));g.round++;setScore2(`${g.round}/${g.rounds}`);
+  timers.push(setTimeout(()=>{if(g.round>=g.rounds)levelWin("shadow");else shadowRound();},900));}
+/* ---------- spot the difference ---------- */
+function diffInit(){const L=lvl("diff"),gs=Math.min(5,{a:3,b:3,c:4}[age||"b"]+Math.floor((L-1)/3)),k=Math.min(6,gs*gs-3,{a:2,b:3,c:3}[age||"b"]+Math.floor((L-1)/2));
+  const em=[...new Set(shuffle(WORDS).map(w=>w[0]))];const left=em.slice(0,gs*gs);const spare=em.slice(gs*gs);
+  const right=left.slice(),diffs=new Set(shuffle([...left.keys()]).slice(0,k));let j=0;diffs.forEach(i=>{right[i]=rnd(0,3)===0?"":spare[j++];});
+  game={df:true,gs,left,right,diffs,found:new Set(),won:false};drawDiff();}
+function drawDiff(){const g=game,el=document.getElementById("diffbox");if(!el)return;
+  const board=(arr,side)=>`<div class="dfb" style="grid-template-columns:repeat(${g.gs},minmax(0,1fr))">${arr.map((e,i)=>`<button class="dfc${g.found.has(i)?" found":""}" data-df="${i}" data-side="${side}" aria-label="${i+1}">${e}</button>`).join("")}</div>`;
+  el.innerHTML=`<h2>${t("diffHint").replace("{n}",g.diffs.size)}</h2>`+board(g.left,"l")+board(g.right,"r");setScore2(`🔍 ${g.found.size}/${g.diffs.size}`);}
+function diffTap(i,btn){const g=game;if(!g.df||g.won||g.found.has(i))return;
+  if(!g.diffs.has(i)){sfx("no");shakeEl(btn);return;}
+  g.found.add(i);sfx("ok");drawDiff();if(g.found.size===g.diffs.size){g.won=true;timers.push(setTimeout(()=>levelWin("diff"),500));}}
+/* ---------- kitchen ---------- */
+function cookInit(){const L=lvl("cook"),r=RECIPES[(L-1)%RECIPES.length];game={ck:true,r,i:0,won:false};cookOpts();drawCook();speak(cookSay());}
+function cookOpts(){const g=game;if(g.i>=g.r.s.length){g.opts=[];return;}const want=g.r.s[g.i],n={a:3,b:4,c:5}[age||"b"];
+  g.opts=shuffle([want,...shuffle(Object.keys(FOOD).filter(k=>k!==want&&!g.r.s.slice(0,g.i).includes(k))).slice(0,n-1)]);}
+function cookSay(){const g=game,k=g.r.s[g.i];if(!k)return t("cookDone");const f=FOOD[k];return FOODACT.includes(k)?LW(f)+"!":t("cookPut").replace("{x}",LW(f));}
+function drawCook(){const g=game,el=document.getElementById("cookbox");if(!el)return;const done=g.i>=g.r.s.length,k=g.r.s[g.i];
+  el.innerHTML=`<h3 style="margin:0;text-align:center">${g.r.e} ${g.r.t[LI[lang]]}</h3>
+    <div class="pot${done?" done":""}"><div class="potin">${done?`<span class="dish">${g.r.e}</span>`:g.r.s.slice(0,g.i).map(x=>`<span>${FOOD[x][0]}</span>`).join("")}</div><span class="potp">🍲</span></div>
+    <h2 id="ckq">${done?"⭐ "+t("cookDone"):cookSay()+(age==="a"?" "+FOOD[k][0]:"")}</h2>
+    ${done?"":`<div class="opts ${g.opts.length===4?"four":""}">${g.opts.map(x=>`<button class="opt" data-ck="${x}" aria-label="${LW(FOOD[x])}"><span class="big">${FOOD[x][0]}</span><span class="w">${LW(FOOD[x])}</span></button>`).join("")}</div>`}`;
+  setScore2(`${g.i}/${g.r.s.length}`);}
+function cookTap(k,btn){const g=game;if(!g.ck||g.won||g.busy)return;
+  if(k!==g.r.s[g.i]){sfx("no");shakeEl(btn);speak(t("notThat"));return;}
+  g.busy=true;btn.classList.add("ok");sfx("pop");speak(LW(FOOD[k]));
+  timers.push(setTimeout(()=>{g.busy=false;g.i++;cookOpts();drawCook();
+    if(g.i>=g.r.s.length){g.won=true;speak(t("cookDone"));timers.push(setTimeout(()=>levelWin("cook"),700));}else speak(cookSay());},450));}
+/* ---------- good habits / in order (same engine) ---------- */
+function seqInit(kind){const L=lvl(kind),list=kind==="habits"?HABITS:ORDERS,it=list[(L-1)%list.length];
+  game={sq:true,kind,it,i:0,cards:shuffle([...it.s.keys()]),won:false};drawSeq();speak(it.t[LI[lang]]);}
+function drawSeq(){const g=game,el=document.getElementById("seqbox");if(!el)return;const S=g.it.s;
+  el.innerHTML=`<h3 style="margin:0;text-align:center">${g.it.e} ${g.it.t[LI[lang]]}</h3>
+    <div class="slots" style="grid-template-columns:repeat(${S.length},minmax(0,1fr))">${S.map((s,i)=>`<div class="slot${i<g.i?" on":""}"><small>${i+1}</small>${i<g.i?`<span class="e">${s[0]}</span><span class="w">${LW(s)}</span>`:""}</div>`).join("")}</div>
+    <div class="opts ${S.length-g.i===4?"four":""}">${g.cards.filter(c=>c>=g.i).map(c=>`<button class="opt" data-sq="${c}" aria-label="${LW(S[c])}"><span class="big">${S[c][0]}</span><span class="w">${LW(S[c])}</span></button>`).join("")}</div>`;
+  setScore2(`${g.i}/${S.length}`);}
+function seqTap(c,btn){const g=game;if(!g.sq||g.won)return;
+  if(c!==g.i){sfx("no");shakeEl(btn);speak(t("notThat"));return;}
+  g.i++;sfx("pop");speak(LW(g.it.s[c]));drawSeq();
+  if(g.i>=g.it.s.length){g.won=true;timers.push(setTimeout(()=>levelWin(g.kind),600));}}
 /* ---------- events ---------- */
 function showErr(msg){try{let b=document.getElementById("errbox");if(!b){b=document.createElement("div");b.id="errbox";document.body.appendChild(b);}
   b.textContent="⚠️ "+String(msg).slice(0,160)+" (v"+APP_VERSION+")";b.hidden=false;clearTimeout(b._t);b._t=setTimeout(()=>{b.hidden=true;},9000);}catch(e){}}
@@ -727,6 +864,15 @@ function onTap(e){
   const ag2=e.target.closest("[data-again]"); if(ag2){stopAll(); screen=ag2.dataset.again; render(); return;}
   const lvb=e.target.closest("[data-lv]"); if(lvb&&!lvb.disabled){stopAll();setLv(screen,lvl(screen)+ +lvb.dataset.lv);render();return;}
   const nx=e.target.closest("[data-nextlv]"); if(nx){const g=nx.dataset.nextlv;stopAll();setLv(g,lvl(g)+1);screen=g;render();return;}
+  const rg=e.target.closest("[data-rg]"); if(rg){paintTap(+rg.dataset.rg);return;}
+  const pcol=e.target.closest("[data-pcol]"); if(pcol&&game.pt){game.col=PAINTCOL[+pcol.dataset.pcol];document.querySelectorAll("[data-pcol]").forEach(b=>b.classList.toggle("on",b===pcol));const c=COLORS[+pcol.dataset.pcol];if(c)speak(c[WI[lang]]);sfx("pop");return;}
+  const mz=e.target.closest("[data-mz]"); if(mz){const [dx,dy]=mz.dataset.mz.split(",").map(Number);mazeMove(dx,dy,false);return;}
+  const mzc=e.target.closest("[data-mzc]"); if(mzc){mazeTap(+mzc.dataset.mzc);return;}
+  const dtb=e.target.closest("[data-dt]"); if(dtb){dotTap(+dtb.dataset.dt,dtb);return;}
+  const shi=e.target.closest("[data-shi]"); if(shi){shadowTap(+shi.dataset.shi,shi);return;}
+  const dfb=e.target.closest("[data-df]"); if(dfb){diffTap(+dfb.dataset.df,dfb);return;}
+  const ckb=e.target.closest("[data-ck]"); if(ckb){cookTap(ckb.dataset.ck,ckb);return;}
+  const sqb=e.target.closest("[data-sq]"); if(sqb){seqTap(+sqb.dataset.sq,sqb);return;}
   const tbb=e.target.closest("[data-tube]"); if(tbb){tubeTap(+tbb.dataset.tube);return;}
   if(e.target.closest("[data-sundo]")){const g=game;if(g.hist&&g.hist.length){g.tb=g.hist.pop();g.sel=-1;g.moves++;drawSort();}return;}
   const pg=e.target.closest("[data-parentgo]"); if(pg){stopAll();gateNew("parent");screen="gate";render();return;}
@@ -787,9 +933,9 @@ function onTap(e){
   }
 }
 document.addEventListener("keydown",e=>{
-  if(screen!=="snake") return;
+  if(screen!=="snake"&&screen!=="maze") return;
   const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];
-  if(m){e.preventDefault();turn(m);}
+  if(m){e.preventDefault();if(screen==="maze")mazeMove(m[0],m[1],false);else turn(m);}
 });
 
 initProfiles();

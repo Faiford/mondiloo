@@ -66,3 +66,9 @@ Put MP3 files in `songs/` and list them in `SONGS` in `js/content.js`, for examp
 ## Worksheets
 
 Printable PDF packs are in `worksheets/` (one per language). Parents open them from the Parent area.
+
+## New games in 1.5.0
+Play: Coloring (8 pages), Maze, Connect the dots, Shadows, Spot the difference.
+World: Kitchen (8 recipes incl. diri ak pwa, pikliz, soup joumou), Good habits (6 routines), In order (7 sequences).
+All have levels, stars and the 4 languages. Text lives in `js/content.js` (FOOD, RECIPES, HABITS, ORDERS);
+coloring pages and dot shapes live in `js/app.js` (PAINT, DOTS). Coloring and Maze are free; the rest are Premium.

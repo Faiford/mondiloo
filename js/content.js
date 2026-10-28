@@ -36,9 +36,9 @@ const UI={
 };
 /* age groups: a = 3–4, b = 5–6, c = 7–8 */
 const AGES={
- a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","haiti"]},
- b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","haiti"]},
- c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","haiti"]}
+ a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","haiti"]},
+ b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","haiti"]},
+ c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","haiti"]}
 };
 const BASE={
  ht:["zewo","en","de","twa","kat","senk","sis","sèt","uit","nèf","dis","onz","douz","trèz","katòz","kenz","sèz","disèt","dizuit","diznèf"],
@@ -126,7 +126,7 @@ const AVATARS=["🦁", "🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "
    payUrl: paste your Stripe Payment Link here when it is ready (https://buy.stripe.com/...). */
 const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, payUrl:"", contact:""};
 /* Activities anyone can use for free. Everything else needs Premium (or the free trial). */
-const FREE=["mem","snake","draw","album","daily","words","stories","abc","count","add","nums","colors","animals","haiti","songs"];
+const FREE=["mem","snake","draw","album","daily","words","stories","abc","count","add","nums","colors","animals","haiti","songs","paint","maze"];
 /* Songs: put MP3 files in the songs/ folder and list them here, for example:
    {e:"🎵", t:["Count with me","Ann konte","Comptons","Contemos"], file:"songs/ann-konte.mp3"} */
 const SONGS=[];
@@ -137,3 +137,46 @@ const NOTECOL=["#E53935","#FB8C00","#FDD835","#2E9E4F","#13A3A3","#1E63D6","#7E3
 const SONG=[0,0,4,4,5,5,4,-1,3,3,2,2,1,1,0];
 const ITEMS=["🍎","🥭","⭐","🐟","🌺","⚽","🐔","🍌"];
 const FRUITS=["🍎","🥭","🍌","🍊","🍉","🍇","🍍","🥥"];
+
+/* ===== 1.5.0: more games (coloring, maze, dots, shadows, differences, kitchen, habits, order) ===== */
+Object.assign(UI.ht,{paint:"Kolorye",paintS:"Bay desen an koulè",maze:"Labirent",mazeS:"Jwenn chemen lakay",dots:"Konekte pwen",dotsS:"Swiv nimewo yo",shadow:"Lonbraj",shadowS:"Ki moun lonbraj sa a?",diff:"Diferans",diffS:"Jwenn sa ki chanje",cook:"Kizin",cookS:"Fè bon manje",habits:"Bon abitid",habitsS:"Kisa nou fè anvan?",order:"An lòd",orderS:"Kisa ki vini anvan?",
+  paintHint:"Chwazi yon koulè, epi touche desen an",mazeHint:"Ede ti poul la rive lakay li",dotsHint:"Touche nimewo yo youn apre lòt",shadowQ:"Ki moun lonbraj sa a?",diffHint:"Jwenn {n} diferans",cookPut:"Mete: {x}",orderHint:"Touche yo nan bon lòd",cookDone:"Manje a pare!"});
+Object.assign(UI.en,{paint:"Coloring",paintS:"Color the picture",maze:"Maze",mazeS:"Find the way home",dots:"Connect the dots",dotsS:"Follow the numbers",shadow:"Shadows",shadowS:"Whose shadow is it?",diff:"Differences",diffS:"Find what changed",cook:"Kitchen",cookS:"Cook something yummy",habits:"Good habits",habitsS:"What do we do first?",order:"In order",orderS:"What comes first?",
+  paintHint:"Pick a color, then tap the picture",mazeHint:"Help the chick get home",dotsHint:"Tap the numbers in order",shadowQ:"Whose shadow is this?",diffHint:"Find {n} differences",cookPut:"Add: {x}",orderHint:"Tap them in the right order",cookDone:"Food is ready!"});
+Object.assign(UI.fr,{paint:"Coloriage",paintS:"Colorie le dessin",maze:"Labyrinthe",mazeS:"Trouve le chemin de la maison",dots:"Relie les points",dotsS:"Suis les nombres",shadow:"Ombres",shadowS:"À qui est cette ombre ?",diff:"Différences",diffS:"Trouve ce qui a changé",cook:"Cuisine",cookS:"Prépare un bon plat",habits:"Bonnes habitudes",habitsS:"Qu'est-ce qu'on fait d'abord ?",order:"Dans l'ordre",orderS:"Qu'est-ce qui vient d'abord ?",
+  paintHint:"Choisis une couleur, puis touche le dessin",mazeHint:"Aide le poussin à rentrer chez lui",dotsHint:"Touche les nombres dans l'ordre",shadowQ:"À qui est cette ombre ?",diffHint:"Trouve {n} différences",cookPut:"Ajoute : {x}",orderHint:"Touche-les dans le bon ordre",cookDone:"C'est prêt !"});
+Object.assign(UI.es,{paint:"Colorear",paintS:"Colorea el dibujo",maze:"Laberinto",mazeS:"Encuentra el camino a casa",dots:"Une los puntos",dotsS:"Sigue los números",shadow:"Sombras",shadowS:"¿De quién es esta sombra?",diff:"Diferencias",diffS:"Encuentra lo que cambió",cook:"Cocina",cookS:"Prepara algo rico",habits:"Buenos hábitos",habitsS:"¿Qué hacemos primero?",order:"En orden",orderS:"¿Qué va primero?",
+  paintHint:"Elige un color y toca el dibujo",mazeHint:"Ayuda al pollito a llegar a casa",dotsHint:"Toca los números en orden",shadowQ:"¿De quién es esta sombra?",diffHint:"Encuentra {n} diferencias",cookPut:"Agrega: {x}",orderHint:"Tócalos en el orden correcto",cookDone:"¡La comida está lista!"});
+/* Kitchen ingredients: [emoji, English, Kreyòl, Français, Español]. act:true = an action (shown as is, not "Add: …") */
+const FOOD={mango:["🥭","Mango","Mango","la mangue","el mango"],water:["💧","Water","Dlo","l'eau","el agua"],lime:["🍋","Lime","Sitwon","le citron","el limón"],honey:["🍯","Honey","Siwo myèl","le miel","la miel"],ice:["🧊","Ice","Glas","les glaçons","el hielo"],
+  bread:["🍞","Bread","Pen","le pain","el pan"],peanut:["🥜","Peanut butter","Manba","le beurre de cacahuète","la crema de maní"],banana:["🍌","Banana","Fig","la banane","el plátano"],pineapple:["🍍","Pineapple","Anana","l'ananas","la piña"],melon:["🍉","Watermelon","Melon dlo","la pastèque","la sandía"],
+  beans:["🫘","Beans","Pwa","les haricots","los frijoles"],garlic:["🧄","Garlic","Lay","l'ail","el ajo"],salt:["🧂","Salt","Sèl","le sel","la sal"],rice:["🍚","Rice","Diri","le riz","el arroz"],egg:["🥚","Eggs","Ze","les œufs","los huevos"],onion:["🧅","Onion","Zonyon","l'oignon","la cebolla"],
+  tomato:["🍅","Tomato","Tomat","la tomate","el tomate"],cabbage:["🥬","Cabbage","Chou","le chou","el repollo"],carrot:["🥕","Carrot","Kawòt","la carotte","la zanahoria"],pepper:["🌶️","Hot pepper","Piman","le piment","el chile"],pumpkin:["🎃","Pumpkin","Joumou","le giraumon","la calabaza"],milk:["🥛","Milk","Lèt","le lait","la leche"],
+  spoon:["🥄","Stir it","Brase l","Mélange","Revuelve"],fire:["🔥","Cook it","Kwit li","Fais cuire","Cocínalo"]};
+const FOODACT=["spoon","fire"];
+/* Recipes: t = [English, Kreyòl, Français, Español], e = finished dish, s = steps in order */
+const RECIPES=[
+ {t:["Peanut butter bread","Pen ak manba","Pain au beurre de cacahuète","Pan con maní"],e:"🥪",s:["bread","peanut","banana"]},
+ {t:["Hot milk","Lèt cho","Lait chaud","Leche caliente"],e:"☕",s:["milk","honey","fire","spoon"]},
+ {t:["Mango juice","Ji mango","Jus de mangue","Jugo de mango"],e:"🥤",s:["mango","water","lime","honey","ice"]},
+ {t:["Fruit salad","Salad fwi","Salade de fruits","Ensalada de frutas"],e:"🥗",s:["banana","pineapple","melon","mango","spoon"]},
+ {t:["Scrambled eggs","Ze bat","Œufs brouillés","Huevos revueltos"],e:"🍳",s:["egg","onion","tomato","salt","fire"]},
+ {t:["Pikliz","Pikliz","Pikliz","Pikliz"],e:"🫙",s:["cabbage","carrot","pepper","onion","lime"]},
+ {t:["Rice and beans","Diri ak pwa","Riz et haricots","Arroz con frijoles"],e:"🍛",s:["water","beans","garlic","salt","rice","fire"]},
+ {t:["Soup joumou","Soup joumou","Soupe joumou","Sopa joumou"],e:"🍲",s:["water","pumpkin","carrot","cabbage","onion","fire"]}];
+/* Good habits and "in order": each step = [emoji, English, Kreyòl, Français, Español] */
+const HABITS=[
+ {t:["Wash your hands","Lave men","Se laver les mains","Lavarse las manos"],e:"🧼",s:[["💧","Wet your hands","Mouye men ou","Mouille tes mains","Mójate las manos"],["🧼","Use soap","Mete savon","Mets du savon","Usa jabón"],["👐","Rub, rub","Fwote, fwote","Frotte, frotte","Frota, frota"],["🧻","Dry your hands","Seche men ou","Sèche tes mains","Sécate las manos"]]},
+ {t:["Brush your teeth","Bwose dan","Se brosser les dents","Cepillarse los dientes"],e:"🪥",s:[["🪥","Take the toothbrush","Pran bwòs la","Prends la brosse","Toma el cepillo"],["🧴","Put on toothpaste","Mete pat dantifris","Mets le dentifrice","Pon la pasta"],["😁","Brush, brush","Bwose, bwose","Brosse, brosse","Cepilla, cepilla"],["💧","Rinse your mouth","Rense bouch ou","Rince ta bouche","Enjuágate la boca"]]},
+ {t:["Tidy up","Range chanm nan","Ranger","Ordenar"],e:"🧸",s:[["🧸","Pick up the toys","Ranmase jwèt yo","Ramasse les jouets","Recoge los juguetes"],["📦","Put them in the box","Mete yo nan bwat la","Mets-les dans la boîte","Ponlos en la caja"],["🧹","Sweep","Bale","Balaie","Barre"],["✨","All clean!","Tout pwòp!","Tout propre !","¡Todo limpio!"]]},
+ {t:["Meal time","Lè pou manje","L'heure du repas","Hora de comer"],e:"🍽️",s:[["🧼","Wash your hands","Lave men ou","Lave tes mains","Lávate las manos"],["🙏","Say thank you","Di mèsi","Dis merci","Da las gracias"],["🍽️","Eat","Manje","Mange","Come"],["🧽","Wash the plate","Lave asyèt la","Lave l'assiette","Lava el plato"]]},
+ {t:["Good morning","Bonjou, maten!","Le matin","La mañana"],e:"⏰",s:[["⏰","Wake up","Leve","Lève-toi","Despiértate"],["🚿","Take a shower","Benyen","Prends ta douche","Báñate"],["👕","Get dressed","Abiye","Habille-toi","Vístete"],["🍞","Eat breakfast","Manje maten","Prends ton petit-déjeuner","Desayuna"],["🎒","Go to school","Ale lekòl","Va à l'école","Ve a la escuela"]]},
+ {t:["Bedtime","Lè pou dòmi","L'heure du coucher","Hora de dormir"],e:"😴",s:[["🛁","Take a bath","Benyen","Prends ton bain","Báñate"],["👚","Put on pajamas","Mete pijama","Mets ton pyjama","Ponte la pijama"],["🪥","Brush your teeth","Bwose dan ou","Brosse tes dents","Cepíllate los dientes"],["📖","Read a story","Li yon istwa","Lis une histoire","Lee un cuento"],["😴","Sleep","Dòmi","Dors","Duerme"]]}];
+const ORDERS=[
+ {t:["From egg to hen","Soti ze rive poul","De l'œuf à la poule","Del huevo a la gallina"],e:"🐔",s:[["🥚","Egg","Ze","Œuf","Huevo"],["🐣","It hatches","Li kale","Il éclot","Nace"],["🐥","Chick","Ti poul","Poussin","Pollito"],["🐔","Hen","Poul","Poule","Gallina"]]},
+ {t:["The mango tree","Pye mango a","Le manguier","El árbol de mango"],e:"🥭",s:[["🌰","Seed","Grenn","Graine","Semilla"],["🌱","Sprout","Ti plant","Pousse","Brote"],["🌳","Tree","Pyebwa","Arbre","Árbol"],["🥭","Mango","Mango","Mangue","Mango"]]},
+ {t:["One day","Yon jounen","Une journée","Un día"],e:"🌙",s:[["🌅","Morning","Maten","Matin","Mañana"],["☀️","Noon","Midi","Midi","Mediodía"],["🌇","Evening","Aswè","Soir","Tarde"],["🌙","Night","Lannuit","Nuit","Noche"]]},
+ {t:["After the rain","Apre lapli","Après la pluie","Después de la lluvia"],e:"🌈",s:[["☁️","Clouds","Nyaj","Nuages","Nubes"],["🌧️","Rain","Lapli","Pluie","Lluvia"],["🌤️","The sun comes back","Solèy la tounen","Le soleil revient","Vuelve el sol"],["🌈","Rainbow","Lakansyèl","Arc-en-ciel","Arcoíris"]]},
+ {t:["Caterpillar to butterfly","Cheni vin papiyon","De la chenille au papillon","De oruga a mariposa"],e:"🦋",s:[["🥚","Tiny egg","Ti ze","Petit œuf","Huevito"],["🐛","Caterpillar","Cheni","Chenille","Oruga"],["🍃","It eats leaves","Li manje fèy","Elle mange des feuilles","Come hojas"],["🦋","Butterfly","Papiyon","Papillon","Mariposa"]]},
+ {t:["Growing up","Grandi","Grandir","Crecer"],e:"🧓",s:[["👶","Baby","Tibebe","Bébé","Bebé"],["🧒","Child","Timoun","Enfant","Niño"],["🧑","Adult","Granmoun","Adulte","Adulto"],["🧓","Grandparent","Granparan","Grand-parent","Abuelo"]]},
+ {t:["Build a house","Bati yon kay","Construire une maison","Construir una casa"],e:"🏠",s:[["🧱","Blocks","Blòk","Briques","Bloques"],["🏗️","Build","Bati","Construire","Construir"],["🏠","House","Kay","Maison","Casa"],["🎉","Party!","Fèt!","Fête !","¡Fiesta!"]]}];
