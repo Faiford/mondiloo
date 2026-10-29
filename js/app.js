@@ -1,4 +1,4 @@
-const APP_VERSION="1.6.0";
+const APP_VERSION="1.6.1";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -20,7 +20,7 @@ const word=w=>w[WI[lang]];
 const nw=n=>numWord(n,lang);
 const addStar=(k=1)=>{const before=Math.floor(stars/10),sb=Math.min(STICKERS.length,Math.floor(stars/5));stars+=k;save();if(Math.min(STICKERS.length,Math.floor(stars/5))>sb){setTimeout(()=>{sfx("star");cheer(t("newSticker")+" "+STICKERS[Math.floor(stars/5)-1]);},700);}if(Math.floor(stars/10)>before){setTimeout(()=>{confetti(140);cheer("🏆");},300);}const s=document.querySelector(".pill span");if(s)s.textContent=stars;};
 function stopTimersOnly(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];}
-function stopAll(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};clearTimeout(sayT);try{if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();}catch(e){}}
+function stopAll(){document.querySelectorAll("audio").forEach(x=>{try{x.pause();}catch(e){}});timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};clearTimeout(sayT);try{if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();}catch(e){}}
 
 let sound=true; try{sound=localStorage.getItem("tk-snd")!=="0";}catch(e){}
 function tiki(mood){
@@ -160,6 +160,7 @@ function render(){
   if(screen==="diff") diffInit();
   if(screen==="cook") cookInit();
   if(screen==="habits"||screen==="order") seqInit(screen);
+  if(screen==="songs"){const au=[...document.querySelectorAll(".song audio")];au.forEach(x=>x.addEventListener("play",()=>au.forEach(y=>{if(y!==x)y.pause();})));}
   if(screen==="pattern") patternInit();
   if(screen==="odd") oddInit();
   if(screen==="spell") spellInit();
@@ -168,7 +169,7 @@ function render(){
   if(screen==="mole") moleInit();
 }
 function playTop(){
-  const right=["puzzle","music",...NEWG,...NEWG2].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
+  const right=["puzzle","music","songs","album",...NEWG,...NEWG2].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
   const dHead=screen==="daily"?`<div class="dhead">🔥 ${t("daily")} · ${Math.min(daily.i+1,3)}/3</div>`:"";
   return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}${dHead}`;

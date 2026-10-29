@@ -131,7 +131,9 @@ const FREE=["mem","snake","draw","album","daily","words","stories","abc","count"
    {e:"🎵", t:["Count with me","Ann konte","Comptons","Contemos"], file:"songs/ann-konte.mp3", lang:"ht"}
    lang = the language the song is sung in (ht, en, fr, es). Every child sees every song;
    songs in the child's own language come first, the others show a small language badge. */
-const SONGS=[];
+const SONGS=[
+ {e:"🎨", t:["What Color?","Ki Koulè?","Quelle couleur ?","¿Qué color?"], file:"songs/ki-koule.mp3", lang:"ht"},
+ {e:"🔢", t:["Ti Mimi: Let's count 1–10","Ti Mimi: Ann Konte 1–10","Ti Mimi : Comptons de 1 à 10","Ti Mimi: Contemos del 1 al 10"], file:"songs/ann-konte-1-10.mp3", lang:"ht"}];
 /* Printable worksheet packs (in the worksheets/ folder) */
 const WORKSHEETS={ht:"worksheets/mundiko-worksheets-ht.pdf",en:"worksheets/mundiko-worksheets-en.pdf",fr:"worksheets/mundiko-worksheets-fr.pdf",es:"worksheets/mundiko-worksheets-es.pdf"};
 const NOTES=[261.63,293.66,329.63,349.23,392,440,493.88,523.25];
