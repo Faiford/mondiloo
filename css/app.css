@@ -329,3 +329,29 @@ a.cat{text-decoration:none;color:var(--ink)}
 .slot .e{font-size:30px;line-height:1;animation:pop .4s}
 .slot .w{font-size:11px;font-weight:800;text-align:center;overflow-wrap:anywhere;line-height:1.1}
 @media (max-width:420px){.dot2{width:34px;height:34px;font-size:14px}.shbig{font-size:96px}}
+
+/* ===== 1.6.0 games ===== */
+.patrow{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;font-size:clamp(30px,9vw,44px);line-height:1;padding:10px;background:var(--bg);border:3px solid var(--line);border-radius:18px}
+.patrow .pq{min-width:1.2em;text-align:center;border:3px dashed var(--sky);border-radius:12px;color:var(--sky);font-family:var(--display);font-weight:800}
+.pabox,.spbox{display:flex;flex-direction:column;gap:12px}
+.spslots{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.spslots span{width:44px;height:52px;border-bottom:4px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:32px}
+.spslots span.on{color:var(--leaf);animation:pop .3s}
+.sptiles{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.sptile{width:56px;height:56px;border:3px solid var(--line);border-radius:14px;background:#fff;font-family:var(--display);font-weight:800;font-size:28px}
+.sptile.used{visibility:hidden}
+.sptile.no{animation:shake .35s;border-color:var(--coral)}
+.simon{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:340px;align-self:center;margin:0 auto}
+.simpad{aspect-ratio:1;border:0;border-radius:28px;opacity:.55;transition:opacity .12s,transform .12s;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.simpad.lit{opacity:1;transform:scale(1.05);box-shadow:0 0 0 6px #fff,0 0 24px rgba(0,0,0,.25)}
+.sibox{display:flex;flex-direction:column;gap:12px;text-align:center}
+.hdlist{display:flex;align-items:center;justify-content:center;gap:10px;font-size:34px;flex-wrap:wrap}
+.hdlist b{font-size:18px}
+.hdlist span.got{opacity:.35;text-decoration:line-through}
+.hdb .dfc{font-size:clamp(18px,6vw,30px)}
+.moles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;max-width:360px;align-self:center;margin:0 auto}
+.hole{aspect-ratio:1;border:0;border-radius:50%;background:radial-gradient(circle at 50% 70%,#6B4A2B 0 45%,#8D6A45 46% 60%,#CFE8B4 61%);overflow:hidden;display:flex;align-items:center;justify-content:center;padding:0}
+.hole span{font-size:clamp(40px,13vw,60px);transform:translateY(80%);transition:transform .15s}
+.hole span.up{transform:none}
+.hole.no{animation:shake .35s}
+.lbadge{font-size:11px;font-weight:800;background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:1px 6px;margin-left:4px;white-space:nowrap}

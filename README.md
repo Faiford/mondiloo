@@ -72,3 +72,8 @@ Play: Coloring (8 pages), Maze, Connect the dots, Shadows, Spot the difference.
 World: Kitchen (8 recipes incl. diri ak pwa, pikliz, soup joumou), Good habits (6 routines), In order (7 sequences).
 All have levels, stars and the 4 languages. Text lives in `js/content.js` (FOOD, RECIPES, HABITS, ORDERS);
 coloring pages and dot shapes live in `js/app.js` (PAINT, DOTS). Coloring and Maze are free; the rest are Premium.
+
+## New games in 1.6.0
+Play: Follow me (color memory), Crab tap, Hide and seek. Math: Patterns. World: Odd one out. Language: Spell it (ages 5–8).
+Songs: each song in `SONGS` can have `lang:"ht"` (or en/fr/es). Every child sees every song; songs in the child's
+language come first and the others get a small language badge.

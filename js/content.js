@@ -36,9 +36,9 @@ const UI={
 };
 /* age groups: a = 3–4, b = 5–6, c = 7–8 */
 const AGES={
- a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","haiti"]},
- b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","haiti"]},
- c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","haiti"]}
+ a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","pattern","odd","haiti"]},
+ b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","pattern","odd","spell","haiti"]},
+ c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","pattern","odd","spell","haiti"]}
 };
 const BASE={
  ht:["zewo","en","de","twa","kat","senk","sis","sèt","uit","nèf","dis","onz","douz","trèz","katòz","kenz","sèz","disèt","dizuit","diznèf"],
@@ -128,7 +128,9 @@ const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, p
 /* Activities anyone can use for free. Everything else needs Premium (or the free trial). */
 const FREE=["mem","snake","draw","album","daily","words","stories","abc","count","add","nums","colors","animals","haiti","songs","paint","maze"];
 /* Songs: put MP3 files in the songs/ folder and list them here, for example:
-   {e:"🎵", t:["Count with me","Ann konte","Comptons","Contemos"], file:"songs/ann-konte.mp3"} */
+   {e:"🎵", t:["Count with me","Ann konte","Comptons","Contemos"], file:"songs/ann-konte.mp3", lang:"ht"}
+   lang = the language the song is sung in (ht, en, fr, es). Every child sees every song;
+   songs in the child's own language come first, the others show a small language badge. */
 const SONGS=[];
 /* Printable worksheet packs (in the worksheets/ folder) */
 const WORKSHEETS={ht:"worksheets/mundiko-worksheets-ht.pdf",en:"worksheets/mundiko-worksheets-en.pdf",fr:"worksheets/mundiko-worksheets-fr.pdf",es:"worksheets/mundiko-worksheets-es.pdf"};
@@ -180,3 +182,13 @@ const ORDERS=[
  {t:["Caterpillar to butterfly","Cheni vin papiyon","De la chenille au papillon","De oruga a mariposa"],e:"🦋",s:[["🥚","Tiny egg","Ti ze","Petit œuf","Huevito"],["🐛","Caterpillar","Cheni","Chenille","Oruga"],["🍃","It eats leaves","Li manje fèy","Elle mange des feuilles","Come hojas"],["🦋","Butterfly","Papiyon","Papillon","Mariposa"]]},
  {t:["Growing up","Grandi","Grandir","Crecer"],e:"🧓",s:[["👶","Baby","Tibebe","Bébé","Bebé"],["🧒","Child","Timoun","Enfant","Niño"],["🧑","Adult","Granmoun","Adulte","Adulto"],["🧓","Grandparent","Granparan","Grand-parent","Abuelo"]]},
  {t:["Build a house","Bati yon kay","Construire une maison","Construir una casa"],e:"🏠",s:[["🧱","Blocks","Blòk","Briques","Bloques"],["🏗️","Build","Bati","Construire","Construir"],["🏠","House","Kay","Maison","Casa"],["🎉","Party!","Fèt!","Fête !","¡Fiesta!"]]}];
+
+/* ===== 1.6.0: patterns, odd one out, spell it, follow me, hide and seek, crab tap ===== */
+Object.assign(UI.ht,{pattern:"Modèl",patternS:"Kisa ki vini apre?",odd:"Pa menm",oddS:"Kilès ki diferan?",spell:"Fè mo a",spellS:"Mete lèt yo an plas",simon:"Swiv mwen",simonS:"Sonje koulè yo",hidden:"Chèche kache",hiddenS:"Jwenn sa ki kache",mole:"Frape krab",moleS:"Touche krab yo vit",
+  patternQ:"Kisa ki vini apre?",oddQ:"Kilès ki pa menm ak lòt yo?",spellQ:"Ekri mo a",simonWatch:"Gade byen...",simonGo:"Ou menm kounya!",hiddenQ:"Jwenn yo:",moleQ:"Touche krab yo! Pa touche tòti a."});
+Object.assign(UI.en,{pattern:"Patterns",patternS:"What comes next?",odd:"Odd one out",oddS:"Which one is different?",spell:"Spell it",spellS:"Put the letters in place",simon:"Follow me",simonS:"Remember the colors",hidden:"Hide and seek",hiddenS:"Find the hidden things",mole:"Crab tap",moleS:"Tap the crabs fast",
+  patternQ:"What comes next?",oddQ:"Which one does not belong?",spellQ:"Spell the word",simonWatch:"Watch...",simonGo:"Your turn!",hiddenQ:"Find:",moleQ:"Tap the crabs! Not the turtle."});
+Object.assign(UI.fr,{pattern:"Suites",patternS:"Qu'est-ce qui vient après ?",odd:"L'intrus",oddS:"Lequel est différent ?",spell:"Épelle",spellS:"Mets les lettres en place",simon:"Suis-moi",simonS:"Retiens les couleurs",hidden:"Cache-cache",hiddenS:"Trouve les objets cachés",mole:"Attrape le crabe",moleS:"Touche vite les crabes",
+  patternQ:"Qu'est-ce qui vient après ?",oddQ:"Lequel n'est pas comme les autres ?",spellQ:"Écris le mot",simonWatch:"Regarde bien...",simonGo:"À toi !",hiddenQ:"Trouve :",moleQ:"Touche les crabes ! Pas la tortue."});
+Object.assign(UI.es,{pattern:"Secuencias",patternS:"¿Qué sigue?",odd:"El intruso",oddS:"¿Cuál es diferente?",spell:"Deletrea",spellS:"Pon las letras en su lugar",simon:"Sígueme",simonS:"Recuerda los colores",hidden:"Escondidas",hiddenS:"Encuentra lo escondido",mole:"Atrapa el cangrejo",moleS:"Toca los cangrejos rápido",
+  patternQ:"¿Qué sigue?",oddQ:"¿Cuál no es como los demás?",spellQ:"Escribe la palabra",simonWatch:"Mira bien...",simonGo:"¡Tu turno!",hiddenQ:"Encuentra:",moleQ:"¡Toca los cangrejos! No la tortuga."});

@@ -1,11 +1,11 @@
-const APP_VERSION="1.5.0";
+const APP_VERSION="1.6.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
 if(lang&&age) screen="home"; else if(lang) screen="age";
 let LV={}; try{LV=JSON.parse(localStorage.getItem("tk-lv")||"{}")||{};}catch(e){LV={};}
-const LVGAMES=["mem","snake","balloon","puzzle","sort","paint","maze","dots","shadow","diff","cook","habits","order"];
+const LVGAMES=["mem","snake","balloon","puzzle","sort","paint","maze","dots","shadow","diff","cook","habits","order","pattern","odd","spell","simon","hidden","mole"];
 const lvKey=g=>`${age||"b"}-${g}`;
 const lvl=g=>(LV[lvKey(g)]||{cur:1}).cur;
 const lvMax=g=>(LV[lvKey(g)]||{max:1}).max||1;
@@ -109,9 +109,9 @@ function bar(){
 const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>`;
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
-const PLAYS=["mem","snake","balloon","sort","puzzle","paint","maze","dots","shadow","diff","draw","music","songs","album"];
-const CATOF={cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
-const GAMEINFO={paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
+const PLAYS=["mem","snake","balloon","sort","puzzle","simon","mole","hidden","paint","maze","dots","shadow","diff","draw","music","songs","album"];
+const CATOF={pattern:"math",odd:"world",spell:"lang",cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
+const GAMEINFO={pattern:["🔁","c-grape"],odd:["🙃","c-coral"],spell:["🔡","c-leaf"],simon:["🚦","c-rose"],hidden:["🕵️","c-ink"],mole:["🦀","c-coral"],paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
   mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
 const tile=k=>`<button class="game ${GAMEINFO[k][1]}${isLocked(k)?" locked":""}" data-go="${k}">${isLocked(k)?`<span class="lock" aria-label="Premium">🔒</span>`:""}<span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
@@ -160,9 +160,15 @@ function render(){
   if(screen==="diff") diffInit();
   if(screen==="cook") cookInit();
   if(screen==="habits"||screen==="order") seqInit(screen);
+  if(screen==="pattern") patternInit();
+  if(screen==="odd") oddInit();
+  if(screen==="spell") spellInit();
+  if(screen==="simon") simonInit();
+  if(screen==="hidden") hiddenInit();
+  if(screen==="mole") moleInit();
 }
 function playTop(){
-  const right=["puzzle","music",...NEWG].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
+  const right=["puzzle","music",...NEWG,...NEWG2].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
   const dHead=screen==="daily"?`<div class="dhead">🔥 ${t("daily")} · ${Math.min(daily.i+1,3)}/3</div>`:"";
   return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}${dHead}`;
@@ -242,7 +248,8 @@ function play(){
       <div class="nav"><button data-sp="-1" ${sPage===0?"disabled":""}>← ${t("prev")}</button>${last?`<button data-story="-1" style="background:var(--leaf)">⭐ ${t("theEnd")}</button>`:`<button data-sp="1">${t("next")} →</button>`}</div>`;}
   if(scr==="songs"){
     if(!SONGS.length) return `<div class="hello" style="flex-direction:column;text-align:center">${tiki("happy")}<h2>${t("songsSoon")}</h2></div>`;
-    return `<div class="songs">${SONGS.map(sg=>`<div class="song"><span class="e">${sg.e||"🎵"}</span><b>${esc(Array.isArray(sg.t)?sg.t[LI[lang]]:sg.t)}</b><audio controls preload="none" src="${sg.file}"></audio></div>`).join("")}</div>`;}
+    const sl=sg=>sg.lang||"ht", list=[...SONGS.filter(sg=>sl(sg)===lang),...SONGS.filter(sg=>sl(sg)!==lang)];
+    return `<div class="songs">${list.map(sg=>`<div class="song"><span class="e">${sg.e||"🎵"}</span><b>${esc(Array.isArray(sg.t)?sg.t[LI[lang]]:sg.t)}${sl(sg)!==lang?` <small class="lbadge">${sl(sg)==="ht"?"🇭🇹 ":""}${LANGS[sl(sg)]?LANGS[sl(sg)].name:sl(sg)}</small>`:""}</b><audio controls preload="none" src="${sg.file}"></audio></div>`).join("")}</div>`;}
   if(scr==="proverbs"){const p=PROVERBS[pvIdx];
     return `<div class="book"><div class="pic">${p[5]}</div><p class="line">${p[0]}</p><p class="hint" style="font-weight:800;margin:0">${t("meaning")}</p><p style="margin:0;text-align:center;font-size:18px">${p[WI[lang]]}</p></div>
       <div class="nav"><button data-pv="-1">← ${t("prev")}</button><output>${pvIdx+1} / ${PROVERBS.length}</output><button data-pv="1">${t("next")} →</button></div>`;}
@@ -291,6 +298,12 @@ function play(){
   if(scr==="shadow") return `<h2>${t("shadowQ")}</h2><div class="shbox" id="shbox"></div>`;
   if(scr==="diff") return `<div class="diffbox" id="diffbox"></div>`;
   if(scr==="cook") return `<div class="cookbox" id="cookbox"></div>`;
+  if(scr==="pattern") return `<h2>${t("patternQ")}</h2><div class="pabox" id="pabox"></div>`;
+  if(scr==="odd") return `<h2>${t("oddQ")}</h2><div id="odbox"></div>`;
+  if(scr==="spell") return `<h2>${t("spellQ")}</h2><div class="spbox" id="spbox"></div>`;
+  if(scr==="simon") return `<div class="sibox" id="sibox"></div>`;
+  if(scr==="hidden") return `<div class="diffbox" id="hdbox"></div>`;
+  if(scr==="mole") return `<p class="hint" style="text-align:center">${age==="a"?t("moleS"):t("moleQ")}</p><div class="moles" id="mlbox"></div>`;
   if(scr==="habits"||scr==="order") return `<p class="hint" style="text-align:center">${t("orderHint")}</p><div class="seqbox" id="seqbox"></div>`;
   return "";
 }
@@ -780,7 +793,7 @@ function dotTap(i,btn){const g=game;if(!g.dt||g.won)return;
 /* ---------- shadows ---------- */
 function shadowInit(){const L=lvl("shadow");game={sh:true,L,round:0,rounds:5,n:Math.min(6,{a:3,b:4,c:4}[age||"b"]+Math.floor((L-1)/2))};shadowRound();}
 function shadowRound(){const g=game;let pool=WORDS;
-  if(g.L>=3){const ks=Object.keys(THEMES).filter(k=>THEMES[k].length>=g.n+2);if(ks.length)pool=THEMES[ks[rnd(0,ks.length-1)]];}
+  if(g.L>=3){const ks=TORDER.filter(k=>k!=="mix"&&(themeList(k)||[]).length>=g.n+2);if(ks.length)pool=themeList(ks[rnd(0,ks.length-1)]);}
   const seen=new Set(),pick=[];for(const w of shuffle(pool)){if(!seen.has(w[0])){seen.add(w[0]);pick.push(w);}if(pick.length===g.n)break;}
   g.items=pick;g.ans=rnd(0,pick.length-1);g.busy=false;drawShadow();}
 function drawShadow(){const g=game,el=document.getElementById("shbox");if(!el)return;
@@ -829,6 +842,103 @@ function seqTap(c,btn){const g=game;if(!g.sq||g.won)return;
   if(c!==g.i){sfx("no");shakeEl(btn);speak(t("notThat"));return;}
   g.i++;sfx("pop");speak(LW(g.it.s[c]));drawSeq();
   if(g.i>=g.it.s.length){g.won=true;timers.push(setTimeout(()=>levelWin(g.kind),600));}}
+/* ---------- 1.6.0 games ---------- */
+const NEWG2=["pattern","odd","spell","simon","hidden","mole"];
+const allWords=()=>[...WORDS,...TORDER.filter(k=>k!=="mix").flatMap(k=>themeList(k)||[])];
+const uniqEmoji=list=>{const s=new Set(),o=[];list.forEach(w=>{if(!s.has(w[0])){s.add(w[0]);o.push(w);}});return o;};
+/* patterns: AB, ABB, AAB, ABC, AABB */
+function patternInit(){game={pa:true,L:lvl("pattern"),round:0,rounds:5};patternRound();}
+function patternRound(){const g=game,L=g.L;
+  const types=age==="a"?(L<3?["AB"]:["AB","ABB","AAB"]):age==="b"?(L<2?["AB"]:L<4?["AB","ABB","AAB"]:["ABB","AAB","ABC"]):(L<2?["AB","ABB"]:L<4?["ABC","AAB","ABB"]:["ABC","AABB","ABCB"]);
+  const ty=types[rnd(0,types.length-1)],letters=[...new Set(ty)],em=shuffle([...FRUITS,...ITEMS,"🐶","🐱","🐟","🦋","🚗","🎈"].filter((x,i,a)=>a.indexOf(x)===i));
+  const map={};letters.forEach((c,i)=>map[c]=em[i]);
+  const full=ty.length<=2?3:2, seq=[];for(let r=0;r<full;r++)ty.split("").forEach(c=>seq.push(map[c]));
+  const cut=rnd(0,ty.length-1);for(let i=0;i<cut;i++)seq.push(map[ty[i]]);
+  const ans=map[ty[cut]];const opts=new Set([ans]);letters.forEach(c=>opts.add(map[c]));let j=letters.length;while(opts.size<3)opts.add(em[j++]);
+  g.seq=seq;g.ans=ans;g.opts=shuffle([...opts]).slice(0,4);if(!g.opts.includes(ans))g.opts[0]=ans;g.busy=false;drawPattern();}
+function drawPattern(){const g=game,el=document.getElementById("pabox");if(!el)return;
+  el.innerHTML=`<div class="patrow">${g.seq.map(e=>`<span>${e}</span>`).join("")}<span class="pq">${g.done?g.ans:"?"}</span></div>
+   <div class="opts ${g.opts.length===4?"four":""}">${g.opts.map((e,i)=>`<button class="opt" data-pat="${i}"><span class="big">${e}</span></button>`).join("")}</div>`;
+  setScore2(`${g.round}/${g.rounds}`);}
+function patternTap(i,btn){const g=game;if(!g.pa||g.busy)return;
+  if(g.opts[i]!==g.ans){sfx("no");shakeEl(btn);speak(t("no"));return;}
+  g.busy=true;g.done=true;g.round++;sfx("ok");drawPattern();g.done=false;
+  timers.push(setTimeout(()=>{if(g.round>=g.rounds)levelWin("pattern");else patternRound();},900));}
+/* odd one out */
+function oddInit(){game={od:true,L:lvl("odd"),round:0,rounds:5};oddRound();}
+function oddRound(){const g=game,ks=shuffle(TORDER.filter(k=>k!=="mix"&&(themeList(k)||[]).length>=4)),n=age==="a"?3:4;
+  const same=shuffle(uniqEmoji(themeList(ks[0]))).slice(0,n-1),other=shuffle(uniqEmoji(themeList(ks[1])).filter(w=>!same.some(x=>x[0]===w[0])))[0];
+  g.items=shuffle([...same,other]);g.ans=g.items.indexOf(other);g.busy=false;drawOdd();}
+function drawOdd(){const g=game,el=document.getElementById("odbox");if(!el)return;
+  el.innerHTML=`<div class="opts ${g.items.length===4?"four":""}">${g.items.map((w,i)=>`<button class="opt" data-odd="${i}" aria-label="${word(w)}"><span class="big">${w[0]}</span><span class="w">${g.show?word(w):""}</span></button>`).join("")}</div>`;
+  setScore2(`${g.round}/${g.rounds}`);}
+function oddTap(i,btn){const g=game;if(!g.od||g.busy)return;
+  if(i!==g.ans){sfx("no");shakeEl(btn);speak(t("notThat"));return;}
+  g.busy=true;g.round++;btn.classList.add("ok");sfx("ok");speak(word(g.items[i]));setScore2(`${g.round}/${g.rounds}`);
+  timers.push(setTimeout(()=>{if(g.round>=g.rounds)levelWin("odd");else oddRound();},900));}
+/* spell it */
+const letters=s=>Array.from(s.toLocaleLowerCase());
+function spellInit(){game={sp:true,L:lvl("spell"),round:0,rounds:3};spellRound();}
+function spellRound(){const g=game,lo={a:2,b:3,c:4}[age||"b"]+Math.floor((g.L-1)/3),hi=lo+1;
+  let pool=uniqEmoji(allWords()).filter(w=>{const x=word(w);return /^[\p{L}]+$/u.test(x)&&letters(x).length>=lo&&letters(x).length<=hi;});
+  if(!pool.length)pool=uniqEmoji(allWords()).filter(w=>/^[\p{L}]+$/u.test(word(w))&&letters(word(w)).length<=6);
+  const w=pool[rnd(0,pool.length-1)],L=letters(word(w));
+  g.w=w;g.L2=L;g.i=0;g.tiles=shuffle(L.map((c,k)=>({c,k,used:false})));g.busy=false;drawSpell();speak(word(w));}
+function drawSpell(){const g=game,el=document.getElementById("spbox");if(!el)return;
+  el.innerHTML=`<div class="stage" style="font-size:90px;line-height:1">${g.w[0]}</div>
+   <div class="spslots">${g.L2.map((c,i)=>`<span class="${i<g.i?"on":""}">${i<g.i?c.toLocaleUpperCase():""}</span>`).join("")}</div>
+   <div class="sptiles">${g.tiles.map((t2,i)=>`<button class="sptile${t2.used?" used":""}" data-spl="${i}" ${t2.used?"disabled":""}>${t2.c.toLocaleUpperCase()}</button>`).join("")}</div>`;
+  setScore2(`${g.round}/${g.rounds}`);}
+function spellTap(i,btn){const g=game;if(!g.sp||g.busy)return;const tl=g.tiles[i];if(!tl||tl.used)return;
+  if(tl.c!==g.L2[g.i]){sfx("no");shakeEl(btn);return;}
+  tl.used=true;g.i++;sfx("pop");speak(tl.c);
+  if(g.i>=g.L2.length){g.busy=true;g.round++;drawSpell();sfx("ok");speak(word(g.w));timers.push(setTimeout(()=>{if(g.round>=g.rounds)levelWin("spell");else spellRound();},1200));}
+  else drawSpell();}
+/* follow me (Simon) */
+const SIMCOL=["#E53935","#1E63D6","#FDD835","#2E9E4F"],SIMNOTE=[0,2,4,7];
+function simonInit(){const L=lvl("simon");game={si:true,goal:{a:3,b:4,c:5}[age||"b"]+L-1,seq:[rnd(0,3)],pos:0,busy:true};drawSimon();timers.push(setTimeout(simonShow,700));}
+function drawSimon(msg){const g=game,el=document.getElementById("sibox");if(!el)return;
+  el.innerHTML=`<h2 id="simsg">${msg||t("simonWatch")}</h2><div class="simon">${SIMCOL.map((c,i)=>`<button class="simpad" data-sim="${i}" style="background:${c}" aria-label="${COLORS[[0,1,2,3][i]][WI[lang]]}"></button>`).join("")}</div>`;
+  setScore2(`${g.seq.length-1}/${g.goal}`);}
+function simLight(i,ms=420){const b=document.querySelector(`[data-sim="${i}"]`);if(b){b.classList.add("lit");timers.push(setTimeout(()=>b.classList.remove("lit"),ms));}if(sound)note(SIMNOTE[i],ms/1000);}
+function simonShow(){const g=game;if(!g.si)return;g.busy=true;g.pos=0;const m=document.getElementById("simsg");if(m)m.textContent=t("simonWatch");
+  const gap=Math.max(380,700-g.seq.length*30);
+  g.seq.forEach((c,k)=>timers.push(setTimeout(()=>simLight(c,gap*.7),k*gap)));
+  timers.push(setTimeout(()=>{if(game!==g)return;g.busy=false;const m2=document.getElementById("simsg");if(m2)m2.textContent=t("simonGo");},g.seq.length*gap));}
+function simonTap(i){const g=game;if(!g.si||g.busy)return;simLight(i,250);
+  if(i!==g.seq[g.pos]){g.busy=true;levelFail("simon",t("no"));return;}
+  g.pos++;if(g.pos<g.seq.length)return;
+  g.busy=true;if(g.seq.length>=g.goal){timers.push(setTimeout(()=>levelWin("simon"),400));return;}
+  g.seq.push(rnd(0,3));setScore2(`${g.seq.length-1}/${g.goal}`);timers.push(setTimeout(simonShow,900));}
+/* hide and seek */
+function hiddenInit(){const L=lvl("hidden"),gs=Math.min(7,{a:4,b:5,c:6}[age||"b"]+Math.floor((L-1)/3)),k=Math.min(5,{a:2,b:3,c:3}[age||"b"]+Math.floor((L-1)/2));
+  const em=shuffle([...new Set(allWords().map(w=>w[0]))]);const targets=em.slice(0,k),rest=em.slice(k);
+  const cells=Array.from({length:gs*gs},(_,i)=>rest[i%rest.length]);const pos=shuffle([...cells.keys()]).slice(0,k);pos.forEach((p,j)=>cells[p]=targets[j]);
+  game={hd:true,gs,cells,targets,pos,found:new Set(),won:false};drawHidden();}
+function drawHidden(){const g=game,el=document.getElementById("hdbox");if(!el)return;
+  el.innerHTML=`<div class="hdlist"><b>${t("hiddenQ")}</b>${g.targets.map(e=>`<span class="${g.found.has(e)?"got":""}">${e}</span>`).join("")}</div>
+   <div class="dfb hdb" style="grid-template-columns:repeat(${g.gs},minmax(0,1fr));max-width:400px">${g.cells.map((e,i)=>`<button class="dfc${g.found.has(e)&&g.targets.includes(e)?" found":""}" data-hd="${i}">${e}</button>`).join("")}</div>`;
+  setScore2(`🔍 ${g.found.size}/${g.targets.length}`);}
+function hiddenTap(i,btn){const g=game;if(!g.hd||g.won)return;const e=g.cells[i];
+  if(!g.targets.includes(e)||g.found.has(e)){if(!g.found.has(e)){sfx("no");shakeEl(btn);}return;}
+  g.found.add(e);sfx("ok");drawHidden();if(g.found.size===g.targets.length){g.won=true;timers.push(setTimeout(()=>levelWin("hidden"),500));}}
+/* crab tap */
+function moleInit(){const L=lvl("mole"),goal={a:6,b:8,c:10}[age||"b"]+(L-1)*2,secs=30,up=Math.max(650,{a:1500,b:1200,c:1000}[age||"b"]*Math.pow(.93,L-1));
+  game={ml:true,goal,left:secs,up,hits:0,holes:Array(9).fill(""),done:false,turtle:age!=="a"&&L>=2};drawMole();
+  const tick=()=>{const g=game;if(!g.ml||g.done)return;if(g.left<=0){g.done=true;stopTimersOnly();levelFail("mole",t("timeUp"));return;}g.left--;moleScore();};
+  timers.push(setInterval(tick,1000));
+  const pop=()=>{const g=game;if(!g.ml||g.done)return;const free=g.holes.map((h,i)=>h?-1:i).filter(i=>i>=0);if(!free.length)return;
+    const i=free[rnd(0,free.length-1)];g.holes[i]=g.turtle&&rnd(0,3)===0?"🐢":"🦀";drawMole();
+    timers.push(setTimeout(()=>{if(game!==g||g.done)return;if(g.holes[i]&&g.holes[i]!=="✨"){g.holes[i]="";drawMole();}},g.up));};
+  pop();timers.push(setInterval(pop,Math.round(g0up(game.up))));}
+const g0up=u=>u*.62;
+function moleScore(){const g=game;setScore2(`⏱ ${g.left} · 🦀 ${g.hits}/${g.goal}`);}
+function drawMole(){const g=game,el=document.getElementById("mlbox");if(!el)return;
+  el.innerHTML=g.holes.map((h,i)=>`<button class="hole" data-ml="${i}"><span class="${h?"up":""}">${h||""}</span></button>`).join("");moleScore();}
+function moleTap(i,btn){const g=game;if(!g.ml||g.done)return;const h=g.holes[i];if(!h||h==="✨")return;
+  if(h==="🐢"){sfx("no");shakeEl(btn);speak(t("notThat"));g.holes[i]="";g.hits=Math.max(0,g.hits-1);drawMole();return;}
+  g.hits++;sfx("pop");g.holes[i]="✨";drawMole();timers.push(setTimeout(()=>{if(game===g&&g.holes[i]==="✨"){g.holes[i]="";drawMole();}},250));
+  if(g.hits>=g.goal){g.done=true;stopTimersOnly();timers.push(setTimeout(()=>levelWin("mole"),300));}}
 /* ---------- events ---------- */
 function showErr(msg){try{let b=document.getElementById("errbox");if(!b){b=document.createElement("div");b.id="errbox";document.body.appendChild(b);}
   b.textContent="⚠️ "+String(msg).slice(0,160)+" (v"+APP_VERSION+")";b.hidden=false;clearTimeout(b._t);b._t=setTimeout(()=>{b.hidden=true;},9000);}catch(e){}}
@@ -872,6 +982,12 @@ function onTap(e){
   const shi=e.target.closest("[data-shi]"); if(shi){shadowTap(+shi.dataset.shi,shi);return;}
   const dfb=e.target.closest("[data-df]"); if(dfb){diffTap(+dfb.dataset.df,dfb);return;}
   const ckb=e.target.closest("[data-ck]"); if(ckb){cookTap(ckb.dataset.ck,ckb);return;}
+  const pat=e.target.closest("[data-pat]"); if(pat){patternTap(+pat.dataset.pat,pat);return;}
+  const odb=e.target.closest("[data-odd]"); if(odb){oddTap(+odb.dataset.odd,odb);return;}
+  const spl=e.target.closest("[data-spl]"); if(spl){spellTap(+spl.dataset.spl,spl);return;}
+  const sim=e.target.closest("[data-sim]"); if(sim){simonTap(+sim.dataset.sim);return;}
+  const hdb=e.target.closest("[data-hd]"); if(hdb){hiddenTap(+hdb.dataset.hd,hdb);return;}
+  const mlb=e.target.closest("[data-ml]"); if(mlb){moleTap(+mlb.dataset.ml,mlb);return;}
   const sqb=e.target.closest("[data-sq]"); if(sqb){seqTap(+sqb.dataset.sq,sqb);return;}
   const tbb=e.target.closest("[data-tube]"); if(tbb){tubeTap(+tbb.dataset.tube);return;}
   if(e.target.closest("[data-sundo]")){const g=game;if(g.hist&&g.hist.length){g.tb=g.hist.pop();g.sel=-1;g.moves++;drawSort();}return;}
