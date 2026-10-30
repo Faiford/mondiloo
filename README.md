@@ -81,3 +81,7 @@ language come first and the others get a small language badge.
 ## 1.6.1: first songs
 `songs/ki-koule.mp3` (Ki Koulè?) and `songs/ann-konte-1-10.mp3` (Ti Mimi: Ann Konte 1–10), re-encoded to 128 kbps.
 A song is saved on the phone the first time it is played, so it then plays offline. Only one song plays at a time.
+
+## New games in 1.7.0
+Play: Tic-tac-toe against Tiki. World: Feed the animals (FEED), Feelings (EMOS). Language: Opposites (OPPS).
+Math: Missing number, Big and small. Data for the new games is in `js/content.js`.

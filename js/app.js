@@ -1,11 +1,11 @@
-const APP_VERSION="1.6.1";
+const APP_VERSION="1.7.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
 if(lang&&age) screen="home"; else if(lang) screen="age";
 let LV={}; try{LV=JSON.parse(localStorage.getItem("tk-lv")||"{}")||{};}catch(e){LV={};}
-const LVGAMES=["mem","snake","balloon","puzzle","sort","paint","maze","dots","shadow","diff","cook","habits","order","pattern","odd","spell","simon","hidden","mole"];
+const LVGAMES=["mem","snake","balloon","puzzle","sort","paint","maze","dots","shadow","diff","cook","habits","order","pattern","odd","spell","simon","hidden","mole","feed","emo","opp","miss","ttt","size"];
 const lvKey=g=>`${age||"b"}-${g}`;
 const lvl=g=>(LV[lvKey(g)]||{cur:1}).cur;
 const lvMax=g=>(LV[lvKey(g)]||{max:1}).max||1;
@@ -109,9 +109,9 @@ function bar(){
 const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>`;
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
-const PLAYS=["mem","snake","balloon","sort","puzzle","simon","mole","hidden","paint","maze","dots","shadow","diff","draw","music","songs","album"];
-const CATOF={pattern:"math",odd:"world",spell:"lang",cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
-const GAMEINFO={pattern:["🔁","c-grape"],odd:["🙃","c-coral"],spell:["🔡","c-leaf"],simon:["🚦","c-rose"],hidden:["🕵️","c-ink"],mole:["🦀","c-coral"],paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
+const PLAYS=["mem","snake","balloon","sort","puzzle","ttt","simon","mole","hidden","paint","maze","dots","shadow","diff","draw","music","songs","album"];
+const CATOF={feed:"world",emo:"world",opp:"lang",miss:"math",size:"math",pattern:"math",odd:"world",spell:"lang",cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
+const GAMEINFO={feed:["🥕","c-leaf"],emo:["😊","c-amber"],opp:["↔️","c-sky"],miss:["❓","c-grape"],ttt:["⭕","c-teal"],size:["📏","c-rose"],pattern:["🔁","c-grape"],odd:["🙃","c-coral"],spell:["🔡","c-leaf"],simon:["🚦","c-rose"],hidden:["🕵️","c-ink"],mole:["🦀","c-coral"],paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
   mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
 const tile=k=>`<button class="game ${GAMEINFO[k][1]}${isLocked(k)?" locked":""}" data-go="${k}">${isLocked(k)?`<span class="lock" aria-label="Premium">🔒</span>`:""}<span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
@@ -167,9 +167,12 @@ function render(){
   if(screen==="simon") simonInit();
   if(screen==="hidden") hiddenInit();
   if(screen==="mole") moleInit();
+  if(["feed","emo","opp","miss"].includes(screen)) rqInit(screen);
+  if(screen==="size") sizeInit();
+  if(screen==="ttt") tttInit();
 }
 function playTop(){
-  const right=["puzzle","music","songs","album",...NEWG,...NEWG2].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
+  const right=["puzzle","music","songs","album",...NEWG,...NEWG2,...NEWG3].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
   const dHead=screen==="daily"?`<div class="dhead">🔥 ${t("daily")} · ${Math.min(daily.i+1,3)}/3</div>`:"";
   return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}${dHead}`;
@@ -299,6 +302,9 @@ function play(){
   if(scr==="shadow") return `<h2>${t("shadowQ")}</h2><div class="shbox" id="shbox"></div>`;
   if(scr==="diff") return `<div class="diffbox" id="diffbox"></div>`;
   if(scr==="cook") return `<div class="cookbox" id="cookbox"></div>`;
+  if(["feed","emo","opp","miss"].includes(scr)) return `<div class="rqbox" id="rqbox"></div>`;
+  if(scr==="size") return `<div class="szbox" id="szbox"></div>`;
+  if(scr==="ttt") return `<div class="ttbox" id="ttbox"></div>`;
   if(scr==="pattern") return `<h2>${t("patternQ")}</h2><div class="pabox" id="pabox"></div>`;
   if(scr==="odd") return `<h2>${t("oddQ")}</h2><div id="odbox"></div>`;
   if(scr==="spell") return `<h2>${t("spellQ")}</h2><div class="spbox" id="spbox"></div>`;
@@ -940,6 +946,67 @@ function moleTap(i,btn){const g=game;if(!g.ml||g.done)return;const h=g.holes[i];
   if(h==="🐢"){sfx("no");shakeEl(btn);speak(t("notThat"));g.holes[i]="";g.hits=Math.max(0,g.hits-1);drawMole();return;}
   g.hits++;sfx("pop");g.holes[i]="✨";drawMole();timers.push(setTimeout(()=>{if(game===g&&g.holes[i]==="✨"){g.holes[i]="";drawMole();}},250));
   if(g.hits>=g.goal){g.done=true;stopTimersOnly();timers.push(setTimeout(()=>levelWin("mole"),300));}}
+/* ---------- 1.7.0 games ---------- */
+const NEWG3=["feed","emo","opp","miss","ttt","size"];
+/* round quizzes: each RQ maker returns {say, center, opts:[emoji/number], labels, ans, okSay} */
+const RQ={
+ feed:g=>{const n=age==="a"?3:4,pick=shuffle(FEED).slice(0,n),ans=rnd(0,n-1),A=pick[ans];
+   return {say:t("feedQ").replace("{x}",A[2+LI[lang]]),center:`<div class="stage rqbig">${A[0]}</div>`,opts:pick.map(f=>f[1]),labels:null,ans,okSay:A[1]};},
+ emo:g=>{const n=age==="a"?3:Math.min(EMOS.length,4+Math.floor((g.L-1)/3)),pick=shuffle(EMOS).slice(0,n),ans=rnd(0,n-1);
+   return {say:t("emoQ").replace("{x}",LW(pick[ans])),center:"",opts:pick.map(e=>e[0]),labels:null,ans,okSay:LW(pick[ans])};},
+ opp:g=>{const n=age==="a"?3:4,ps=shuffle(OPPS).slice(0,n),side=rnd(0,1),P=ps[0],qw=(side?P[3]:P[2])[LI[lang]];
+   const items=ps.map((p,i)=>{const s=i===0?1-side:rnd(0,1);return [p[s],(s?p[3]:p[2])[LI[lang]]];}),order=shuffle([...items.keys()]);
+   return {say:t("oppQ").replace("{x}",qw),center:`<div class="stage rqbig" style="flex-direction:column;gap:0">${P[side]}<span class="rqw">${qw}</span></div>`,opts:order.map(i=>items[i][0]),labels:order.map(i=>items[i][1]),ans:order.indexOf(0),okSay:items[0][1]};},
+ miss:g=>{const mx=age==="a"?10:age==="b"?(g.L<4?20:50):100,steps=age==="a"?[1]:age==="b"?(g.L<3?[1]:[1,2]):(g.L<3?[1,2,5]:[2,5,10,3]);
+   const st=steps[rnd(0,steps.length-1)],down=age==="c"&&rnd(0,2)===0,len=age==="a"?4:5;let a0=rnd(down?st*(len-1):0,Math.max(down?st*(len-1):0,mx-(down?0:st*(len-1))));
+   if(age==="a")a0=Math.max(1,a0);const seq=Array.from({length:len},(_,i)=>down?a0-i*st:a0+i*st),hole=rnd(1,len-1),ansN=seq[hole];
+   const o=new Set([ansN]);let k=0;while(o.size<3&&k<50){k++;const d=ansN+[-st,st,-1,1,2*st][rnd(0,4)];if(d>=0&&d<=mx+2*st)o.add(d);}
+   const opts=shuffle([...o]);
+   return {say:t("missQ"),center:`<div class="misrow">${seq.map((x,i)=>`<span class="${i===hole?"pq":""}">${i===hole?"?":x}</span>`).join("")}</div>`,opts,labels:opts.map(x=>nw(x)),ans:opts.indexOf(ansN),okSay:nw(ansN),num:true};}};
+function rqInit(k){game={rq:k,L:lvl(k),round:0,rounds:5};rqRound();}
+function rqRound(){const g=game;Object.assign(g,RQ[g.rq](g));g.busy=false;drawRQ();speak(g.say);}
+function drawRQ(){const g=game,el=document.getElementById("rqbox");if(!el)return;
+  el.innerHTML=`<h2>${g.say}</h2>${g.center}<div class="opts ${g.opts.length===4?"four":""}">${g.opts.map((o,i)=>`<button class="opt" data-rq="${i}">${g.num?`<span class="n">${o}</span>`:`<span class="big">${o}</span>`}${g.labels?`<span class="w">${g.labels[i]}</span>`:""}</button>`).join("")}</div>`;
+  setScore2(`${g.round}/${g.rounds}`);}
+function rqTap(i,btn){const g=game;if(!g.rq||g.busy)return;
+  if(i!==g.ans){sfx("no");shakeEl(btn);speak(t("no"));return;}
+  g.busy=true;btn.classList.add("ok");sfx("ok");speak(g.okSay);g.round++;setScore2(`${g.round}/${g.rounds}`);
+  const q2=document.querySelector("#rqbox .pq");if(q2){q2.textContent=g.opts[i];q2.classList.add("got");}
+  timers.push(setTimeout(()=>{if(g.round>=g.rounds)levelWin(g.rq);else rqRound();},1000));}
+/* big and small */
+const SIZEEM=["🍎","⭐","🎈","🐟","🌳","🏠","⚽","🐢","🌻","🚗"];
+function sizeInit(){game={sz:true,L:lvl("size"),round:0,rounds:3};sizeRound();}
+function sizeRound(){const g=game,n=Math.min(6,{a:3,b:4,c:5}[age||"b"]+Math.floor((g.L-1)/3));
+  g.e=SIZEEM[rnd(0,SIZEEM.length-1)];const mx={3:92,4:80,5:66,6:56}[n]||60;g.sizes=Array.from({length:n},(_,i)=>Math.round(26+i*((mx-26)/(n-1))));g.pos=shuffle([...g.sizes.keys()]);
+  g.up=age==="a"||rnd(0,1)===0;g.i=0;g.busy=false;drawSize();speak(g.up?t("sizeUp"):t("sizeDown"));}
+function drawSize(){const g=game,el=document.getElementById("szbox");if(!el)return;const n=g.sizes.length,want=k=>g.up?k:n-1-k;
+  el.innerHTML=`<h2>${g.up?t("sizeUp"):t("sizeDown")}</h2><div class="szrow">${g.pos.map(k=>{const r=g.up?k:n-1-k,done=r<g.i;
+    return `<button class="szb${done?" done":""}" data-szi="${k}" ${done?"disabled":""}><span style="font-size:${g.sizes[k]}px">${g.e}</span>${done?`<i>${r+1}</i>`:""}</button>`;}).join("")}</div>`;
+  setScore2(`${g.round}/${g.rounds}`);}
+function sizeTap(k,btn){const g=game;if(!g.sz||g.busy)return;const n=g.sizes.length,r=g.up?k:n-1-k;
+  if(r!==g.i){sfx("no");shakeEl(btn);return;}
+  g.i++;sfx("pop");speak(nw(g.i));drawSize();
+  if(g.i>=n){g.busy=true;g.round++;sfx("ok");setScore2(`${g.round}/${g.rounds}`);timers.push(setTimeout(()=>{if(g.round>=g.rounds)levelWin("size");else sizeRound();},900));}}
+/* tic-tac-toe against Tiki */
+const LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const tttWin=(b,m)=>LINES.find(l=>l.every(i=>b[i]===m));
+function tttInit(){const L=lvl("ttt");game={tt:true,L,b:Array(9).fill(""),me:(CURP&&CURP.av)||"🦁",ai:"🐦",busy:false,over:false,
+  slip:Math.max(.12,{a:.7,b:.55,c:.45}[age||"b"]-(L-1)*.08)};drawTTT(t("tttYou"));}
+function drawTTT(msg){const g=game,el=document.getElementById("ttbox");if(!el)return;const w=g.line||[];
+  el.innerHTML=`<h2 id="ttmsg">${msg}</h2><div class="ttt">${g.b.map((v,i)=>`<button class="ttc${w.includes(i)?" win":""}" data-tt="${i}" ${v||g.over?"disabled":""}>${v}</button>`).join("")}</div>
+   <p class="hint" style="text-align:center;font-size:20px">${g.me}${CURP&&CURP.name?" "+esc(CURP.name):""} 🆚 ${g.ai} Tiki</p>`;}
+function tttAiMove(){const g=game,b=g.b,free=b.map((v,i)=>v?-1:i).filter(i=>i>=0);if(!free.length)return -1;
+  if(Math.random()<g.slip)return free[rnd(0,free.length-1)];
+  for(const m of [g.ai,g.me])for(const i of free){const c=b.slice();c[i]=m;if(tttWin(c,m))return i;}
+  if(!b[4])return 4;const cs=[0,2,6,8].filter(i=>!b[i]);if(cs.length)return cs[rnd(0,cs.length-1)];return free[rnd(0,free.length-1)];}
+function tttEnd(){const g=game;
+  let l=tttWin(g.b,g.me);if(l){g.over=true;g.line=l;drawTTT("⭐ "+t("ok"));sfx("ok");timers.push(setTimeout(()=>levelWin("ttt"),700));return true;}
+  l=tttWin(g.b,g.ai);if(l){g.over=true;g.line=l;drawTTT(t("tttLose"));timers.push(setTimeout(()=>levelFail("ttt",t("tttLose")),800));return true;}
+  if(g.b.every(v=>v)){g.over=true;drawTTT(t("tttDraw"));timers.push(setTimeout(()=>levelFail("ttt",t("tttDraw")),800));return true;}
+  return false;}
+function tttTap(i){const g=game;if(!g.tt||g.busy||g.over||g.b[i])return;
+  g.b[i]=g.me;sfx("pop");if(tttEnd())return;g.busy=true;drawTTT(t("tttTiki"));
+  timers.push(setTimeout(()=>{if(game!==g)return;const m=tttAiMove();if(m>=0)g.b[m]=g.ai;sfx("pop");g.busy=false;if(!tttEnd())drawTTT(t("tttYou"));},650));}
 /* ---------- events ---------- */
 function showErr(msg){try{let b=document.getElementById("errbox");if(!b){b=document.createElement("div");b.id="errbox";document.body.appendChild(b);}
   b.textContent="⚠️ "+String(msg).slice(0,160)+" (v"+APP_VERSION+")";b.hidden=false;clearTimeout(b._t);b._t=setTimeout(()=>{b.hidden=true;},9000);}catch(e){}}
@@ -983,6 +1050,9 @@ function onTap(e){
   const shi=e.target.closest("[data-shi]"); if(shi){shadowTap(+shi.dataset.shi,shi);return;}
   const dfb=e.target.closest("[data-df]"); if(dfb){diffTap(+dfb.dataset.df,dfb);return;}
   const ckb=e.target.closest("[data-ck]"); if(ckb){cookTap(ckb.dataset.ck,ckb);return;}
+  const rqb=e.target.closest("[data-rq]"); if(rqb){rqTap(+rqb.dataset.rq,rqb);return;}
+  const szb=e.target.closest("[data-szi]"); if(szb){sizeTap(+szb.dataset.szi,szb);return;}
+  const ttb=e.target.closest("[data-tt]"); if(ttb){tttTap(+ttb.dataset.tt);return;}
   const pat=e.target.closest("[data-pat]"); if(pat){patternTap(+pat.dataset.pat,pat);return;}
   const odb=e.target.closest("[data-odd]"); if(odb){oddTap(+odb.dataset.odd,odb);return;}
   const spl=e.target.closest("[data-spl]"); if(spl){spellTap(+spl.dataset.spl,spl);return;}

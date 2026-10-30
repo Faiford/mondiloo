@@ -36,9 +36,9 @@ const UI={
 };
 /* age groups: a = 3–4, b = 5–6, c = 7–8 */
 const AGES={
- a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","pattern","odd","haiti"]},
- b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","pattern","odd","spell","haiti"]},
- c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","pattern","odd","spell","haiti"]}
+ a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","pattern","odd","feed","emo","opp","miss","size","haiti"]},
+ b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","haiti"]},
+ c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","haiti"]}
 };
 const BASE={
  ht:["zewo","en","de","twa","kat","senk","sis","sèt","uit","nèf","dis","onz","douz","trèz","katòz","kenz","sèz","disèt","dizuit","diznèf"],
@@ -194,3 +194,26 @@ Object.assign(UI.fr,{pattern:"Suites",patternS:"Qu'est-ce qui vient après ?",od
   patternQ:"Qu'est-ce qui vient après ?",oddQ:"Lequel n'est pas comme les autres ?",spellQ:"Écris le mot",simonWatch:"Regarde bien...",simonGo:"À toi !",hiddenQ:"Trouve :",moleQ:"Touche les crabes ! Pas la tortue."});
 Object.assign(UI.es,{pattern:"Secuencias",patternS:"¿Qué sigue?",odd:"El intruso",oddS:"¿Cuál es diferente?",spell:"Deletrea",spellS:"Pon las letras en su lugar",simon:"Sígueme",simonS:"Recuerda los colores",hidden:"Escondidas",hiddenS:"Encuentra lo escondido",mole:"Atrapa el cangrejo",moleS:"Toca los cangrejos rápido",
   patternQ:"¿Qué sigue?",oddQ:"¿Cuál no es como los demás?",spellQ:"Escribe la palabra",simonWatch:"Mira bien...",simonGo:"¡Tu turno!",hiddenQ:"Encuentra:",moleQ:"¡Toca los cangrejos! No la tortuga."});
+
+/* ===== 1.7.0: feed the animals, feelings, opposites, missing number, tic-tac-toe, big and small ===== */
+Object.assign(UI.ht,{feed:"Bay bèt yo manje",feedS:"Kisa chak bèt manje?",emo:"Santiman",emoS:"Kijan yo santi yo?",opp:"Kontrè",oppS:"Cho ak frèt",miss:"Nimewo ki manke",missS:"3, 4, ?, 6",ttt:"Twa an liy",tttS:"Jwe kont Tiki",size:"Gwo ak piti",sizeS:"Mete yo an lòd gwosè",
+  feedQ:"Kisa {x} manje?",emoQ:"Kilès ki {x}?",oppQ:"Kisa ki kontrè «{x}»?",missQ:"Ki nimewo ki manke?",tttYou:"Se tou pa w!",tttTiki:"Se tou Tiki...",tttDraw:"Match nil! Eseye ankò",tttLose:"Tiki genyen! Eseye ankò",sizeUp:"Touche soti nan pi piti rive nan pi gwo",sizeDown:"Touche soti nan pi gwo rive nan pi piti"});
+Object.assign(UI.en,{feed:"Feed the animals",feedS:"Who eats what?",emo:"Feelings",emoS:"How do they feel?",opp:"Opposites",oppS:"Hot and cold",miss:"Missing number",missS:"3, 4, ?, 6",ttt:"Tic-tac-toe",tttS:"Play against Tiki",size:"Big and small",sizeS:"Put them in size order",
+  feedQ:"What does the {x} eat?",emoQ:"Who is {x}?",oppQ:"What is the opposite of “{x}”?",missQ:"Which number is missing?",tttYou:"Your turn!",tttTiki:"Tiki's turn...",tttDraw:"It's a tie! Try again",tttLose:"Tiki wins! Try again",sizeUp:"Tap from smallest to biggest",sizeDown:"Tap from biggest to smallest"});
+Object.assign(UI.fr,{feed:"Nourris les animaux",feedS:"Qui mange quoi ?",emo:"Émotions",emoS:"Comment se sentent-ils ?",opp:"Contraires",oppS:"Chaud et froid",miss:"Nombre manquant",missS:"3, 4, ?, 6",ttt:"Morpion",tttS:"Joue contre Tiki",size:"Grand et petit",sizeS:"Range par taille",
+  feedQ:"Que mange {x} ?",emoQ:"Qui est {x} ?",oppQ:"Quel est le contraire de « {x} » ?",missQ:"Quel nombre manque ?",tttYou:"À toi !",tttTiki:"Au tour de Tiki...",tttDraw:"Match nul ! Essaie encore",tttLose:"Tiki a gagné ! Essaie encore",sizeUp:"Touche du plus petit au plus grand",sizeDown:"Touche du plus grand au plus petit"});
+Object.assign(UI.es,{feed:"Alimenta a los animales",feedS:"¿Quién come qué?",emo:"Emociones",emoS:"¿Cómo se sienten?",opp:"Opuestos",oppS:"Caliente y frío",miss:"Número que falta",missS:"3, 4, ?, 6",ttt:"Tres en raya",tttS:"Juega contra Tiki",size:"Grande y pequeño",sizeS:"Ordena por tamaño",
+  feedQ:"¿Qué come {x}?",emoQ:"¿Quién está {x}?",oppQ:"¿Cuál es lo contrario de «{x}»?",missQ:"¿Qué número falta?",tttYou:"¡Tu turno!",tttTiki:"Turno de Tiki...",tttDraw:"¡Empate! Inténtalo otra vez",tttLose:"¡Ganó Tiki! Inténtalo otra vez",sizeUp:"Toca del más pequeño al más grande",sizeDown:"Toca del más grande al más pequeño"});
+/* Feed: [animal, food, English, Kreyòl, Français, Español] (animal names as used in the question) */
+const FEED=[["🐰","🥕","rabbit","lapen an","le lapin","el conejo"],["🐒","🍌","monkey","makak la","le singe","el mono"],["🐶","🦴","dog","chen an","le chien","el perro"],["🐱","🐟","cat","chat la","le chat","el gato"],
+  ["🐄","🌾","cow","bèf la","la vache","la vaca"],["🐔","🌽","hen","poul la","la poule","la gallina"],["🐝","🌸","bee","myèl la","l'abeille","la abeja"],["🐼","🎋","panda","panda a","le panda","el panda"],
+  ["🐦","🐛","bird","zwazo a","l'oiseau","el pájaro"],["🐭","🧀","mouse","sourit la","la souris","el ratón"],["🐴","🍏","horse","chwal la","le cheval","el caballo"],["🐐","🥬","goat","kabrit la","la chèvre","la cabra"]];
+/* Feelings: [emoji, English, Kreyòl, Français, Español] */
+const EMOS=[["😀","happy","kontan","content","feliz"],["😢","sad","tris","triste","triste"],["😡","angry","fache","en colère","enojado"],["😨","scared","pè","effrayé","asustado"],
+  ["😴","sleepy","gen dòmi","fatigué","con sueño"],["😲","surprised","sezi","surpris","sorprendido"],["🤒","sick","malad","malade","enfermo"],["😋","hungry","grangou","affamé","con hambre"]];
+/* Opposites: [emoji A, emoji B, [A in en, ht, fr, es], [B in en, ht, fr, es]] */
+const OPPS=[["🔥","🧊",["hot","cho","chaud","caliente"],["cold","frèt","froid","frío"]],["🐘","🐭",["big","gwo","grand","grande"],["small","piti","petit","pequeño"]],
+  ["☀️","🌙",["day","lajounen","jour","día"],["night","lannuit","nuit","noche"]],["😀","😢",["happy","kontan","content","feliz"],["sad","tris","triste","triste"]],
+  ["⬆️","⬇️",["up","anwo","en haut","arriba"],["down","anba","en bas","abajo"]],["🐢","🐆",["slow","dousman","lent","lento"],["fast","vit","rapide","rápido"]],
+  ["📖","📕",["open","ouvè","ouvert","abierto"],["closed","fèmen","fermé","cerrado"]],["🌳","🌱",["tall","wo","haut","alto"],["short","kout","bas","bajo"]],
+  ["🧼","🐷",["clean","pwòp","propre","limpio"],["dirty","sal","sale","sucio"]],["🪶","🏋️",["light","lejè","léger","ligero"],["heavy","lou","lourd","pesado"]]];
