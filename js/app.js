@@ -1,11 +1,11 @@
-const APP_VERSION="1.8.0";
+const APP_VERSION="1.9.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
 if(lang&&age) screen="home"; else if(lang) screen="age";
 let LV={}; try{LV=JSON.parse(localStorage.getItem("tk-lv")||"{}")||{};}catch(e){LV={};}
-const LVGAMES=["mem","snake","balloon","puzzle","sort","paint","maze","dots","shadow","diff","cook","habits","order","pattern","odd","spell","simon","hidden","mole","feed","emo","opp","miss","ttt","size"];
+const LVGAMES=["mem","snake","balloon","puzzle","sort","paint","maze","dots","shadow","diff","cook","habits","order","pattern","odd","spell","simon","hidden","mole","feed","emo","opp","miss","ttt","size","talk"];
 const lvKey=g=>`${age||"b"}-${g}`;
 const lvl=g=>(LV[lvKey(g)]||{cur:1}).cur;
 const lvMax=g=>(LV[lvKey(g)]||{max:1}).max||1;
@@ -20,7 +20,7 @@ const word=w=>w[WI[lang]];
 const nw=n=>numWord(n,lang);
 const addStar=(k=1)=>{const before=Math.floor(stars/10),sb=Math.min(STICKERS.length,Math.floor(stars/5));stars+=k;save();if(Math.min(STICKERS.length,Math.floor(stars/5))>sb){setTimeout(()=>{sfx("star");cheer(t("newSticker")+" "+STICKERS[Math.floor(stars/5)-1]);},700);}if(Math.floor(stars/10)>before){setTimeout(()=>{confetti(140);cheer("🏆");},300);}const s=document.querySelector(".pill span");if(s)s.textContent=stars;};
 function stopTimersOnly(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];}
-function stopAll(){document.querySelectorAll("audio").forEach(x=>{try{x.pause();}catch(e){}});timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};clearTimeout(sayT);try{if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();}catch(e){}}
+function stopAll(){micStop();document.querySelectorAll("audio").forEach(x=>{try{x.pause();}catch(e){}});timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};clearTimeout(sayT);try{if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();}catch(e){}}
 
 let sound=true; try{sound=localStorage.getItem("tk-snd")!=="0";}catch(e){}
 function tiki(mood){
@@ -110,8 +110,8 @@ const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
 const PLAYS=["mem","snake","balloon","sort","puzzle","ttt","simon","mole","hidden","paint","maze","dots","shadow","diff","draw","music","songs","album"];
-const CATOF={globe:"world",feed:"world",emo:"world",opp:"lang",miss:"math",size:"math",pattern:"math",odd:"world",spell:"lang",cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
-const GAMEINFO={globe:["🌍","c-sky"],feed:["🥕","c-leaf"],emo:["😊","c-amber"],opp:["↔️","c-sky"],miss:["❓","c-grape"],ttt:["⭕","c-teal"],size:["📏","c-rose"],pattern:["🔁","c-grape"],odd:["🙃","c-coral"],spell:["🔡","c-leaf"],simon:["🚦","c-rose"],hidden:["🕵️","c-ink"],mole:["🦀","c-coral"],paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
+const CATOF={talk:"lang",globe:"world",feed:"world",emo:"world",opp:"lang",miss:"math",size:"math",pattern:"math",odd:"world",spell:"lang",cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
+const GAMEINFO={talk:["🎤","c-rose"],globe:["🌍","c-sky"],feed:["🥕","c-leaf"],emo:["😊","c-amber"],opp:["↔️","c-sky"],miss:["❓","c-grape"],ttt:["⭕","c-teal"],size:["📏","c-rose"],pattern:["🔁","c-grape"],odd:["🙃","c-coral"],spell:["🔡","c-leaf"],simon:["🚦","c-rose"],hidden:["🕵️","c-ink"],mole:["🦀","c-coral"],paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
   mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
 const tile=k=>`<button class="game ${GAMEINFO[k][1]}${isLocked(k)?" locked":""}" data-go="${k}">${isLocked(k)?`<span class="lock" aria-label="Premium">🔒</span>`:""}<span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
@@ -174,9 +174,10 @@ function render(){
   if(["feed","emo","opp","miss"].includes(screen)) rqInit(screen);
   if(screen==="size") sizeInit();
   if(screen==="ttt") tttInit();
+  if(screen==="talk") talkInit();
 }
 function playTop(){
-  const right=["puzzle","music","songs","album",...NEWG,...NEWG2,...NEWG3].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
+  const right=["puzzle","music","songs","album",...NEWG,...NEWG2,...NEWG3,"talk"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
   const dHead=screen==="daily"?`<div class="dhead">🔥 ${t("daily")} · ${Math.min(daily.i+1,3)}/3</div>`:"";
   const backBtn=screen==="globe"&&gC>=0?`<button class="back" data-gback="1">← ${t("back")}</button>`:`<button class="back" data-go="${screen==="haiti"&&fromGlobe?"globe":"home"}">← ${t("back")}</button>`;
@@ -313,6 +314,7 @@ function play(){
   if(scr==="shadow") return `<h2>${t("shadowQ")}</h2><div class="shbox" id="shbox"></div>`;
   if(scr==="diff") return `<div class="diffbox" id="diffbox"></div>`;
   if(scr==="cook") return `<div class="cookbox" id="cookbox"></div>`;
+  if(scr==="talk") return `<div class="tkbox" id="tkbox"></div>`;
   if(["feed","emo","opp","miss"].includes(scr)) return `<div class="rqbox" id="rqbox"></div>`;
   if(scr==="size") return `<div class="szbox" id="szbox"></div>`;
   if(scr==="ttt") return `<div class="ttbox" id="ttbox"></div>`;
@@ -1024,6 +1026,42 @@ function tttEnd(){const g=game;
 function tttTap(i){const g=game;if(!g.tt||g.busy||g.over||g.b[i])return;
   g.b[i]=g.me;sfx("pop");if(tttEnd())return;g.busy=true;drawTTT(t("tttTiki"));
   timers.push(setTimeout(()=>{if(game!==g)return;const m=tttAiMove();if(m>=0)g.b[m]=g.ai;sfx("pop");g.busy=false;if(!tttEnd())drawTTT(t("tttYou"));},650));}
+/* ---------- say it with me (microphone). The recording lives only in memory and is dropped on leaving. ---------- */
+let MIC=null;
+function micStop(){try{if(MIC){if(MIC.rec&&MIC.rec.state==="recording")MIC.rec.stop();if(MIC.stream)MIC.stream.getTracks().forEach(x=>x.stop());if(MIC.au)MIC.au.pause();if(MIC.url)URL.revokeObjectURL(MIC.url);cancelAnimationFrame(MIC.raf);if(MIC.src)MIC.src.disconnect();}}catch(e){}MIC=null;}
+function talkInit(){game={tk:true,L:lvl("talk"),round:0,rounds:5};talkRound();}
+function talkRound(){const g=game,useP=age!=="a"&&g.L>=3;
+  const pool=useP?PHRASES.filter(p=>word(p).split(" ").length<=4):uniqEmoji(allWords()).filter(w=>!/\s/.test(word(w)));
+  g.item=pool[rnd(0,pool.length-1)];g.state="idle";g.has=false;g.starred=false;g.err=false;
+  if(MIC&&MIC.url){URL.revokeObjectURL(MIC.url);MIC.url=null;}
+  drawTalk();speak(word(g.item));}
+function drawTalk(){const g=game,el=document.getElementById("tkbox");if(!el)return;const w=word(g.item);
+  el.innerHTML=`<div class="wcard tkcard"><span class="pic">${g.item[0]}</span><span class="word" style="font-size:clamp(28px,9vw,48px);text-align:center">${w}</span></div>
+   ${lang==="ht"?`<p class="hint" style="text-align:center">${t("micParent")}</p>`:`<button class="say" data-tlisten="1" style="align-self:center">🔊 ${t("listen")}</button>`}
+   <button class="mic${g.state==="rec"?" rec":""}" data-mic="1" aria-label="🎤">${g.state==="rec"?"⏹️":"🎤"}</button>
+   <p class="fb${g.err?" no":""}" id="micfb" aria-live="polite">${g.err?t("micNo"):g.state==="rec"?t("micRec"):t("micTap")}</p>
+   ${g.has?`<div class="nav" style="justify-content:center;gap:10px"><button data-micplay="1">▶️ ${t("micPlay")}</button><button data-micnext="1" style="background:var(--leaf)">⭐ ${t("next")} →</button></div>`:""}`;
+  setScore2(`${g.round}/${g.rounds}`);}
+async function micStart(){const g=game;if(!g.tk||g.state==="rec")return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||typeof MediaRecorder==="undefined"){g.err=true;drawTalk();return;}
+  try{if(!MIC||!MIC.stream||MIC.stream.getTracks().every(x=>x.readyState==="ended")){const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      if(game!==g){stream.getTracks().forEach(x=>x.stop());return;}MIC={stream};}}
+  catch(e){g.err=true;drawTalk();return;}
+  if(MIC.au)MIC.au.pause();if(MIC.url){URL.revokeObjectURL(MIC.url);MIC.url=null;}
+  let rec;try{rec=new MediaRecorder(MIC.stream);}catch(e){g.err=true;drawTalk();return;}
+  const chunks=[];MIC.rec=rec;
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+  rec.onstop=()=>{cancelAnimationFrame(MIC&&MIC.raf);if(game!==g||!MIC)return;
+    if(chunks.length){MIC.url=URL.createObjectURL(new Blob(chunks,{type:rec.mimeType||"audio/webm"}));g.has=true;if(!g.starred){g.starred=true;addStar();statOk();}}
+    g.state="idle";drawTalk();micPlay();};
+  rec.start();g.state="rec";g.err=false;drawTalk();
+  try{const c=getCtx();if(c){if(!MIC.src){MIC.src=c.createMediaStreamSource(MIC.stream);MIC.an=c.createAnalyser();MIC.an.fftSize=256;MIC.src.connect(MIC.an);}
+    const buf=new Uint8Array(MIC.an.fftSize);const loop=()=>{if(!MIC||g.state!=="rec")return;MIC.an.getByteTimeDomainData(buf);let m=0;for(const v of buf)m=Math.max(m,Math.abs(v-128));
+      const b=document.querySelector(".mic.rec");if(b)b.style.transform=`scale(${1+Math.min(.35,m/90)})`;MIC.raf=requestAnimationFrame(loop);};loop();}}catch(e){}
+  timers.push(setTimeout(()=>{if(game===g&&g.state==="rec")micEnd();},4000));}
+function micEnd(){if(MIC&&MIC.rec&&MIC.rec.state==="recording")MIC.rec.stop();}
+function micPlay(){if(!MIC||!MIC.url)return;try{if(MIC.au)MIC.au.pause();MIC.au=new Audio(MIC.url);const p=MIC.au.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+function talkNext(){const g=game;if(!g.tk)return;if(MIC&&MIC.au)MIC.au.pause();g.round++;sfx("ok");if(g.round>=g.rounds){setScore2(`${g.round}/${g.rounds}`);levelWin("talk");}else talkRound();}
 /* ---------- events ---------- */
 function showErr(msg){try{let b=document.getElementById("errbox");if(!b){b=document.createElement("div");b.id="errbox";document.body.appendChild(b);}
   b.textContent="⚠️ "+String(msg).slice(0,160)+" (v"+APP_VERSION+")";b.hidden=false;clearTimeout(b._t);b._t=setTimeout(()=>{b.hidden=true;},9000);}catch(e){}}
@@ -1067,6 +1105,10 @@ function onTap(e){
   const shi=e.target.closest("[data-shi]"); if(shi){shadowTap(+shi.dataset.shi,shi);return;}
   const dfb=e.target.closest("[data-df]"); if(dfb){diffTap(+dfb.dataset.df,dfb);return;}
   const ckb=e.target.closest("[data-ck]"); if(ckb){cookTap(ckb.dataset.ck,ckb);return;}
+  if(e.target.closest("[data-mic]")){if(game.state==="rec")micEnd();else micStart();return;}
+  if(e.target.closest("[data-micplay]")){micPlay();return;}
+  if(e.target.closest("[data-micnext]")){talkNext();return;}
+  if(e.target.closest("[data-tlisten]")){if(game.item)speak(word(game.item));return;}
   const gcb=e.target.closest("[data-gc]"); if(gcb){const i=+gcb.dataset.gc;stopAll();sfx("pop");if(COUNTRIES[i].haiti){fromGlobe=true;hIdx=0;screen="haiti";render();return;}gC=i;gS=0;render();speak(globeSlides(COUNTRIES[i])[0][1]);return;}
   const gxb=e.target.closest("[data-gx]"); if(gxb&&!gxb.disabled&&gC>=0){const sl=globeSlides(COUNTRIES[gC]);gS=Math.max(0,Math.min(sl.length-1,gS+ +gxb.dataset.gx));sfx("pop");render();speak(sl[gS][1]);return;}
   if(e.target.closest("[data-gdone]")){addStar();statOk();sfx("ok");confetti();cheer(t("theEnd")+"!");gC=-1;gS=0;render();return;}

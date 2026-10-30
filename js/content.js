@@ -36,9 +36,9 @@ const UI={
 };
 /* age groups: a = 3–4, b = 5–6, c = 7–8 */
 const AGES={
- a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","pattern","odd","feed","emo","opp","miss","size","globe"]},
- b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","globe"]},
- c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","globe"]}
+ a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","talk","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","pattern","odd","feed","emo","opp","miss","size","globe"]},
+ b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","talk","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","globe"]},
+ c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","talk","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","globe"]}
 };
 const BASE={
  ht:["zewo","en","de","twa","kat","senk","sis","sèt","uit","nèf","dis","onz","douz","trèz","katòz","kenz","sèz","disèt","dizuit","diznèf"],
@@ -274,3 +274,9 @@ RECIPES.splice(2,0,{t:["Sushi","Sushi","Sushis","Sushi"],e:"🍣",s:["rice","fis
 RECIPES.splice(4,0,{t:["Pizza","Pitza","Pizza","Pizza"],e:"🍕",s:["dough","tomato","cheese","mushroom","fire"]});
 RECIPES.splice(7,0,{t:["Tacos","Tako","Tacos","Tacos"],e:"🌮",s:["dough","meat","cabbage","tomato","cheese"]});
 RECIPES.splice(9,0,{t:["Pancakes","Pankèk","Crêpes","Panqueques"],e:"🥞",s:["flour","egg","milk","spoon","fire","honey"]});
+
+/* ===== 1.9.0: Say it with me (microphone) ===== */
+Object.assign(UI.ht,{talk:"Repete apre m",talkS:"Pale epi tande vwa w",micTap:"Peze 🎤 epi di mo a",micRec:"M ap koute...",micPlay:"Tande vwa w",micNo:"Mikwofòn nan pa disponib isit la. Mande yon granmoun pou l pèmèt li, oswa louvri app la nan Chrome.",micParent:"Granmoun: li mo a fò pou timoun nan, epi kite l repete l.",micAgain:"Ankò"});
+Object.assign(UI.en,{talk:"Say it with me",talkS:"Talk and hear your voice",micTap:"Tap 🎤 and say the word",micRec:"I'm listening...",micPlay:"Hear your voice",micNo:"The microphone isn't available here. Ask a grown-up to allow it, or open the app in Chrome.",micParent:"Grown-ups: read the word out loud, then let your child repeat it.",micAgain:"Again"});
+Object.assign(UI.fr,{talk:"Répète après moi",talkS:"Parle et écoute ta voix",micTap:"Touche 🎤 et dis le mot",micRec:"J'écoute...",micPlay:"Écoute ta voix",micNo:"Le micro n'est pas disponible ici. Demande à un adulte de l'autoriser, ou ouvre l'app dans Chrome.",micParent:"Adultes : lisez le mot à voix haute, puis laissez l'enfant le répéter.",micAgain:"Encore"});
+Object.assign(UI.es,{talk:"Repite conmigo",talkS:"Habla y escucha tu voz",micTap:"Toca 🎤 y di la palabra",micRec:"Te escucho...",micPlay:"Escucha tu voz",micNo:"El micrófono no está disponible aquí. Pide a un adulto que lo permita, o abre la app en Chrome.",micParent:"Adultos: lean la palabra en voz alta y dejen que el niño la repita.",micAgain:"Otra vez"});

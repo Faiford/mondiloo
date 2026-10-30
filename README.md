@@ -92,3 +92,9 @@ Math: Missing number, Big and small. Data for the new games is in `js/content.js
 - Kitchen: sushi, pizza, tacos, pancakes added between the Haitian recipes. Coloring: rocket and whale added.
 - For English/French/Spanish users, Haitian-only items (proverbs, Bouki ak Malis) come after the general ones.
   Kreyòl users see them first.
+
+## 1.9.0: Say it with me 🎤
+The child sees a word (later short phrases), hears it (English/French/Spanish voice; in Kreyòl a grown-up reads it),
+taps 🎤, says it, and hears their own voice back. The recording stays in memory only, is never saved or sent,
+and the microphone is released as soon as the child leaves the activity. privacy.html was updated to say this.
+The microphone needs https (Hostinger SSL) and works in Chrome/Safari; in-app browsers may not allow it.
