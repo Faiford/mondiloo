@@ -85,3 +85,10 @@ A song is saved on the phone the first time it is played, so it then plays offli
 ## New games in 1.7.0
 Play: Tic-tac-toe against Tiki. World: Feed the animals (FEED), Feelings (EMOS). Language: Opposites (OPPS).
 Math: Missing number, Big and small. Data for the new games is in `js/content.js`.
+
+## 1.8.0: Mundiko for every child
+- "Discover the world" (COUNTRIES in `js/content.js`): Haiti first (opens Discover Haiti), then 10 more countries,
+  each with "hello" in its language and 3 facts. Add a country by copying a block.
+- Kitchen: sushi, pizza, tacos, pancakes added between the Haitian recipes. Coloring: rocket and whale added.
+- For English/French/Spanish users, Haitian-only items (proverbs, Bouki ak Malis) come after the general ones.
+  Kreyòl users see them first.

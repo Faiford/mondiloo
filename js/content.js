@@ -36,9 +36,9 @@ const UI={
 };
 /* age groups: a = 3–4, b = 5–6, c = 7–8 */
 const AGES={
- a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","pattern","odd","feed","emo","opp","miss","size","haiti"]},
- b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","haiti"]},
- c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","haiti"]}
+ a:{label:"3–4",e:"🧸",count:[1,10],add:5,sub:0,nums:20,pairs:4,memMode:"emoji",grid:10,speed:440,wrap:true,bal:"free",learn:["words","phrases","stories","abc","trace","find","count","add","nums","colors","shapes","body","animals","days","habits","order","cook","pattern","odd","feed","emo","opp","miss","size","globe"]},
+ b:{label:"5–6",e:"🎒",count:[1,20],add:10,sub:10,nums:100,pairs:8,memMode:"picword",grid:14,speed:340,wrap:true,bal:"color",learn:["words","phrases","stories","proverbs","abc","trace","find","count","add","sub","cmp","nums","colors","shapes","body","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","globe"]},
+ c:{label:"7–8",e:"🚀",count:[11,100],add:100,sub:50,nums:100,pairs:10,memMode:"numword",grid:16,speed:260,wrap:false,bal:"bigger",learn:["words","phrases","stories","proverbs","abc","find","count","add","sub","mul","cmp","nums","shapes","animals","days","clock","habits","order","cook","pattern","odd","spell","feed","emo","opp","miss","size","globe"]}
 };
 const BASE={
  ht:["zewo","en","de","twa","kat","senk","sis","sèt","uit","nèf","dis","onz","douz","trèz","katòz","kenz","sèz","disèt","dizuit","diznèf"],
@@ -126,7 +126,7 @@ const AVATARS=["🦁", "🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "
    payUrl: paste your Stripe Payment Link here when it is ready (https://buy.stripe.com/...). */
 const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, payUrl:"", contact:""};
 /* Activities anyone can use for free. Everything else needs Premium (or the free trial). */
-const FREE=["mem","snake","draw","album","daily","words","stories","abc","count","add","nums","colors","animals","haiti","songs","paint","maze"];
+const FREE=["mem","snake","draw","album","daily","words","stories","abc","count","add","nums","colors","animals","haiti","songs","paint","maze","globe"];
 /* Songs: put MP3 files in the songs/ folder and list them here, for example:
    {e:"🎵", t:["Count with me","Ann konte","Comptons","Contemos"], file:"songs/ann-konte.mp3", lang:"ht"}
    lang = the language the song is sung in (ht, en, fr, es). Every child sees every song;
@@ -217,3 +217,60 @@ const OPPS=[["🔥","🧊",["hot","cho","chaud","caliente"],["cold","frèt","fro
   ["⬆️","⬇️",["up","anwo","en haut","arriba"],["down","anba","en bas","abajo"]],["🐢","🐆",["slow","dousman","lent","lento"],["fast","vit","rapide","rápido"]],
   ["📖","📕",["open","ouvè","ouvert","abierto"],["closed","fèmen","fermé","cerrado"]],["🌳","🌱",["tall","wo","haut","alto"],["short","kout","bas","bajo"]],
   ["🧼","🐷",["clean","pwòp","propre","limpio"],["dirty","sal","sale","sucio"]],["🪶","🏋️",["light","lejè","léger","ligero"],["heavy","lou","lourd","pesado"]]];
+
+/* ===== 1.8.0: Discover the world ===== */
+Object.assign(UI.ht,{globe:"Dekouvri mond lan",globeS:"Peyi ak kilti",hiIn:"{c}, moun di: «{h}»"});
+Object.assign(UI.en,{globe:"Discover the world",globeS:"Countries and cultures",hiIn:"{c}, people say: “{h}”"});
+Object.assign(UI.fr,{globe:"Découvre le monde",globeS:"Pays et cultures",hiIn:"{c}, on dit : « {h} »"});
+Object.assign(UI.es,{globe:"Descubre el mundo",globeS:"Países y culturas",hiIn:"{c}, la gente dice: «{h}»"});
+/* Countries: f = flag, n = name, inP = "in <country>", hi = hello in that country, s = facts [emoji, [en, ht, fr, es]].
+   Haiti (first) opens the Discover Haiti pages. Add a country by copying one block. */
+const COUNTRIES=[
+ {f:"🇭🇹",n:["Haiti","Ayiti","Haïti","Haití"],haiti:true},
+ {f:"🇺🇸",n:["United States","Etazini","États-Unis","Estados Unidos"],inP:["In the United States","Ozetazini","Aux États-Unis","En Estados Unidos"],hi:"Hello!",s:[
+  ["🗽",["The Statue of Liberty stands in New York.","Estati Libète a kanpe Nouyòk.","La statue de la Liberté est à New York.","La Estatua de la Libertad está en Nueva York."]],
+  ["🍔",["Many people love hamburgers and hot dogs.","Anpil moun renmen anbègè ak hot dog.","Beaucoup de gens aiment les hamburgers et les hot-dogs.","A muchas personas les encantan las hamburguesas y los perritos calientes."]],
+  ["🦅",["The bald eagle is the national bird.","Malfini tèt blan an se zwazo nasyonal la.","Le pygargue à tête blanche est l'oiseau national.","El águila calva es el ave nacional."]]]},
+ {f:"🇨🇦",n:["Canada","Kanada","Canada","Canadá"],inP:["In Canada","Nan Kanada","Au Canada","En Canadá"],hi:"Hello! Bonjour!",s:[
+  ["🍁",["A red maple leaf is on the flag.","Gen yon fèy erab wouj sou drapo a.","Une feuille d'érable rouge est sur le drapeau.","Hay una hoja de arce roja en la bandera."]],
+  ["🥞",["People eat pancakes with maple syrup.","Moun manje pankèk ak siwo erab.","On mange des crêpes avec du sirop d'érable.","Comen panqueques con jarabe de arce."]],
+  ["❄️",["Winter is very cold, with lots of snow.","Livè a frèt anpil, gen anpil nèj.","L'hiver est très froid, avec beaucoup de neige.","El invierno es muy frío, con mucha nieve."]]]},
+ {f:"🇲🇽",n:["Mexico","Meksik","Mexique","México"],inP:["In Mexico","Nan Meksik","Au Mexique","En México"],hi:"¡Hola!",s:[
+  ["🌮",["Tacos are a favorite food.","Tako se yon manje moun renmen anpil.","Les tacos sont un plat préféré.","Los tacos son una comida favorita."]],
+  ["🌵",["You can see big cactus plants in the desert.","Ou ka wè gwo pye kaktis nan dezè a.","On voit de grands cactus dans le désert.","Se ven cactus grandes en el desierto."]],
+  ["🪅",["At parties, children break a piñata.","Nan fèt, timoun kraze yon pinyata.","Aux fêtes, les enfants cassent une piñata.","En las fiestas, los niños rompen una piñata."]]]},
+ {f:"🇧🇷",n:["Brazil","Brezil","Brésil","Brasil"],inP:["In Brazil","Nan Brezil","Au Brésil","En Brasil"],hi:"Olá!",s:[
+  ["⚽",["People love to play soccer.","Moun renmen jwe foutbòl anpil.","Les gens adorent jouer au football.","A la gente le encanta jugar al fútbol."]],
+  ["🌳",["The Amazon is the biggest rainforest in the world.","Amazoni se pi gwo forè twopikal sou latè.","L'Amazonie est la plus grande forêt tropicale du monde.","La Amazonía es la selva tropical más grande del mundo."]],
+  ["🦜",["Colorful parrots live in the forest.","Jako ak bèl koulè rete nan forè a.","Des perroquets colorés vivent dans la forêt.","Loros de colores viven en la selva."]]]},
+ {f:"🇫🇷",n:["France","Frans","France","Francia"],inP:["In France","An Frans","En France","En Francia"],hi:"Bonjour !",s:[
+  ["🗼",["The Eiffel Tower is in Paris.","Tou Eyfèl la nan Pari.","La tour Eiffel est à Paris.","La Torre Eiffel está en París."]],
+  ["🥐",["People eat croissants and long bread called baguettes.","Moun manje kwasan ak pen long yo rele bagèt.","On mange des croissants et des baguettes.","Comen cruasanes y panes largos llamados baguettes."]],
+  ["🧀",["France makes hundreds of kinds of cheese.","Lafrans fè plizyè santèn kalite fwomaj.","La France fabrique des centaines de fromages.","Francia hace cientos de tipos de queso."]]]},
+ {f:"🇰🇪",n:["Kenya","Kenya","Kenya","Kenia"],inP:["In Kenya","Nan Kenya","Au Kenya","En Kenia"],hi:"Jambo!",s:[
+  ["🦁",["Lions, zebras and giraffes live in the savanna.","Lyon, zèb ak jiraf rete nan savann nan.","Les lions, les zèbres et les girafes vivent dans la savane.","Leones, cebras y jirafas viven en la sabana."]],
+  ["🏃",["Kenya has some of the fastest runners in the world.","Kenya gen kèk nan pi bon kourè sou latè.","Le Kenya a certains des coureurs les plus rapides du monde.","Kenia tiene algunos de los corredores más rápidos del mundo."]],
+  ["🍵",["Many families grow and drink tea.","Anpil fanmi plante te epi bwè te.","Beaucoup de familles cultivent et boivent du thé.","Muchas familias cultivan y toman té."]]]},
+ {f:"🇪🇬",n:["Egypt","Ejip","Égypte","Egipto"],inP:["In Egypt","Nan Ejip","En Égypte","En Egipto"],hi:"Ahlan!",s:[
+  ["🏜️",["The giant pyramids are very, very old.","Gwo piramid yo gen anpil anpil ane.","Les grandes pyramides sont très, très anciennes.","Las grandes pirámides son muy, muy antiguas."]],
+  ["🐫",["Camels walk across the desert.","Chamo mache nan dezè a.","Les chameaux traversent le désert.","Los camellos cruzan el desierto."]],
+  ["🌊",["The Nile is one of the longest rivers in the world.","Nil se youn nan pi long rivyè sou latè.","Le Nil est l'un des plus longs fleuves du monde.","El Nilo es uno de los ríos más largos del mundo."]]]},
+ {f:"🇮🇳",n:["India","Lend","Inde","India"],inP:["In India","Nan Lend","En Inde","En India"],hi:"Namaste!",s:[
+  ["🐘",["Elephants live in the forests.","Elefan rete nan forè yo.","Des éléphants vivent dans les forêts.","Los elefantes viven en los bosques."]],
+  ["🍛",["Curry with rice is a favorite meal.","Kari ak diri se yon manje moun renmen.","Le curry avec du riz est un plat préféré.","El curry con arroz es una comida favorita."]],
+  ["🕌",["The Taj Mahal is a beautiful white building.","Taj Mahal se yon bèl bilding blan.","Le Taj Mahal est un beau monument blanc.","El Taj Mahal es un hermoso edificio blanco."]]]},
+ {f:"🇨🇳",n:["China","Lachin","Chine","China"],inP:["In China","Nan Lachin","En Chine","En China"],hi:"Nǐ hǎo!",s:[
+  ["🐼",["Giant pandas live in the mountains and eat bamboo.","Panda yo rete nan mòn yo epi yo manje banbou.","Les pandas géants vivent dans les montagnes et mangent du bambou.","Los pandas gigantes viven en las montañas y comen bambú."]],
+  ["🥢",["Many people eat with chopsticks.","Anpil moun manje ak ti baton.","Beaucoup de gens mangent avec des baguettes.","Muchas personas comen con palillos."]],
+  ["🧱",["The Great Wall is very, very long.","Gran Miray la long anpil anpil.","La Grande Muraille est très, très longue.","La Gran Muralla es muy, muy larga."]]]},
+ {f:"🇯🇵",n:["Japan","Japon","Japon","Japón"],inP:["In Japan","Nan Japon","Au Japon","En Japón"],hi:"Konnichiwa!",s:[
+  ["🍣",["Sushi is made with rice and fish.","Sushi fèt ak diri ak pwason.","Les sushis sont faits de riz et de poisson.","El sushi se hace con arroz y pescado."]],
+  ["🗻",["Mount Fuji is the tallest mountain in Japan.","Mòn Fuji se mòn ki pi wo nan Japon.","Le mont Fuji est la plus haute montagne du Japon.","El monte Fuji es la montaña más alta de Japón."]],
+  ["🌸",["In spring, pink cherry blossoms bloom everywhere.","Nan prentan, flè seriz woz yo fleri toupatou.","Au printemps, les cerisiers roses fleurissent partout.","En primavera, los cerezos rosados florecen por todas partes."]]]}];
+/* More kitchen ingredients and recipes from around the world */
+Object.assign(FOOD,{dough:["🫓","Dough","Pat","la pâte","la masa"],meat:["🍖","Meat","Vyann","la viande","la carne"],mushroom:["🍄","Mushrooms","Djondjon","les champignons","los champiñones"],
+  fish:["🐟","Fish","Pwason","le poisson","el pescado"],cheese:["🧀","Cheese","Fwomaj","le fromage","el queso"],cucumber:["🥒","Cucumber","Konkonm","le concombre","el pepino"],avocado:["🥑","Avocado","Zaboka","l'avocat","el aguacate"],flour:["🌾","Flour","Farin","la farine","la harina"]});
+RECIPES.splice(2,0,{t:["Sushi","Sushi","Sushis","Sushi"],e:"🍣",s:["rice","fish","cucumber","avocado"]});
+RECIPES.splice(4,0,{t:["Pizza","Pitza","Pizza","Pizza"],e:"🍕",s:["dough","tomato","cheese","mushroom","fire"]});
+RECIPES.splice(7,0,{t:["Tacos","Tako","Tacos","Tacos"],e:"🌮",s:["dough","meat","cabbage","tomato","cheese"]});
+RECIPES.splice(9,0,{t:["Pancakes","Pankèk","Crêpes","Panqueques"],e:"🥞",s:["flour","egg","milk","spoon","fire","honey"]});

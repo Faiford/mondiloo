@@ -1,6 +1,6 @@
-const APP_VERSION="1.7.0";
+const APP_VERSION="1.8.0";
 /* ---------- state ---------- */
-let pvIdx=0, hIdx=0, trIdx=0;
+let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
 try{lang=localStorage.getItem("tk-lang")||null; age=localStorage.getItem("tk-age")||null; stars=+localStorage.getItem("tk-stars")||0;}catch(e){}
 if(lang&&age) screen="home"; else if(lang) screen="age";
@@ -110,11 +110,15 @@ const flag=c=>`<span class="flagbar">${c.map(x=>`<i style="background:${x}"></i>
 let homeCat="all";
 const CATS={all:["✨","catAll"],play:["🎮","catPlay"],lang:["📖","catLang"],math:["🔢","catMath"],world:["🌍","catWorld"]};
 const PLAYS=["mem","snake","balloon","sort","puzzle","ttt","simon","mole","hidden","paint","maze","dots","shadow","diff","draw","music","songs","album"];
-const CATOF={feed:"world",emo:"world",opp:"lang",miss:"math",size:"math",pattern:"math",odd:"world",spell:"lang",cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
-const GAMEINFO={feed:["🥕","c-leaf"],emo:["😊","c-amber"],opp:["↔️","c-sky"],miss:["❓","c-grape"],ttt:["⭕","c-teal"],size:["📏","c-rose"],pattern:["🔁","c-grape"],odd:["🙃","c-coral"],spell:["🔡","c-leaf"],simon:["🚦","c-rose"],hidden:["🕵️","c-ink"],mole:["🦀","c-coral"],paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
+const CATOF={globe:"world",feed:"world",emo:"world",opp:"lang",miss:"math",size:"math",pattern:"math",odd:"world",spell:"lang",cook:"world",habits:"world",order:"world",proverbs:"lang",trace:"lang",haiti:"world",phrases:"lang",stories:"lang",words:"lang",abc:"lang",find:"lang",count:"math",add:"math",sub:"math",mul:"math",cmp:"math",nums:"math",colors:"world",shapes:"world",body:"world",animals:"world",days:"world",clock:"world"};
+const GAMEINFO={globe:["🌍","c-sky"],feed:["🥕","c-leaf"],emo:["😊","c-amber"],opp:["↔️","c-sky"],miss:["❓","c-grape"],ttt:["⭕","c-teal"],size:["📏","c-rose"],pattern:["🔁","c-grape"],odd:["🙃","c-coral"],spell:["🔡","c-leaf"],simon:["🚦","c-rose"],hidden:["🕵️","c-ink"],mole:["🦀","c-coral"],paint:["🖌️","c-rose"],maze:["🌀","c-sky"],dots:["✏️","c-amber"],shadow:["👤","c-ink"],diff:["🔍","c-teal"],cook:["🍳","c-amber"],habits:["🪥","c-sky"],order:["🐣","c-leaf"],songs:["🎤","c-coral"],proverbs:["🦉","c-teal"],trace:["✍️","c-rose"],haiti:["🇭🇹","c-sky"],album:["📒","c-grape"],daily:["🔥","c-amber"],phrases:["💬","c-sky"],stories:["📚","c-grape"],abc:["🔠","c-amber"],animals:["🐮","c-leaf"],days:["📅","c-sky"],clock:["⏰","c-grape"],puzzle:["🧩","c-sky"],music:["🎹","c-rose"],words:["🔤","c-coral"],count:["🖐️","c-sky"],add:["➕","c-leaf"],sub:["➖","c-rose"],colors:["🎨","c-grape"],find:["👂","c-amber"],nums:["🔢","c-ink"],shapes:["🔷","c-teal"],body:["👃","c-coral"],cmp:["⚖️","c-sky"],mul:["✖️","c-rose"],draw:["🖍️","c-teal"],
   mem:["🃏","c-grape"],sort:["🧪","c-amber"],snake:["🐍","c-leaf"],balloon:["🎈","c-coral"]};
 const tile=k=>`<button class="game ${GAMEINFO[k][1]}${isLocked(k)?" locked":""}" data-go="${k}">${isLocked(k)?`<span class="lock" aria-label="Premium">🔒</span>`:""}<span class="e" aria-hidden="true">${GAMEINFO[k][0]}</span><b>${t(k)}</b><small>${t(k+"S").replace("{n}",A().nums)}</small></button>`;
 
+const HT_FIRST=["proverbs"];
+function homeOrder(list){return lang==="ht"?list:[...list.filter(g=>!HT_FIRST.includes(g)),...list.filter(g=>HT_FIRST.includes(g))];}
+const storyOrder=()=>{const all=STORIES.map((_,i)=>i),nb=BOUKI_STORIES.length;return lang==="ht"?all:[...all.slice(nb),...all.slice(0,nb)];};
+function globeSlides(c){return [[c.f,t("hiIn").replace("{c}",c.inP[LI[lang]]).replace("{h}",c.hi)],...c.s.map(x=>[x[0],x[1][LI[lang]]])];}
 function render(){
   let h=bar();
   if(screen==="lang"){
@@ -130,7 +134,7 @@ function render(){
       ${tro?`<div class="trophies" aria-label="${tro}">${"🏆".repeat(Math.min(tro,10))}${tro>10?" +"+(tro-10):""}</div>`:`<small style="color:var(--muted);font-weight:700">${t("nextT")}: ${10-into} ⭐</small>`}</div></div>
       <button class="dailyb${dailyDoneToday()?" done":""}" data-go="daily"><span class="fl">🔥</span><span class="dt"><b>${t("daily")}</b><small>${dailyDoneToday()?t("doneToday"):t("dailyS")}</small></span><span class="st">${streakNow()}<small>${t("streakL")}</small></span></button>
       <div class="cats" role="group">${Object.keys(CATS).map(k=>`<button class="cat" data-cat="${k}" aria-pressed="${homeCat===k}">${CATS[k][0]} ${t(CATS[k][1])}</button>`).join("")}</div>
-      ${["play","lang","math","world"].filter(k=>homeCat==="all"||homeCat===k).map(k=>{const items=k==="play"?PLAYS:A().learn.filter(g=>CATOF[g]===k);
+      ${["play","lang","math","world"].filter(k=>homeCat==="all"||homeCat===k).map(k=>{const items=k==="play"?PLAYS:homeOrder(A().learn).filter(g=>CATOF[g]===k);
         return items.length?`<h3>${CATS[k][0]} ${t(CATS[k][1])}</h3><div class="games">${items.map(tile).join("")}</div>`:"";}).join("")}</section>`;
   } else if(screen==="who"){
     h+=`<section class="card"><h1>${t("who")}</h1><div class="kids">${PROFILES.map(p=>`<button class="kid" data-prof="${p.id}"><span>${p.av}</span><b>${esc(p.name)||"—"}</b><small>${AGES[p.age||"b"].label} ${t("yrs")}</small></button>`).join("")}</div></section>`;
@@ -175,7 +179,8 @@ function playTop(){
   const right=["puzzle","music","songs","album",...NEWG,...NEWG2,...NEWG3].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
   const dHead=screen==="daily"?`<div class="dhead">🔥 ${t("daily")} · ${Math.min(daily.i+1,3)}/3</div>`:"";
-  return `<div class="top"><button class="back" data-go="home">← ${t("back")}</button>${right}</div>${lvBar}${dHead}`;
+  const backBtn=screen==="globe"&&gC>=0?`<button class="back" data-gback="1">← ${t("back")}</button>`:`<button class="back" data-go="${screen==="haiti"&&fromGlobe?"globe":"home"}">← ${t("back")}</button>`;
+  return `<div class="top">${backBtn}${right}</div>${lvBar}${dHead}`;
 }
 
 /* ---------- learning games ---------- */
@@ -244,7 +249,7 @@ function play(){
     return `${tabs}<div class="stage" style="font-size:80px">${q.ph[q.ans][0]}</div><h2>${t("qPhrase")}</h2>
       <div class="opts" style="grid-template-columns:1fr">${q.ph.map((x,i)=>`<button class="opt" data-a="${i}" style="min-height:58px"><span class="w" style="font-size:19px;color:var(--ink)">${x[WI[lang]]}</span></button>`).join("")}</div>${fb}`;}
   if(scr==="stories"){
-    if(story<0) return `<div class="games">${STORIES.map((st,i)=>`<button class="game ${["c-coral","c-sky","c-leaf"][i%3]}" data-story="${i}"><span class="e">${st.e}</span><b>${st.t[LI[lang]]}</b><small>${st.p.length} ${t("pages")}</small></button>`).join("")}</div>`;
+    if(story<0) return `<div class="games">${storyOrder().map(i=>[STORIES[i],i]).map(([st,i],j)=>`<button class="game ${["c-coral","c-sky","c-leaf"][j%3]}" data-story="${i}"><span class="e">${st.e}</span><b>${st.t[LI[lang]]}</b><small>${st.p.length} ${t("pages")}</small></button>`).join("")}</div>`;
     const st=STORIES[story], last=sPage===st.p.length-1, pg=st.p[sPage];
     return `<h2>${st.t[LI[lang]]}</h2><div class="book"><div class="pic">${pg[0]}</div><p class="line">${pg[WI[lang]]}</p>
       <details><summary>${t("otherL")}</summary><div class="others" style="margin-top:8px">${Object.keys(WI).filter(k=>k!==lang).map(k=>`<span>${LANGS[k].name}: ${pg[WI[k]]}</span>`).join("")}</div></details></div>
@@ -257,6 +262,12 @@ function play(){
   if(scr==="proverbs"){const p=PROVERBS[pvIdx];
     return `<div class="book"><div class="pic">${p[5]}</div><p class="line">${p[0]}</p><p class="hint" style="font-weight:800;margin:0">${t("meaning")}</p><p style="margin:0;text-align:center;font-size:18px">${p[WI[lang]]}</p></div>
       <div class="nav"><button data-pv="-1">← ${t("prev")}</button><output>${pvIdx+1} / ${PROVERBS.length}</output><button data-pv="1">${t("next")} →</button></div>`;}
+  if(scr==="globe"){
+    if(gC<0) return `<div class="games">${COUNTRIES.map((c,i)=>`<button class="game ${["c-sky","c-coral","c-leaf","c-amber","c-grape","c-teal","c-rose"][i%7]}" data-gc="${i}"><span class="e">${c.f}</span><b>${c.n[LI[lang]]}</b><small>${c.haiti?t("haitiS"):esc(c.hi)}</small></button>`).join("")}</div>`;
+    const c=COUNTRIES[gC],sl=globeSlides(c),last=gS===sl.length-1,cur=sl[gS];
+    return `<div class="book"><h2>${c.f} ${c.n[LI[lang]]}</h2><div class="pic">${cur[0]}</div><p class="line">${cur[1]}</p></div>
+      <div class="dots">${sl.map((_,i)=>`<i class="${i===gS?"on":""}"></i>`).join("")}</div>
+      <div class="nav"><button data-gx="-1" ${gS===0?"disabled":""}>← ${t("prev")}</button>${last?`<button data-gdone="1" style="background:var(--leaf)">⭐ ${t("theEnd")}</button>`:`<button data-gx="1">${t("next")} →</button>`}</div>`;}
   if(scr==="haiti"){const h=HAITI[hIdx];
     const vis=h[0]==="flag"?`<svg viewBox="0 0 150 90" width="210" role="img" aria-label="flag"><rect width="150" height="45" fill="#00209F"/><rect y="45" width="150" height="45" fill="#D21034"/><rect x="55" y="30" width="40" height="30" fill="#fff"/><path d="M75 36v18M67 54h16" stroke="#016A16" stroke-width="3"/><circle cx="75" cy="38" r="4" fill="#016A16"/></svg>`
       :h[0]==="deps"?`<ol class="deps">${DEPS[lang].map(d=>`<li>${d}</li>`).join("")}</ol>`:`<div class="pic">${h[0]}</div>`;
@@ -746,6 +757,12 @@ const PAINT=[
  {e:"🇭🇹",r:[S_("rect",'x="0" y="0" width="200" height="200"'),S_("rect",'x="0" y="182" width="200" height="18"'),S_("rect",'x="18" y="18" width="9" height="168"'),S_("rect",'x="27" y="30" width="152" height="50"'),S_("rect",'x="27" y="80" width="152" height="50"'),S_("rect",'x="82" y="62" width="42" height="36"'),S_("circle",'cx="22" cy="14" r="7"')],d:'<path d="M103 90v-18M95 90h16" stroke="#24305E" stroke-width="3" stroke-linecap="round"/>'},
  {e:"🌈",r:[S_("rect",'x="0" y="0" width="200" height="200"'),...[0,1,2,3,4].map(i=>{const R=92-13*i,r=R-13;return S_("path",`d="M${100-R} 160 A${R} ${R} 0 0 1 ${100+R} 160 L${100+r} 160 A${r} ${r} 0 0 0 ${100-r} 160 Z"`);}),S_("ellipse",'cx="30" cy="160" rx="30" ry="16"'),S_("ellipse",'cx="170" cy="160" rx="30" ry="16"'),S_("circle",'cx="170" cy="32" r="17"')],d:""},
  {e:"🥭",r:[S_("rect",'x="0" y="0" width="200" height="160"'),S_("rect",'x="0" y="160" width="200" height="40"'),S_("rect",'x="90" y="105" width="20" height="62"'),S_("ellipse",'cx="100" cy="82" rx="68" ry="50"'),S_("ellipse",'cx="72" cy="92" rx="9" ry="12"'),S_("ellipse",'cx="122" cy="74" rx="9" ry="12"'),S_("ellipse",'cx="108" cy="108" rx="9" ry="12"'),S_("circle",'cx="28" cy="28" r="15"')],d:""}];
+/* 1.8.0: flag page last, two more pages from everywhere */
+PAINT.push(...PAINT.splice(5,1));
+PAINT.splice(2,0,{e:"🚀",r:[S_("rect",'x="0" y="0" width="200" height="200"'),S_("circle",'cx="160" cy="160" r="22"'),S_("circle",'cx="35" cy="40" r="7"'),S_("circle",'cx="165" cy="55" r="6"'),S_("circle",'cx="38" cy="160" r="6"'),
+  S_("polygon",'points="88,150 112,150 100,188"'),S_("polygon",'points="80,112 55,156 80,150"'),S_("polygon",'points="120,112 145,156 120,150"'),S_("rect",'x="80" y="50" width="40" height="102" rx="12"'),S_("polygon",'points="80,58 100,14 120,58"'),S_("circle",'cx="100" cy="88" r="12"')],d:""});
+PAINT.splice(5,0,{e:"🐳",r:[S_("rect",'x="0" y="0" width="200" height="95"'),S_("rect",'x="0" y="95" width="200" height="105"'),S_("circle",'cx="166" cy="30" r="16"'),S_("ellipse",'cx="82" cy="70" rx="9" ry="18"'),
+  S_("polygon",'points="155,120 194,94 190,142"'),S_("ellipse",'cx="95" cy="128" rx="66" ry="38"'),S_("ellipse",'cx="90" cy="150" rx="46" ry="13"'),S_("circle",'cx="60" cy="120" r="7"')],d:'<path d="M50 136 q12 8 26 2" stroke="#24305E" stroke-width="3" fill="none" stroke-linecap="round"/>'});
 const PAINTCOL=[...COLORS.map(c=>c[0]),"#8D5524","#7CC8F8","#FFFFFF"];
 function paintInit(){const L=lvl("paint"),pg=PAINT[(L-1)%PAINT.length];game={pt:true,pg,fill:pg.r.map(()=>"#FFFFFF"),col:PAINTCOL[0],won:false};drawPaint();}
 function drawPaint(){const g=game,el=document.getElementById("paintsvg");if(!el)return;
@@ -1026,7 +1043,7 @@ document.addEventListener("touchend",e=>{
 document.addEventListener("click",e=>{if(Date.now()-lastTouchTap<700)return;try{onTap(e);}catch(err){showErr(err&&err.message||err);}});
 function onTap(e){
   const g=e.target.closest("[data-go]");
-  if(g){stopAll(); const dest=g.dataset.go;
+  if(g){stopAll(); const dest=g.dataset.go; if(dest==="globe"&&screen!=="haiti"){gC=-1;gS=0;} if(dest!=="haiti"&&dest!=="globe")fromGlobe=false;
     if(!["home","lang","age"].includes(dest)&&overLimit()){screen="limit";render();return;}
     if(isLocked(dest)){wantedK=dest;payErr=false;screen="paywall";render();return;}
     screen=dest; if(!["home","lang","age"].includes(dest)) statAct(dest);
@@ -1050,6 +1067,10 @@ function onTap(e){
   const shi=e.target.closest("[data-shi]"); if(shi){shadowTap(+shi.dataset.shi,shi);return;}
   const dfb=e.target.closest("[data-df]"); if(dfb){diffTap(+dfb.dataset.df,dfb);return;}
   const ckb=e.target.closest("[data-ck]"); if(ckb){cookTap(ckb.dataset.ck,ckb);return;}
+  const gcb=e.target.closest("[data-gc]"); if(gcb){const i=+gcb.dataset.gc;stopAll();sfx("pop");if(COUNTRIES[i].haiti){fromGlobe=true;hIdx=0;screen="haiti";render();return;}gC=i;gS=0;render();speak(globeSlides(COUNTRIES[i])[0][1]);return;}
+  const gxb=e.target.closest("[data-gx]"); if(gxb&&!gxb.disabled&&gC>=0){const sl=globeSlides(COUNTRIES[gC]);gS=Math.max(0,Math.min(sl.length-1,gS+ +gxb.dataset.gx));sfx("pop");render();speak(sl[gS][1]);return;}
+  if(e.target.closest("[data-gdone]")){addStar();statOk();sfx("ok");confetti();cheer(t("theEnd")+"!");gC=-1;gS=0;render();return;}
+  if(e.target.closest("[data-gback]")){stopAll();gC=-1;gS=0;render();return;}
   const rqb=e.target.closest("[data-rq]"); if(rqb){rqTap(+rqb.dataset.rq,rqb);return;}
   const szb=e.target.closest("[data-szi]"); if(szb){sizeTap(+szb.dataset.szi,szb);return;}
   const ttb=e.target.closest("[data-tt]"); if(ttb){tttTap(+ttb.dataset.tt);return;}
@@ -1069,7 +1090,7 @@ function onTap(e){
   const lm=e.target.closest("[data-limit]"); if(lm){STATS.limit=+lm.dataset.limit;saveStats();render();return;}
   const pv=e.target.closest("[data-pv]"); if(pv){pvIdx=(pvIdx+ +pv.dataset.pv+PROVERBS.length)%PROVERBS.length;render();return;}
   const hx=e.target.closest("[data-hx]"); if(hx&&!hx.disabled){hIdx=Math.max(0,Math.min(HAITI.length-1,hIdx+ +hx.dataset.hx));render();sfx("pop");return;}
-  if(e.target.closest("[data-hdone]")){addStar();statOk();sfx("ok");confetti();cheer(t("theEnd")+"!");hIdx=0;screen="home";render();return;}
+  if(e.target.closest("[data-hdone]")){addStar();statOk();sfx("ok");confetti();cheer(t("theEnd")+"!");hIdx=0;screen=fromGlobe?"globe":"home";render();return;}
   const tr=e.target.closest("[data-tr]"); if(tr){stopAll();trIdx=(trIdx+ +tr.dataset.tr+ALPHA[lang].length)%ALPHA[lang].length;render();return;}
   if(e.target.closest("[data-trclear]")){if(game.ic){game.ic.clearRect(0,0,game.S,game.S);game.done=false;const f=document.getElementById("trfb");if(f){f.textContent="";f.className="fb";}}return;}
   const pf=e.target.closest("[data-prof]"); if(pf){switchProfile(pf.dataset.prof);render();return;}
@@ -1115,6 +1136,7 @@ function onTap(e){
     else if(screen==="phrases"&&pMode==="learn") speak(PHRASES[pIdx][WI[lang]]);
     else if(screen==="stories"&&story>=0) speak(STORIES[story].p[sPage][WI[lang]]);
     else if(screen==="abc"){const L=game.letter||ALPHA[lang][0];const w=alphaWord(L);speak(L+(w?". "+w[1]:""));}
+    else if(screen==="globe"){if(gC>=0)speak(globeSlides(COUNTRIES[gC])[gS][1]);else speak(t("globe"));}
     else if(screen==="nums"){const on=document.querySelector(".board .on"); speak(nw(+on.dataset.n));}
     else if(q) speak(q.say);
   }
