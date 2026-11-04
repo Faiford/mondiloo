@@ -104,3 +104,9 @@ The microphone needs https (Hostinger SSL) and works in Chrome/Safari; in-app br
   Returning players (who already chose a language) are sent straight to the app; add `?home` to see the landing page.
 - Link previews (WhatsApp, Facebook): `img/og.png`. Screenshots for the page and the stores: `img/shot-*.jpg`.
 - Trial reminder on the home screen in the last 2 days of the free trial and after it ends.
+
+## 2.2.0: automatic Premium codes + Android prep
+- `merci.html`: Stripe redirects here after payment (`?session_id={CHECKOUT_SESSION_ID}`). It asks the
+  Cloudflare Worker in `worker/mondiloo-codes.js` for the code, shows it, and "Open Mondiloo" activates it
+  (`app.html?code=…`). Until `CODE_API` is set in merci.html, the page says the code comes by email.
+- `.well-known/assetlinks.json`: links the Android app `com.mondiloo.app` to the site. See `store/ANDROID.md`.

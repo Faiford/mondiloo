@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.mondiloo.app",
+    "sha256_cert_fingerprints": ["8A:4C:2C:57:45:C8:63:61:86:23:C8:7B:07:02:6D:8E:B7:60:5E:46:C8:F0:6C:F0:2E:BF:6C:DE:43:F9:D5:A7"]
+  }
+}]

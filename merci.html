@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mondiloo · Thank you</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FFF6E5">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Nunito:wght@600;800&display=swap">
+<style>
+:root{--bg:#FFF6E5;--ink:#24305E;--muted:#5E6487;--line:#F0E2C4;--leaf:#2DBE7E;--grape:#8E5CF5;--coral:#FF6B5B;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Nunito",system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.card{background:#fff;border:2px solid var(--line);border-radius:28px;padding:28px 22px;max-width:460px;width:100%;text-align:center;box-shadow:0 10px 30px rgba(36,48,94,.08)}
+.card img{width:96px;height:96px;border-radius:24px}
+h1{font-family:"Baloo 2",system-ui,sans-serif;font-size:32px;line-height:1.1;margin:12px 0 6px}
+p{margin:6px 0;color:var(--muted)}
+.code{font:800 28px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;background:#F1EAFE;border:3px dashed var(--grape);border-radius:18px;padding:16px 10px;margin:18px 0 10px;color:var(--ink);user-select:all}
+.btn{display:block;width:100%;font:800 18px "Nunito",sans-serif;border:0;border-radius:18px;padding:14px;margin-top:10px;cursor:pointer;text-decoration:none;color:#fff;background:var(--leaf);box-shadow:0 5px 0 rgba(36,48,94,.16)}
+.btn.alt{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.small{font-size:14px}
+.spin{width:36px;height:36px;border:4px solid var(--line);border-top-color:var(--grape);border-radius:50%;margin:18px auto;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="card">
+  <img src="icons/icon-192.png" alt="">
+  <h1 data-t="h1"></h1>
+  <p data-t="sub"></p>
+  <div id="wait"><div class="spin" aria-hidden="true"></div><p data-t="wait"></p></div>
+  <div id="ok" hidden>
+    <p data-t="yours"></p>
+    <div class="code" id="code"></div>
+    <p class="small" data-t="save"></p>
+    <a class="btn" id="open" href="app.html" data-t="open"></a>
+    <button class="btn alt" id="copy" data-t="copy"></button>
+  </div>
+  <div id="later" hidden>
+    <p data-t="later"></p>
+    <a class="btn" href="app.html" data-t="openOnly"></a>
+  </div>
+  <p class="small" style="margin-top:16px"><span data-t="help"></span> <a href="mailto:contact@mondiloo.com">contact@mondiloo.com</a></p>
+</main>
+<script>
+/* Paste the Cloudflare Worker address here once it is set up, e.g. "https://mondiloo-codes.yourname.workers.dev" */
+const CODE_API = "";
+const T={
+ en:{h1:"Thank you!",sub:"Your Mondiloo Premium payment went through.",wait:"Getting your Premium code…",yours:"Your Premium code:",save:"Write it down or take a screenshot. It works on any device.",open:"⭐ Open Mondiloo and activate",copy:"Copy the code",copied:"Copied ✓",later:"We will email your Premium code within 24 hours. You can start playing now.",openOnly:"Open Mondiloo",help:"Need help?"},
+ ht:{h1:"Mèsi anpil!",sub:"Peman Mondiloo Premium ou a pase.",wait:"N ap chèche kòd Premium ou…",yours:"Men kòd Premium ou:",save:"Ekri l oswa fè yon screenshot. Li mache sou nenpòt aparèy.",open:"⭐ Louvri Mondiloo epi aktive l",copy:"Kopye kòd la",copied:"Kopye ✓",later:"N ap voye kòd Premium ou pa imèl nan 24 è. Ou ka kòmanse jwe kounya.",openOnly:"Louvri Mondiloo",help:"Ou bezwen èd?"},
+ fr:{h1:"Merci !",sub:"Votre paiement Mondiloo Premium est validé.",wait:"Nous préparons votre code Premium…",yours:"Votre code Premium :",save:"Notez-le ou faites une capture d'écran. Il marche sur tous les appareils.",open:"⭐ Ouvrir Mondiloo et activer",copy:"Copier le code",copied:"Copié ✓",later:"Nous vous enverrons votre code Premium par e-mail sous 24 h. Vous pouvez déjà jouer.",openOnly:"Ouvrir Mondiloo",help:"Besoin d'aide ?"},
+ es:{h1:"¡Gracias!",sub:"Tu pago de Mondiloo Premium se realizó.",wait:"Buscando tu código Premium…",yours:"Tu código Premium:",save:"Anótalo o toma una captura de pantalla. Funciona en cualquier dispositivo.",open:"⭐ Abrir Mondiloo y activar",copy:"Copiar el código",copied:"Copiado ✓",later:"Te enviaremos tu código Premium por correo en 24 horas. Ya puedes empezar a jugar.",openOnly:"Abrir Mondiloo",help:"¿Necesitas ayuda?"}};
+let L="en";try{L=localStorage.getItem("tk-lang")||localStorage.getItem("ml-site-lang")||"";}catch(e){}
+if(!T[L]){const n=(navigator.language||"en").slice(0,2);L=T[n]?n:"en";}
+document.documentElement.lang=L;
+document.querySelectorAll("[data-t]").forEach(el=>{el.textContent=T[L][el.dataset.t];});
+const $=id=>document.getElementById(id);
+function later(){$("wait").hidden=true;$("later").hidden=false;}
+const sid=new URLSearchParams(location.search).get("session_id")||"";
+if(!CODE_API||!/^cs_/.test(sid)) later();
+else fetch(CODE_API+"?session_id="+encodeURIComponent(sid)).then(r=>r.json()).then(j=>{
+  if(!j||!j.ok||!j.code) return later();
+  $("code").textContent=j.code;$("open").href="app.html?code="+encodeURIComponent(j.code);
+  $("wait").hidden=true;$("ok").hidden=false;
+  $("copy").onclick=()=>{try{navigator.clipboard.writeText(j.code).then(()=>{$("copy").textContent=T[L].copied;});}catch(e){}};
+}).catch(later);
+</script>
+</body>
+</html>

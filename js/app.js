@@ -1,4 +1,4 @@
-const APP_VERSION="2.1.1";
+const APP_VERSION="2.2.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -685,6 +685,8 @@ let STORE="";try{if(/[?&]src=play/.test(location.search)||document.referrer.inde
 const inPlay=()=>STORE==="play";
 let PREM={}; try{PREM=JSON.parse(localStorage.getItem("tk-prem")||"{}")||{};}catch(e){PREM={};}
 const savePrem=()=>{try{localStorage.setItem("tk-prem",JSON.stringify(PREM));}catch(e){}};
+/* A code in the link (from the thank-you page after paying) activates Premium straight away. */
+try{const qc=new URLSearchParams(location.search).get("code");if(qc&&codeOk(qc)){PREM.code=qc.trim().toUpperCase();savePrem();setTimeout(()=>{try{confetti(160);cheer(t("premOn"));}catch(e){}},600);history.replaceState(null,"",location.pathname);}}catch(e){}
 const DAYMS=86400000;
 function codeOk(code){const m=/^MDL-([A-Z0-9]{4})-([A-Z0-9]{4})$/.exec(String(code||"").trim().toUpperCase());if(!m)return false;
   let h=2166136261;for(const ch of "mondiloo509:"+m[1]){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}
