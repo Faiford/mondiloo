@@ -124,7 +124,7 @@ const AVATARS=["🦁", "🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "
 /* ===== SHOP SETTINGS: change prices or turn Premium off here =====
    enabled:false makes everything free (good for a test period with families).
    payUrl: paste your Stripe Payment Link here when it is ready (https://buy.stripe.com/...). */
-const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, payUrl:"", contact:"contact@mondiloo.com"};
+const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, payUrl:"", payMonth:"https://buy.stripe.com/aFaaEY4MX4Cq6pp2yU0kE00", payYear:"https://buy.stripe.com/bJe5kEenx1qe5llb5q0kE01", contact:"contact@mondiloo.com"};
 /* Activities anyone can use for free. Everything else needs Premium (or the free trial). */
 const FREE=["mem","snake","draw","album","daily","words","stories","abc","count","add","nums","colors","animals","haiti","songs","paint","maze","globe"];
 /* Songs: put MP3 files in the songs/ folder and list them here, for example:
@@ -280,3 +280,9 @@ Object.assign(UI.ht,{talk:"Repete apre m",talkS:"Pale epi tande vwa w",micTap:"P
 Object.assign(UI.en,{talk:"Say it with me",talkS:"Talk and hear your voice",micTap:"Tap 🎤 and say the word",micRec:"I'm listening...",micPlay:"Hear your voice",micNo:"The microphone isn't available here. Ask a grown-up to allow it, or open the app in Chrome.",micParent:"Grown-ups: read the word out loud, then let your child repeat it.",micAgain:"Again"});
 Object.assign(UI.fr,{talk:"Répète après moi",talkS:"Parle et écoute ta voix",micTap:"Touche 🎤 et dis le mot",micRec:"J'écoute...",micPlay:"Écoute ta voix",micNo:"Le micro n'est pas disponible ici. Demande à un adulte de l'autoriser, ou ouvre l'app dans Chrome.",micParent:"Adultes : lisez le mot à voix haute, puis laissez l'enfant le répéter.",micAgain:"Encore"});
 Object.assign(UI.es,{talk:"Repite conmigo",talkS:"Habla y escucha tu voz",micTap:"Toca 🎤 y di la palabra",micRec:"Te escucho...",micPlay:"Escucha tu voz",micNo:"El micrófono no está disponible aquí. Pide a un adulto que lo permita, o abre la app en Chrome.",micParent:"Adultos: lean la palabra en voz alta y dejen que el niño la repita.",micAgain:"Otra vez"});
+
+/* ===== 2.0.2: Stripe payment buttons ===== */
+Object.assign(UI.ht,{payNote:"Apre w peye, n ap voye kòd Premium ou pa imèl nan 24 è. Antre l anba a.",bestDeal:"Pi bon pri"});
+Object.assign(UI.en,{payNote:"After you pay, we email your Premium code within 24 hours. Enter it below.",bestDeal:"Best value"});
+Object.assign(UI.fr,{payNote:"Après le paiement, nous t'envoyons ton code Premium par e-mail sous 24 h. Entre-le ci-dessous.",bestDeal:"Meilleur prix"});
+Object.assign(UI.es,{payNote:"Después de pagar, te enviamos tu código Premium por correo en 24 horas. Escríbelo abajo.",bestDeal:"Mejor precio"});
