@@ -1,8 +1,9 @@
 {
   "name": "Mondiloo",
   "short_name": "Mondiloo",
-  "description": "Jwèt ak leson pou timoun 3–8 an: Kreyòl, English, Français, Español.",
-  "start_url": "./",
+  "description": "Learning games for kids 3–8 in English, Kreyòl, Français and Español. No ads, works offline.",
+  "id": "./app.html",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

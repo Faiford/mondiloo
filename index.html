@@ -1,26 +1,308 @@
 <!doctype html>
-<html lang="ht">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Mondiloo</title>
-<meta name="description" content="Mondiloo: jwèt ak leson pou timoun 3–8 an an Kreyòl, English, Français ak Español.">
+<title>Mondiloo · Learn and play in 4 languages</title>
+<meta name="description" content="Mondiloo is a learning app for kids 3–8: 50+ games and activities in English, Kreyòl, Français and Español. No ads, no accounts, works offline.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mondiloo">
+<meta property="og:title" content="Mondiloo · Learn and play in 4 languages">
+<meta property="og:description" content="50+ games and activities for kids 3–8 in English, Kreyòl, Français and Español. No ads. Works offline.">
+<meta property="og:image" content="https://mondiloo.com/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://mondiloo.com/">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#FFF6E5">
-<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Mondiloo">
+<link rel="manifest" href="manifest.webmanifest">
+<script>
+/* Returning players go straight to the app (add ?home to see this page) */
+try{if(localStorage.getItem("tk-lang")&&location.search.indexOf("home")<0)location.replace("app.html");}catch(e){}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap">
-<link rel="stylesheet" href="css/app.css">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#FFF6E5;--card:#fff;--ink:#24305E;--muted:#5E6487;--line:#F0E2C4;--coral:#FF6B5B;--sun:#FFC83D;--leaf:#2DBE7E;--sky:#2F80ED;--grape:#8E5CF5;--rose:#E0457B;
+  --display:"Baloo 2","Arial Rounded MT Bold",system-ui,sans-serif;--body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--body);overflow-x:hidden}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0}
+.logo{font-family:var(--display);font-weight:800;font-size:30px;line-height:1;text-decoration:none;letter-spacing:-.01em}
+.logo i{font-style:normal}
+.logo i:nth-child(1),.logo i:nth-child(8){color:var(--coral)}.logo i:nth-child(2),.logo i:nth-child(7){color:#F2A007}.logo i:nth-child(3){color:var(--leaf)}.logo i:nth-child(4){color:var(--sky)}.logo i:nth-child(5){color:var(--grape)}.logo i:nth-child(6){color:var(--rose)}
+.langs{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.langs button{font:800 13px var(--body);border:2px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:6px 10px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center;padding:24px 0 40px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(38px,6.4vw,64px);line-height:1.02;margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--coral)}
+.lead{font-size:clamp(17px,2.2vw,20px);color:var(--muted);margin:0 0 22px;max-width:34em}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:800 18px var(--body);text-decoration:none;border-radius:18px;padding:14px 22px;border:0;cursor:pointer;box-shadow:0 5px 0 rgba(36,48,94,.18)}
+.btn.main{background:var(--leaf);color:#fff}
+.btn.alt{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn:active{transform:translateY(2px)}
+.trust{display:flex;flex-wrap:wrap;gap:8px 16px;margin:22px 0 0;padding:0;list-style:none;font-weight:800;font-size:15px}
+.trust li{display:flex;align-items:center;gap:6px}
+.phones{position:relative;height:520px}
+.phone{position:absolute;width:250px;border-radius:30px;border:8px solid var(--ink);background:var(--ink);box-shadow:0 18px 40px rgba(36,48,94,.22);overflow:hidden}
+.phone img{display:block;width:100%;height:auto;border-radius:22px}
+.phone.a{right:110px;top:0;transform:rotate(-4deg)}
+.phone.b{right:0;top:60px;transform:rotate(5deg)}
+.tiki{position:absolute;left:0;bottom:10px;width:120px;border-radius:28px;filter:drop-shadow(0 8px 10px rgba(36,48,94,.18));animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+section{padding:44px 0}
+h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.4vw,44px);line-height:1.05;margin:0 0 8px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 26px;max-width:40em}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:24px;padding:22px}
+.card .e{font-size:38px;line-height:1}
+.card h3{font-family:var(--display);font-weight:800;font-size:22px;margin:8px 0 4px;line-height:1.15}
+.card p{margin:0;color:var(--muted);font-size:16px}
+.ages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.age{border-radius:24px;padding:22px;color:#fff}
+.age b{font-family:var(--display);font-size:32px;display:block;line-height:1}
+.age span{display:block;font-weight:700;margin-top:6px;opacity:.95}
+.age:nth-child(1){background:var(--coral)}.age:nth-child(2){background:var(--sky)}.age:nth-child(3){background:var(--grape)}
+.strip{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 18px;-webkit-overflow-scrolling:touch}
+.strip figure{margin:0;flex:0 0 220px;scroll-snap-align:start}
+.strip img{width:100%;height:auto;border-radius:22px;border:6px solid var(--ink);display:block}
+.strip figcaption{font-weight:800;text-align:center;margin-top:8px;font-size:15px}
+.prices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
+.price{background:#fff;border:2px solid var(--line);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.price.best{border:3px solid var(--grape);position:relative}
+.price .tag{position:absolute;top:-14px;left:24px;background:var(--grape);color:#fff;font-weight:800;font-size:13px;border-radius:999px;padding:4px 12px}
+.price h3{font-family:var(--display);font-size:22px;margin:0}
+.price .amt{font-family:var(--display);font-weight:800;font-size:40px;line-height:1}
+.price .amt small{font-size:16px;color:var(--muted);font-family:var(--body)}
+.price ul{margin:0;padding-left:20px;color:var(--muted);font-size:16px;flex:1}
+.price .btn{width:100%}
+.note{color:var(--muted);font-size:15px;text-align:center;margin-top:16px}
+details{background:#fff;border:2px solid var(--line);border-radius:18px;padding:14px 18px;margin-bottom:10px}
+summary{font-weight:800;cursor:pointer}
+details p{margin:8px 0 0;color:var(--muted)}
+.final{background:var(--ink);color:#fff;border-radius:32px;padding:40px 24px;text-align:center;margin:20px 0 40px}
+.final h2{color:#fff}
+.final p{color:#C9D0EE;margin:0 0 20px}
+footer{padding:24px 0 40px;color:var(--muted);font-size:14px;text-align:center}
+footer a{font-weight:700}
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;padding-top:8px}
+  .phones{height:430px;max-width:420px;margin:0 auto;width:100%}
+  .phone{width:200px}.phone.a{right:auto;left:22%}.phone.b{right:0;top:50px}
+  .tiki{width:96px}
+  .grid,.prices{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  .grid,.prices,.ages{grid-template-columns:1fr}
+  .phones{height:380px}.phone{width:170px}.phone.a{left:14%}
+  .btn{width:100%}
+  header{flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){.tiki{animation:none}html{scroll-behavior:auto}}
+</style>
 </head>
 <body>
-<div class="bgfx" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
-<div class="app" id="app"></div>
-<script src="js/content.js"></script>
-<script src="js/app.js"></script>
+<div class="wrap">
+<header>
+  <a class="logo" href="./" aria-label="Mondiloo"><i>M</i><i>o</i><i>n</i><i>d</i><i>i</i><i>l</i><i>o</i><i>o</i></a>
+  <div class="langs" role="group" aria-label="Language">
+    <button data-l="en">EN</button><button data-l="ht">KR</button><button data-l="fr">FR</button><button data-l="es">ES</button>
+  </div>
+</header>
+
+<div class="hero">
+  <div>
+    <h1 data-t="h1"></h1>
+    <p class="lead" data-t="lead"></p>
+    <div class="cta">
+      <a class="btn main" href="app.html" data-t="play"></a>
+      <a class="btn alt" href="#pricing" data-t="seePrices"></a>
+    </div>
+    <ul class="trust">
+      <li>🚫 <span data-t="t1"></span></li><li>📴 <span data-t="t2"></span></li><li>🔒 <span data-t="t3"></span></li><li>🌍 <span data-t="t4"></span></li>
+    </ul>
+  </div>
+  <div class="phones" aria-hidden="true">
+    <div class="phone a"><img src="img/shot-home.jpg" alt="" width="540" height="1080"></div>
+    <div class="phone b"><img src="img/shot-paint.jpg" alt="" width="540" height="1080"></div>
+    <img class="tiki" src="icons/icon-512.png" alt="">
+  </div>
+</div>
+</div>
+
+<section><div class="wrap">
+  <h2 data-t="whatH"></h2><p class="sub" data-t="whatS"></p>
+  <div class="grid">
+    <div class="card"><div class="e">🎮</div><h3 data-t="f1h"></h3><p data-t="f1p"></p></div>
+    <div class="card"><div class="e">🔤</div><h3 data-t="f2h"></h3><p data-t="f2p"></p></div>
+    <div class="card"><div class="e">🔢</div><h3 data-t="f3h"></h3><p data-t="f3p"></p></div>
+    <div class="card"><div class="e">🌍</div><h3 data-t="f4h"></h3><p data-t="f4p"></p></div>
+    <div class="card"><div class="e">🎵</div><h3 data-t="f5h"></h3><p data-t="f5p"></p></div>
+    <div class="card"><div class="e">👪</div><h3 data-t="f6h"></h3><p data-t="f6p"></p></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <h2 data-t="ageH"></h2><p class="sub" data-t="ageS"></p>
+  <div class="ages">
+    <div class="age"><b>3–4</b><span data-t="a1"></span></div>
+    <div class="age"><b>5–6</b><span data-t="a2"></span></div>
+    <div class="age"><b>7–8</b><span data-t="a3"></span></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <h2 data-t="lookH"></h2>
+  <div class="strip">
+    <figure><img src="img/shot-home.jpg" alt="" loading="lazy" width="540" height="1080"><figcaption data-t="s1"></figcaption></figure>
+    <figure><img src="img/shot-abc.jpg" alt="" loading="lazy" width="540" height="1080"><figcaption data-t="s2"></figcaption></figure>
+    <figure><img src="img/shot-cook.jpg" alt="" loading="lazy" width="540" height="1080"><figcaption data-t="s3"></figcaption></figure>
+    <figure><img src="img/shot-globe.jpg" alt="" loading="lazy" width="540" height="1080"><figcaption data-t="s4"></figcaption></figure>
+    <figure><img src="img/shot-paint.jpg" alt="" loading="lazy" width="540" height="1080"><figcaption data-t="s5"></figcaption></figure>
+    <figure><img src="img/shot-maze.jpg" alt="" loading="lazy" width="540" height="1080"><figcaption data-t="s6"></figcaption></figure>
+  </div>
+</div></section>
+
+<section id="pricing" style="padding-top:0"><div class="wrap">
+  <h2 data-t="priceH"></h2><p class="sub" data-t="priceS"></p>
+  <div class="prices">
+    <div class="price"><h3 data-t="freeH"></h3><div class="amt">$0</div><ul><li data-t="free1"></li><li data-t="free2"></li><li data-t="free3"></li></ul><a class="btn alt" href="app.html" data-t="play"></a></div>
+    <div class="price"><h3 data-t="monthH"></h3><div class="amt">$3.99 <small data-t="perMonth"></small></div><ul><li data-t="p1"></li><li data-t="p2"></li><li data-t="p3"></li></ul><a class="btn main" href="https://buy.stripe.com/aFaaEY4MX4Cq6pp2yU0kE00" target="_blank" rel="noopener" data-t="buyM"></a></div>
+    <div class="price best"><span class="tag" data-t="best"></span><h3 data-t="yearH"></h3><div class="amt">$29.99 <small data-t="perYear"></small></div><ul><li data-t="p1"></li><li data-t="y2"></li><li data-t="p3"></li></ul><a class="btn main" style="background:var(--grape)" href="https://buy.stripe.com/bJe5kEenx1qe5llb5q0kE01" target="_blank" rel="noopener" data-t="buyY"></a></div>
+  </div>
+  <p class="note" data-t="trialNote"></p>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap" style="max-width:760px">
+  <h2 data-t="faqH"></h2>
+  <details><summary data-t="q1"></summary><p data-t="r1"></p></details>
+  <details><summary data-t="q2"></summary><p data-t="r2"></p></details>
+  <details><summary data-t="q3"></summary><p data-t="r3"></p></details>
+  <details><summary data-t="q4"></summary><p data-t="r4"></p></details>
+  <details><summary data-t="q5"></summary><p data-t="r5"></p></details>
+</div></section>
+
+<div class="wrap">
+  <div class="final"><h2 data-t="finalH"></h2><p data-t="finalS"></p><a class="btn main" href="app.html" data-t="play"></a></div>
+</div>
+
+<footer class="wrap">
+  © 2026 509lakay LLC · Perry, Iowa, USA · <a href="privacy.html" data-t="privacy"></a> · <a href="mailto:contact@mondiloo.com">contact@mondiloo.com</a>
+</footer>
+
+<script>
+const T={
+en:{h1:"Learn and play in <em>4 languages</em>",lead:"Mondiloo is a joyful learning app for kids ages 3 to 8: more than 50 games and activities in English, Kreyòl, Français and Español.",play:"▶ Play free",seePrices:"See prices",
+ t1:"No ads",t2:"Works offline",t3:"No accounts",t4:"4 languages",
+ whatH:"Everything in one app",whatS:"Short, playful activities that grow with your child. Switch language at any time.",
+ f1h:"50+ games",f1p:"Memory, mazes, coloring, puzzles, snake, balloons, tic-tac-toe and more, each with levels.",
+ f2h:"Read and speak",f2p:"Words, letters, tracing, phrases, spelling, and 🎤 “Say it with me” to practice out loud.",
+ f3h:"Math that grows",f3p:"From counting to 10 up to 100, adding, subtracting, patterns, missing numbers and clocks.",
+ f4h:"Discover the world",f4p:"11 countries, a kitchen with recipes from everywhere, animals, feelings and good habits.",
+ f5h:"Songs and stories",f5p:"Original songs and picture stories, including classic Haitian tales of Bouki and Malis.",
+ f6h:"For parents",f6p:"A protected parent area with screen-time limits, progress, printable worksheets and several child profiles.",
+ ageH:"Made for every age",ageS:"Pick an age and the activities adapt: bigger numbers, harder levels, new games.",
+ a1:"Colors, shapes, counting to 10, first words",a2:"Reading, adding to 10, clocks and days",a3:"Numbers to 100, spelling, patterns and times tables",
+ lookH:"Take a look",s1:"Home",s2:"Words in 4 languages",s3:"Kitchen",s4:"Discover the world",s5:"Coloring",s6:"Maze",
+ priceH:"Simple prices",priceS:"Start free. Unlock everything when you are ready.",freeH:"Free",free1:"18 activities, free forever",free2:"Songs and stories",free3:"All 4 languages",
+ monthH:"Premium monthly",yearH:"Premium yearly",perMonth:"/ month",perYear:"/ year",best:"Best value · save 37%",
+ p1:"All 50+ activities unlocked",p2:"Cancel anytime",y2:"Pay once a year",p3:"Every new game we add",buyM:"Choose monthly",buyY:"Choose yearly",
+ trialNote:"Try every activity free for 7 days inside the app (ask a grown-up). After you pay, we email your Premium code within 24 hours.",
+ faqH:"Questions from parents",
+ q1:"Is Mondiloo safe for my child?",r1:"Yes. There are no ads, no chat, no accounts and no tracking. Progress is saved only on your device. Purchases and settings sit behind a parent question.",
+ q2:"Which devices work?",r2:"Any phone, tablet or computer with a modern browser (Chrome, Safari, Edge). Add it to your home screen to use it like an app, even offline. An Android app is coming.",
+ q3:"How do I get Premium after paying?",r3:"We email your Premium code within 24 hours. Open the parent area 👪 in the app, tap “Unlock everything” and enter the code.",
+ q4:"Can I cancel?",r4:"Yes, anytime. Email contact@mondiloo.com and we cancel your subscription. You keep Premium until the end of the paid period.",
+ q5:"Does it have voice?",r5:"Words are read aloud in English, French and Spanish by your device's voice. Kreyòl text and Kreyòl songs are included, and a Kreyòl voice is on the way.",
+ finalH:"Ready to play?",finalS:"No sign-up. Open it and start in seconds.",privacy:"Privacy"},
+ht:{h1:"Aprann epi jwe nan <em>4 lang</em>",lead:"Mondiloo se yon app aprantisaj plen kè kontan pou timoun 3 a 8 an: plis pase 50 jwèt ak aktivite an Kreyòl, English, Français ak Español.",play:"▶ Jwe gratis",seePrices:"Wè pri yo",
+ t1:"Pa gen piblisite",t2:"Mache san entènèt",t3:"Pa bezwen kont",t4:"4 lang",
+ whatH:"Tout bagay nan yon sèl app",whatS:"Ti aktivite kout e amizan ki grandi ak pitit ou. Ou ka chanje lang nenpòt ki lè.",
+ f1h:"50+ jwèt",f1p:"Memwa, labirent, kolorye, pezèl, koulèv, balon, twa an liy ak plis ankò, chak ak nivo.",
+ f2h:"Li epi pale",f2p:"Mo, lèt, trase, fraz, fè mo, ak 🎤 «Repete apre m» pou pratike pale fò.",
+ f3h:"Matematik ki grandi",f3p:"Soti nan konte jiska 10 rive 100, adisyon, soustraksyon, modèl, nimewo ki manke ak lè.",
+ f4h:"Dekouvri mond lan",f4p:"11 peyi, yon kizin ak resèt toupatou, bèt, santiman ak bon abitid.",
+ f5h:"Chante ak istwa",f5p:"Chante orijinal ak istwa ak imaj, ansanm ak istwa Bouki ak Malis.",
+ f6h:"Pou paran yo",f6p:"Yon espas paran pwoteje ak limit tan, pwogrè, fèy egzèsis pou enprime ak plizyè pwofil timoun.",
+ ageH:"Fèt pou chak laj",ageS:"Chwazi yon laj e aktivite yo adapte: pi gwo nimewo, nivo pi difisil, nouvo jwèt.",
+ a1:"Koulè, fòm, konte jiska 10, premye mo",a2:"Lekti, adisyon jiska 10, lè ak jou",a3:"Nimewo jiska 100, fè mo, modèl ak miltiplikasyon",
+ lookH:"Gade l",s1:"Akèy",s2:"Mo nan 4 lang",s3:"Kizin",s4:"Dekouvri mond lan",s5:"Kolorye",s6:"Labirent",
+ priceH:"Pri ki senp",priceS:"Kòmanse gratis. Debloke tout lè w pare.",freeH:"Gratis",free1:"18 aktivite, gratis pou tout tan",free2:"Chante ak istwa",free3:"Tout 4 lang yo",
+ monthH:"Premium pa mwa",yearH:"Premium pa ane",perMonth:"/ mwa",perYear:"/ ane",best:"Pi bon pri · ekonomize 37%",
+ p1:"Tout 50+ aktivite yo debloke",p2:"Ou ka anile nenpòt ki lè",y2:"Peye yon fwa pa ane",p3:"Chak nouvo jwèt nou ajoute",buyM:"Chwazi pa mwa",buyY:"Chwazi pa ane",
+ trialNote:"Eseye tout aktivite yo gratis pandan 7 jou nan app la (mande yon granmoun). Apre w peye, n ap voye kòd Premium ou pa imèl nan 24 è.",
+ faqH:"Kesyon paran yo",
+ q1:"Èske Mondiloo an sekirite pou pitit mwen?",r1:"Wi. Pa gen piblisite, pa gen chat, pa gen kont, pa gen swivi. Pwogrè a rete sèlman sou aparèy ou. Acha ak paramèt yo dèyè yon kesyon pou paran.",
+ q2:"Sou ki aparèy li mache?",r2:"Nenpòt telefòn, tablèt oswa òdinatè ki gen yon navigatè resan (Chrome, Safari, Edge). Mete l sou ekran akèy telefòn ou pou sèvi avè l tankou yon app, menm san entènèt. Yon app Android ap vini.",
+ q3:"Kijan pou m jwenn Premium apre m peye?",r3:"N ap voye kòd Premium ou pa imèl nan 24 è. Louvri espas paran 👪 nan app la, peze «Debloke tout» epi antre kòd la.",
+ q4:"Èske m ka anile?",r4:"Wi, nenpòt ki lè. Ekri contact@mondiloo.com e n ap anile abònman an. Ou kenbe Premium jiska fen peryòd ou te peye a.",
+ q5:"Èske li gen vwa?",r5:"Vwa aparèy ou a li mo yo an Anglè, Fransè ak Panyòl. Tèks Kreyòl ak chante Kreyòl yo la deja, e yon vwa Kreyòl ap vini.",
+ finalH:"Pare pou jwe?",finalS:"Pa bezwen enskri. Louvri l epi kòmanse nan kèk segonn.",privacy:"Konfidansyalite"},
+fr:{h1:"Apprendre et jouer en <em>4 langues</em>",lead:"Mondiloo est une appli d'apprentissage joyeuse pour les enfants de 3 à 8 ans : plus de 50 jeux et activités en English, Kreyòl, Français et Español.",play:"▶ Jouer gratuitement",seePrices:"Voir les prix",
+ t1:"Sans publicité",t2:"Fonctionne hors ligne",t3:"Sans compte",t4:"4 langues",
+ whatH:"Tout dans une seule appli",whatS:"Des activités courtes et ludiques qui grandissent avec votre enfant. Changez de langue à tout moment.",
+ f1h:"50+ jeux",f1p:"Mémoire, labyrinthes, coloriage, puzzles, serpent, ballons, morpion et plus, chacun avec des niveaux.",
+ f2h:"Lire et parler",f2p:"Mots, lettres, tracé, phrases, épellation et 🎤 « Répète après moi » pour s'entraîner à voix haute.",
+ f3h:"Des maths qui grandissent",f3p:"De compter jusqu'à 10 jusqu'à 100, additions, soustractions, suites, nombres manquants et l'heure.",
+ f4h:"Découvrir le monde",f4p:"11 pays, une cuisine aux recettes du monde entier, les animaux, les émotions et les bonnes habitudes.",
+ f5h:"Chansons et histoires",f5p:"Des chansons originales et des histoires illustrées, dont les contes haïtiens de Bouki et Malis.",
+ f6h:"Pour les parents",f6p:"Un espace parent protégé : limite de temps d'écran, progrès, fiches à imprimer et plusieurs profils d'enfants.",
+ ageH:"Pour chaque âge",ageS:"Choisissez un âge et les activités s'adaptent : plus grands nombres, niveaux plus durs, nouveaux jeux.",
+ a1:"Couleurs, formes, compter jusqu'à 10, premiers mots",a2:"Lecture, additions jusqu'à 10, l'heure et les jours",a3:"Nombres jusqu'à 100, épellation, suites et tables",
+ lookH:"Aperçu",s1:"Accueil",s2:"Mots en 4 langues",s3:"Cuisine",s4:"Découvrir le monde",s5:"Coloriage",s6:"Labyrinthe",
+ priceH:"Des prix simples",priceS:"Commencez gratuitement. Débloquez tout quand vous êtes prêt.",freeH:"Gratuit",free1:"18 activités, gratuites pour toujours",free2:"Chansons et histoires",free3:"Les 4 langues",
+ monthH:"Premium mensuel",yearH:"Premium annuel",perMonth:"/ mois",perYear:"/ an",best:"Meilleur prix · −37 %",
+ p1:"Les 50+ activités débloquées",p2:"Résiliable à tout moment",y2:"Un paiement par an",p3:"Chaque nouveau jeu ajouté",buyM:"Choisir mensuel",buyY:"Choisir annuel",
+ trialNote:"Essayez toutes les activités gratuitement pendant 7 jours dans l'appli (demandez à un adulte). Après le paiement, nous envoyons votre code Premium par e-mail sous 24 h.",
+ faqH:"Questions des parents",
+ q1:"Mondiloo est-il sûr pour mon enfant ?",r1:"Oui. Pas de publicité, pas de chat, pas de compte, pas de suivi. La progression reste uniquement sur votre appareil. Les achats et réglages sont protégés par une question pour les parents.",
+ q2:"Sur quels appareils ?",r2:"Tout téléphone, tablette ou ordinateur avec un navigateur récent (Chrome, Safari, Edge). Ajoutez-la à l'écran d'accueil pour l'utiliser comme une appli, même hors ligne. Une appli Android arrive.",
+ q3:"Comment obtenir Premium après le paiement ?",r3:"Nous envoyons votre code Premium par e-mail sous 24 h. Ouvrez l'espace parent 👪 dans l'appli, touchez « Tout débloquer » et entrez le code.",
+ q4:"Puis-je résilier ?",r4:"Oui, à tout moment. Écrivez à contact@mondiloo.com et nous résilions l'abonnement. Vous gardez Premium jusqu'à la fin de la période payée.",
+ q5:"Y a-t-il une voix ?",r5:"Les mots sont lus en anglais, français et espagnol par la voix de votre appareil. Le texte et les chansons en kreyòl sont inclus, et une voix kreyòl arrive.",
+ finalH:"Prêt à jouer ?",finalS:"Sans inscription. Ouvrez-la et commencez en quelques secondes.",privacy:"Confidentialité"},
+es:{h1:"Aprende y juega en <em>4 idiomas</em>",lead:"Mondiloo es una app de aprendizaje llena de alegría para niños de 3 a 8 años: más de 50 juegos y actividades en English, Kreyòl, Français y Español.",play:"▶ Jugar gratis",seePrices:"Ver precios",
+ t1:"Sin anuncios",t2:"Funciona sin internet",t3:"Sin cuentas",t4:"4 idiomas",
+ whatH:"Todo en una sola app",whatS:"Actividades cortas y divertidas que crecen con tu hijo. Cambia de idioma cuando quieras.",
+ f1h:"50+ juegos",f1p:"Memoria, laberintos, colorear, rompecabezas, serpiente, globos, tres en raya y más, cada uno con niveles.",
+ f2h:"Leer y hablar",f2p:"Palabras, letras, trazos, frases, deletreo y 🎤 «Repite conmigo» para practicar en voz alta.",
+ f3h:"Matemáticas que crecen",f3p:"De contar hasta 10 hasta 100, sumas, restas, secuencias, números que faltan y la hora.",
+ f4h:"Descubre el mundo",f4p:"11 países, una cocina con recetas de todas partes, animales, emociones y buenos hábitos.",
+ f5h:"Canciones y cuentos",f5p:"Canciones originales y cuentos ilustrados, incluidos los cuentos haitianos de Bouki y Malis.",
+ f6h:"Para los padres",f6p:"Un área protegida para padres con límite de tiempo, progreso, fichas para imprimir y varios perfiles de niños.",
+ ageH:"Para cada edad",ageS:"Elige una edad y las actividades se adaptan: números más grandes, niveles más difíciles, juegos nuevos.",
+ a1:"Colores, formas, contar hasta 10, primeras palabras",a2:"Lectura, sumas hasta 10, la hora y los días",a3:"Números hasta 100, deletreo, secuencias y tablas",
+ lookH:"Échale un vistazo",s1:"Inicio",s2:"Palabras en 4 idiomas",s3:"Cocina",s4:"Descubre el mundo",s5:"Colorear",s6:"Laberinto",
+ priceH:"Precios simples",priceS:"Empieza gratis. Desbloquea todo cuando quieras.",freeH:"Gratis",free1:"18 actividades, gratis para siempre",free2:"Canciones y cuentos",free3:"Los 4 idiomas",
+ monthH:"Premium mensual",yearH:"Premium anual",perMonth:"/ mes",perYear:"/ año",best:"Mejor precio · ahorra 37 %",
+ p1:"Las 50+ actividades desbloqueadas",p2:"Cancela cuando quieras",y2:"Un pago al año",p3:"Cada juego nuevo que agreguemos",buyM:"Elegir mensual",buyY:"Elegir anual",
+ trialNote:"Prueba todas las actividades gratis por 7 días dentro de la app (pide ayuda a un adulto). Después de pagar, te enviamos tu código Premium por correo en 24 horas.",
+ faqH:"Preguntas de los padres",
+ q1:"¿Mondiloo es seguro para mi hijo?",r1:"Sí. No hay anuncios, ni chat, ni cuentas, ni rastreo. El progreso se guarda solo en tu dispositivo. Las compras y ajustes están protegidos con una pregunta para padres.",
+ q2:"¿En qué dispositivos funciona?",r2:"Cualquier teléfono, tableta o computadora con un navegador moderno (Chrome, Safari, Edge). Agrégala a la pantalla de inicio para usarla como una app, incluso sin internet. Pronto habrá una app para Android.",
+ q3:"¿Cómo obtengo Premium después de pagar?",r3:"Te enviamos tu código Premium por correo en 24 horas. Abre el área de padres 👪 en la app, toca «Desbloquear todo» y escribe el código.",
+ q4:"¿Puedo cancelar?",r4:"Sí, cuando quieras. Escribe a contact@mondiloo.com y cancelamos tu suscripción. Mantienes Premium hasta el final del período pagado.",
+ q5:"¿Tiene voz?",r5:"La voz de tu dispositivo lee las palabras en inglés, francés y español. El texto y las canciones en kreyòl están incluidos, y pronto habrá una voz en kreyòl.",
+ finalH:"¿Listo para jugar?",finalS:"Sin registrarte. Ábrela y empieza en segundos.",privacy:"Privacidad"}};
+function setLang(l){
+  if(!T[l])l="en";const d=T[l];
+  document.documentElement.lang=l==="ht"?"ht":l;
+  document.querySelectorAll("[data-t]").forEach(el=>{const v=d[el.dataset.t];if(v!=null)el.innerHTML=v;});
+  document.querySelectorAll("[data-l]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.l===l));
+  try{localStorage.setItem("ml-site-lang",l);}catch(e){}
+}
+document.querySelectorAll("[data-l]").forEach(b=>b.addEventListener("click",()=>setLang(b.dataset.l)));
+let start="en";try{start=localStorage.getItem("ml-site-lang")||"";}catch(e){}
+if(!start){const n=(navigator.language||"en").slice(0,2).toLowerCase();start={ht:"ht",fr:"fr",es:"es"}[n]||"en";}
+setLang(start);
+</script>
 </body>
 </html>

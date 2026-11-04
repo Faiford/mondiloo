@@ -286,3 +286,10 @@ Object.assign(UI.ht,{payNote:"Apre w peye, n ap voye kòd Premium ou pa imèl na
 Object.assign(UI.en,{payNote:"After you pay, we email your Premium code within 24 hours. Enter it below.",bestDeal:"Best value"});
 Object.assign(UI.fr,{payNote:"Après le paiement, nous t'envoyons ton code Premium par e-mail sous 24 h. Entre-le ci-dessous.",bestDeal:"Meilleur prix"});
 Object.assign(UI.es,{payNote:"Después de pagar, te enviamos tu código Premium por correo en 24 horas. Escríbelo abajo.",bestDeal:"Mejor precio"});
+/* ===== 2.1.0: trial reminder ===== */
+Object.assign(UI.ht,{trialSoon:"⏰ Esè gratis la fini nan {n} jou",trialOver:"Esè gratis la fini",seePlans:"Wè pri yo"});
+Object.assign(UI.en,{trialSoon:"⏰ Free trial ends in {n} days",trialOver:"Your free trial has ended",seePlans:"See plans"});
+Object.assign(UI.fr,{trialSoon:"⏰ L'essai gratuit se termine dans {n} jours",trialOver:"L'essai gratuit est terminé",seePlans:"Voir les offres"});
+Object.assign(UI.es,{trialSoon:"⏰ La prueba gratis termina en {n} días",trialOver:"Tu prueba gratis terminó",seePlans:"Ver planes"});
+Object.assign(UI.ht,{trialSoon1:"⏰ Esè gratis la fini nan mwens pase yon jou"});Object.assign(UI.en,{trialSoon1:"⏰ Free trial ends within a day"});
+Object.assign(UI.fr,{trialSoon1:"⏰ L'essai gratuit se termine dans moins d'un jour"});Object.assign(UI.es,{trialSoon1:"⏰ La prueba gratis termina en menos de un día"});

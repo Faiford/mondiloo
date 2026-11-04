@@ -98,3 +98,9 @@ The child sees a word (later short phrases), hears it (English/French/Spanish vo
 taps 🎤, says it, and hears their own voice back. The recording stays in memory only, is never saved or sent,
 and the microphone is released as soon as the child leaves the activity. privacy.html was updated to say this.
 The microphone needs https (Hostinger SSL) and works in Chrome/Safari; in-app browsers may not allow it.
+
+## 2.1.0: landing page
+- `index.html` is now the parents' landing page (4 languages, prices, FAQ). The app itself is `app.html`.
+  Returning players (who already chose a language) are sent straight to the app; add `?home` to see the landing page.
+- Link previews (WhatsApp, Facebook): `img/og.png`. Screenshots for the page and the stores: `img/shot-*.jpg`.
+- Trial reminder on the home screen in the last 2 days of the free trial and after it ends.

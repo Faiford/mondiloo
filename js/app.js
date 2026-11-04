@@ -1,4 +1,4 @@
-const APP_VERSION="2.0.2";
+const APP_VERSION="2.1.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -133,6 +133,7 @@ function render(){
       <div class="prog"><span>⭐ ${into}/10</span><span class="track"><span class="fill" style="width:${into*10}%;display:block"></span></span><span>🏆</span></div>
       ${tro?`<div class="trophies" aria-label="${tro}">${"🏆".repeat(Math.min(tro,10))}${tro>10?" +"+(tro-10):""}</div>`:`<small style="color:var(--muted);font-weight:700">${t("nextT")}: ${10-into} ⭐</small>`}</div></div>
       <button class="dailyb${dailyDoneToday()?" done":""}" data-go="daily"><span class="fl">🔥</span><span class="dt"><b>${t("daily")}</b><small>${dailyDoneToday()?t("doneToday"):t("dailyS")}</small></span><span class="st">${streakNow()}<small>${t("streakL")}</small></span></button>
+      ${trialBanner()}
       <div class="cats" role="group">${Object.keys(CATS).map(k=>`<button class="cat" data-cat="${k}" aria-pressed="${homeCat===k}">${CATS[k][0]} ${t(CATS[k][1])}</button>`).join("")}</div>
       ${["play","lang","math","world"].filter(k=>homeCat==="all"||homeCat===k).map(k=>{const items=k==="play"?PLAYS:homeOrder(A().learn).filter(g=>CATOF[g]===k);
         return items.length?`<h3>${CATS[k][0]} ${t(CATS[k][1])}</h3><div class="games">${items.map(tile).join("")}</div>`:"";}).join("")}</section>`;
@@ -698,6 +699,9 @@ function paywallView(){
    <div class="gaterow"><input id="pcode" class="txt" autocomplete="off" autocapitalize="characters" placeholder="MDL-XXXX-XXXX"><button class="go" data-code="1">${t("activate")}</button></div>
    ${payErr?`<p class="fb no">${t("badCode")}</p>`:""}`;
 }
+function trialBanner(){if(!SHOP.enabled||codeOk(PREM.code)||!PREM.trial)return "";const n=trialDaysLeft();
+  if(n>0&&n<=2)return `<button class="trialb" data-go="paywall"><span>${n===1?t("trialSoon1"):t("trialSoon").replace("{n}",n)}</span><b>${t("seePlans")} →</b></button>`;
+  if(n<=0)return `<button class="trialb over" data-go="paywall"><span>⭐ ${t("trialOver")}</span><b>${t("seePlans")} →</b></button>`;return "";}
 function planLine(){return codeOk(PREM.code)?t("premOn"):trialDaysLeft()>0?t("trialLeft").replace("{n}",trialDaysLeft()):t("freePlan");}
 /* ---------- level win / fail ---------- */
 function levelWin(g){ statOk();
@@ -1084,7 +1088,7 @@ function onTap(e){
   if(g){stopAll(); const dest=g.dataset.go; if(dest==="globe"&&screen!=="haiti"){gC=-1;gS=0;} if(dest!=="haiti"&&dest!=="globe")fromGlobe=false;
     if(!["home","lang","age"].includes(dest)&&overLimit()){screen="limit";render();return;}
     if(isLocked(dest)){wantedK=dest;payErr=false;screen="paywall";render();return;}
-    screen=dest; if(!["home","lang","age"].includes(dest)) statAct(dest);
+    screen=dest; if(GAMEINFO[dest]) statAct(dest);
     if(screen==="daily"){dailyStart();render();speak(q.say);return;}
     if((["count","add","sub","colors","find","shapes","body","cmp","mul","animals","clock"].includes(screen)||(screen==="days"&&age!=="a"))){newQ();render();speak(q.say);}
     else {if(screen==="phrases")pMode="learn"; if(screen==="stories")story=-1; render(); if(screen==="words")speak(word(themeList(theme)[wIdx])); if(screen==="age")speak(t("ageQ"));}
