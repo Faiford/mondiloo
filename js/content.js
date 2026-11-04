@@ -124,7 +124,7 @@ const AVATARS=["🦁", "🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "
 /* ===== SHOP SETTINGS: change prices or turn Premium off here =====
    enabled:false makes everything free (good for a test period with families).
    payUrl: paste your Stripe Payment Link here when it is ready (https://buy.stripe.com/...). */
-const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, payUrl:"", contact:""};
+const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, payUrl:"", contact:"contact@mondiloo.com"};
 /* Activities anyone can use for free. Everything else needs Premium (or the free trial). */
 const FREE=["mem","snake","draw","album","daily","words","stories","abc","count","add","nums","colors","animals","haiti","songs","paint","maze","globe"];
 /* Songs: put MP3 files in the songs/ folder and list them here, for example:
