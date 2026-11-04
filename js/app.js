@@ -1,4 +1,4 @@
-const APP_VERSION="1.9.0";
+const APP_VERSION="2.0.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -96,7 +96,7 @@ function speak(text){
 
 /* ---------- views ---------- */
 const $app=document.getElementById("app");
-const logo=`<div class="logo" aria-label="Mundiko">${"Mundiko".split("").map(c=>`<i>${c}</i>`).join("")}</div>`;
+const logo=`<div class="logo" aria-label="Mondiloo">${"Mondiloo".split("").map(c=>`<i>${c}</i>`).join("")}</div>`;
 function bar(){
   return `<div class="bar">${logo}<div class="bar-r">
    ${CURP&&PROFILES.length>1?`<button class="chip" data-go="who">${CURP.av} ${esc(CURP.name)}</button>`:""}
@@ -149,7 +149,7 @@ function render(){
   } else {
     h+=`<section class="card">${playTop()}${play()}</section>`;
   }
-  h+=`<p class="foot">Mundiko · v${APP_VERSION} · <a href="privacy.html">Privacy</a></p>`;
+  h+=`<p class="foot">Mondiloo · v${APP_VERSION} · <a href="privacy.html">Privacy</a></p>`;
   $app.innerHTML=h;
   if(screen==="snake") snakeInit();
   if(screen==="balloon") balloonInit();
@@ -682,8 +682,8 @@ function traceCheck(){
 let PREM={}; try{PREM=JSON.parse(localStorage.getItem("tk-prem")||"{}")||{};}catch(e){PREM={};}
 const savePrem=()=>{try{localStorage.setItem("tk-prem",JSON.stringify(PREM));}catch(e){}};
 const DAYMS=86400000;
-function codeOk(code){const m=/^MDK-([A-Z0-9]{4})-([A-Z0-9]{4})$/.exec(String(code||"").trim().toUpperCase());if(!m)return false;
-  let h=2166136261;for(const ch of "mundiko509:"+m[1]){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}
+function codeOk(code){const m=/^MDL-([A-Z0-9]{4})-([A-Z0-9]{4})$/.exec(String(code||"").trim().toUpperCase());if(!m)return false;
+  let h=2166136261;for(const ch of "mondiloo509:"+m[1]){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}
   const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let x=h,out="";for(let i=0;i<4;i++){out+=A[x%32];x=Math.floor(x/32);}return out===m[2];}
 const trialDaysLeft=()=>PREM.trial?Math.max(0,Math.ceil((PREM.trial+SHOP.trialDays*DAYMS-Date.now())/DAYMS)):0;
 const isPremium=()=>!SHOP.enabled||codeOk(PREM.code)||trialDaysLeft()>0;
@@ -695,7 +695,7 @@ function paywallView(){
    ${PREM.trialUsed?`<p class="hint" style="text-align:center">${t("trialUsed")}</p>`:`<button class="go" data-trial="1">🎁 ${t("tryFree")}</button>`}
    ${SHOP.payUrl?`<a class="go linkbtn" href="${SHOP.payUrl}" target="_blank" rel="noopener">💳 ${t("buy")}</a>`:`<p class="hint" style="text-align:center">${t("payLater")}${SHOP.contact?" "+esc(SHOP.contact):""}</p>`}
    <h3>🔑 ${t("haveCode")}</h3>
-   <div class="gaterow"><input id="pcode" class="txt" autocomplete="off" autocapitalize="characters" placeholder="MDK-XXXX-XXXX"><button class="go" data-code="1">${t("activate")}</button></div>
+   <div class="gaterow"><input id="pcode" class="txt" autocomplete="off" autocapitalize="characters" placeholder="MDL-XXXX-XXXX"><button class="go" data-code="1">${t("activate")}</button></div>
    ${payErr?`<p class="fb no">${t("badCode")}</p>`:""}`;
 }
 function planLine(){return codeOk(PREM.code)?t("premOn"):trialDaysLeft()>0?t("trialLeft").replace("{n}",trialDaysLeft()):t("freePlan");}

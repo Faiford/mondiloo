@@ -1,4 +1,4 @@
-# Mundiko
+# Mondiloo
 
 Learning and play app for children ages 3–8 in **Kreyòl, English, Français and Español**.
 It is a Progressive Web App (PWA): it runs in the browser, installs on a phone's home screen, and works offline.
@@ -18,13 +18,13 @@ It is a Progressive Web App (PWA): it runs in the browser, installs on a phone's
 
 ## Put it online with GitHub Pages (free)
 
-1. Create a new repository on GitHub named `mundiko`.
+1. Create a new repository on GitHub named `mondiloo`.
 2. Upload all of these files to it, keeping the folders.
 3. In the repository, go to **Settings → Pages**.
 4. Under **Branch**, choose `main` and `/ (root)`, then **Save**.
-5. After a minute or two, the app is live at `https://YOUR-USERNAME.github.io/mundiko/`.
+5. After a minute or two, the app is live at `https://YOUR-USERNAME.github.io/mondiloo/`.
 
-To use your own domain later (for example `mundiko.app`), add it under **Settings → Pages → Custom domain**.
+To use your own domain later (for example `mondiloo.app`), add it under **Settings → Pages → Custom domain**.
 
 ## Install on a phone
 
@@ -35,17 +35,17 @@ To use your own domain later (for example `mundiko.app`), add it under **Setting
 
 1. Change the files you need. Most content changes happen in `js/content.js`.
 2. Raise the version number in **both** places:
-   - `sw.js` → `const VERSION = "mundiko-1.0.1";`
+   - `sw.js` → `const VERSION = "mondiloo-1.0.1";`
    - `js/app.js` → `const APP_VERSION="1.0.1";`
 3. Upload the changed files to GitHub.
 
-The next time someone opens Mundiko, a **"New version! Tap to update"** button appears.
+The next time someone opens Mondiloo, a **"New version! Tap to update"** button appears.
 If you forget step 2, phones keep the old version they saved for offline use.
 
 ## Before launching publicly
 
 - Fill in `[CONTACT EMAIL]` in `privacy.html`.
-- Check the name "Mundiko" at tmsearch.uspto.gov and on Google Play before buying a domain.
+- Check the name "Mondiloo" at tmsearch.uspto.gov and on Google Play before buying a domain.
 - Have a native speaker review the Kreyòl numbers above 20 and the phrases.
 
 ## Free + Premium (in `js/content.js`)
@@ -55,7 +55,7 @@ If you forget step 2, phones keep the old version they saved for offline use.
 - `SHOP.payUrl`: paste your Stripe Payment Link here when it is ready.
 - `FREE`: the list of activities anyone can use without Premium.
 - Families can start a 7-day free trial once per device (behind the parent question).
-- After a family pays, give them one activation code (format `MDK-XXXX-XXXX`) from your private code list.
+- After a family pays, give them one activation code (format `MDL-XXXX-XXXX`) from your private code list.
   Codes are checked on the device, so this is a simple first step; real accounts with Stripe come later.
 
 ## Songs
@@ -86,7 +86,7 @@ A song is saved on the phone the first time it is played, so it then plays offli
 Play: Tic-tac-toe against Tiki. World: Feed the animals (FEED), Feelings (EMOS). Language: Opposites (OPPS).
 Math: Missing number, Big and small. Data for the new games is in `js/content.js`.
 
-## 1.8.0: Mundiko for every child
+## 1.8.0: Mondiloo for every child
 - "Discover the world" (COUNTRIES in `js/content.js`): Haiti first (opens Discover Haiti), then 10 more countries,
   each with "hello" in its language and 3 facts. Add a country by copying a block.
 - Kitchen: sushi, pizza, tacos, pancakes added between the Haitian recipes. Coloring: rocket and whale added.
