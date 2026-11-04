@@ -1,4 +1,4 @@
-const APP_VERSION="2.1.0";
+const APP_VERSION="2.1.1";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -680,6 +680,9 @@ function traceCheck(){
   else if(cov>=0.25){fbx.className="fb";fbx.textContent=t("traceMore");}
 }
 /* ---------- Free + Premium ---------- */
+/* Android (Google Play) build opens app.html?src=play: hide outside payment links there (store policy). */
+let STORE="";try{if(/[?&]src=play/.test(location.search)||document.referrer.indexOf("android-app://")===0)localStorage.setItem("tk-store","play");STORE=localStorage.getItem("tk-store")||"";}catch(e){}
+const inPlay=()=>STORE==="play";
 let PREM={}; try{PREM=JSON.parse(localStorage.getItem("tk-prem")||"{}")||{};}catch(e){PREM={};}
 const savePrem=()=>{try{localStorage.setItem("tk-prem",JSON.stringify(PREM));}catch(e){}};
 const DAYMS=86400000;
@@ -692,9 +695,9 @@ const isLocked=k=>!!(SHOP.enabled&&GAMEINFO[k]&&!FREE.includes(k)&&!isPremium())
 let payErr=false, wantedK=null;
 function paywallView(){
   return `<div class="hello" style="flex-direction:column;text-align:center">${tiki("happy")}<h1>⭐ ${t("unlockAll")}</h1><p class="hint">${t("premBenefits")}</p></div>
-   ${SHOP.payMonth||SHOP.payYear?"":`<div class="prices"><div><b>${SHOP.priceMonth}</b><small>${t("perMonth")}</small></div><div class="best"><b>${SHOP.priceYear}</b><small>${t("perYear")}</small></div></div>`}
+   ${inPlay()||SHOP.payMonth||SHOP.payYear?"":`<div class="prices"><div><b>${SHOP.priceMonth}</b><small>${t("perMonth")}</small></div><div class="best"><b>${SHOP.priceYear}</b><small>${t("perYear")}</small></div></div>`}
    ${PREM.trialUsed?`<p class="hint" style="text-align:center">${t("trialUsed")}</p>`:`<button class="go" data-trial="1">🎁 ${t("tryFree")}</button>`}
-   ${SHOP.payMonth||SHOP.payYear?`<div class="paybtns">${SHOP.payMonth?`<a class="go linkbtn" href="${SHOP.payMonth}" target="_blank" rel="noopener">💳 ${SHOP.priceMonth} <small>${t("perMonth")}</small></a>`:""}${SHOP.payYear?`<a class="go linkbtn best" href="${SHOP.payYear}" target="_blank" rel="noopener">⭐ ${SHOP.priceYear} <small>${t("perYear")} · ${t("bestDeal")}</small></a>`:""}</div><p class="hint" style="text-align:center">${t("payNote")}${SHOP.contact?` <a href="mailto:${SHOP.contact}">${esc(SHOP.contact)}</a>`:""}</p>`:SHOP.payUrl?`<a class="go linkbtn" href="${SHOP.payUrl}" target="_blank" rel="noopener">💳 ${t("buy")}</a>`:`<p class="hint" style="text-align:center">${t("payLater")}${SHOP.contact?" "+esc(SHOP.contact):""}</p>`}
+   ${inPlay()?"":SHOP.payMonth||SHOP.payYear?`<div class="paybtns">${SHOP.payMonth?`<a class="go linkbtn" href="${SHOP.payMonth}" target="_blank" rel="noopener">💳 ${SHOP.priceMonth} <small>${t("perMonth")}</small></a>`:""}${SHOP.payYear?`<a class="go linkbtn best" href="${SHOP.payYear}" target="_blank" rel="noopener">⭐ ${SHOP.priceYear} <small>${t("perYear")} · ${t("bestDeal")}</small></a>`:""}</div><p class="hint" style="text-align:center">${t("payNote")}${SHOP.contact?` <a href="mailto:${SHOP.contact}">${esc(SHOP.contact)}</a>`:""}</p>`:SHOP.payUrl?`<a class="go linkbtn" href="${SHOP.payUrl}" target="_blank" rel="noopener">💳 ${t("buy")}</a>`:`<p class="hint" style="text-align:center">${t("payLater")}${SHOP.contact?" "+esc(SHOP.contact):""}</p>`}
    <h3>🔑 ${t("haveCode")}</h3>
    <div class="gaterow"><input id="pcode" class="txt" autocomplete="off" autocapitalize="characters" placeholder="MDL-XXXX-XXXX"><button class="go" data-code="1">${t("activate")}</button></div>
    ${payErr?`<p class="fb no">${t("badCode")}</p>`:""}`;
