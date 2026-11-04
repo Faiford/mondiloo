@@ -1,4 +1,4 @@
-const APP_VERSION="2.2.0";
+const APP_VERSION="2.2.1";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -605,6 +605,7 @@ function parentView(){
     <div class="cats">${lims.map(m=>`<button class="cat" data-limit="${m}" aria-pressed="${STATS.limit===m}">${m?m+" "+t("minU"):t("noLimit")}</button>`).join("")}</div>
     <h3>⭐ ${t("planL")}: ${planLine()}</h3>
     ${SHOP.enabled&&!codeOk(PREM.code)?`<button class="go alt" data-go="paywall">⭐ ${t("unlockAll")}</button>`:""}
+    ${codeOk(PREM.code)?subView():""}
     <h3>🖨️ ${t("worksheetsL")}</h3>
     <div class="cats">${Object.keys(LANGS).map(k=>`<a class="cat" href="${WORKSHEETS[k]}" target="_blank" rel="noopener">📄 ${LANGS[k].name}</a>`).join("")}</div>
     ${kidsView()}`;
@@ -707,6 +708,12 @@ function paywallView(){
 function trialBanner(){if(!SHOP.enabled||codeOk(PREM.code)||!PREM.trial)return "";const n=trialDaysLeft();
   if(n>0&&n<=2)return `<button class="trialb" data-go="paywall"><span>${n===1?t("trialSoon1"):t("trialSoon").replace("{n}",n)}</span><b>${t("seePlans")} →</b></button>`;
   if(n<=0)return `<button class="trialb over" data-go="paywall"><span>⭐ ${t("trialOver")}</span><b>${t("seePlans")} →</b></button>`;return "";}
+let unPremArm=false;
+function subView(){const mail=SHOP.contact?`<a href="mailto:${SHOP.contact}">${esc(SHOP.contact)}</a>`:"";
+  return `<p class="hint">${t("yourCode")}: <b style="user-select:all;letter-spacing:1px">${esc(PREM.code)}</b><br>${t("codeKeep")}</p>
+  <div class="cats">${SHOP.portal&&!inPlay()?`<a class="cat" href="${SHOP.portal}" target="_blank" rel="noopener">⚙️ ${t("manageSub")}</a>`:SHOP.contact?`<a class="cat" href="mailto:${SHOP.contact}?subject=Mondiloo%20subscription%20${encodeURIComponent(PREM.code)}">⚙️ ${t("manageSub")}</a>`:""}
+  <button class="cat" data-unprem="1">${unPremArm?"⚠️ "+t("unPremQ"):"🚪 "+t("unPrem")}</button></div>
+  ${mail?`<p class="hint">${t("refundNote")} ${mail}</p>`:""}`;}
 function planLine(){return codeOk(PREM.code)?t("premOn"):trialDaysLeft()>0?t("trialLeft").replace("{n}",trialDaysLeft()):t("freePlan");}
 /* ---------- level win / fail ---------- */
 function levelWin(g){ statOk();
@@ -1137,6 +1144,7 @@ function onTap(e){
   const pg=e.target.closest("[data-parentgo]"); if(pg){stopAll();gateNew("parent");screen="gate";render();return;}
   if(e.target.closest("[data-pgate]")){const v=+(document.getElementById("pgate")||{}).value;if(v===gate.a+gate.b){if(gate.next==="trial"){if(!PREM.trialUsed){PREM.trial=Date.now();PREM.trialUsed=true;savePrem();confetti(120);cheer(t("tryFree")+" ✓");}screen=wantedK&&!isLocked(wantedK)?wantedK:"home";wantedK=null;}else screen=gate.next;render();}else{gate.err=true;render();}return;}
   if(e.target.closest("[data-trial]")){gateNew("trial");screen="gate";render();return;}
+  if(e.target.closest("[data-unprem]")){if(!unPremArm){unPremArm=true;render();setTimeout(()=>{unPremArm=false;},5000);return;}unPremArm=false;PREM.code="";savePrem();render();return;}
   if(e.target.closest("[data-code]")){const v=(document.getElementById("pcode")||{}).value||"";if(codeOk(v)){PREM.code=v.trim().toUpperCase();savePrem();sfx("ok");confetti(160);cheer(t("premOn"));screen=wantedK||"home";wantedK=null;render();}else{payErr=true;render();}return;}
   const lm=e.target.closest("[data-limit]"); if(lm){STATS.limit=+lm.dataset.limit;saveStats();render();return;}
   const pv=e.target.closest("[data-pv]"); if(pv){pvIdx=(pvIdx+ +pv.dataset.pv+PROVERBS.length)%PROVERBS.length;render();return;}

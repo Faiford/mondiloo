@@ -124,7 +124,8 @@ const AVATARS=["🦁", "🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "
 /* ===== SHOP SETTINGS: change prices or turn Premium off here =====
    enabled:false makes everything free (good for a test period with families).
    payUrl: paste your Stripe Payment Link here when it is ready (https://buy.stripe.com/...). */
-const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, payUrl:"", payMonth:"https://buy.stripe.com/aFaaEY4MX4Cq6pp2yU0kE00", payYear:"https://buy.stripe.com/bJe5kEenx1qe5llb5q0kE01", contact:"contact@mondiloo.com"};
+const SHOP={enabled:true, priceMonth:"$3.99", priceYear:"$29.99", trialDays:7, payUrl:"", payMonth:"https://buy.stripe.com/aFaaEY4MX4Cq6pp2yU0kE00", payYear:"https://buy.stripe.com/bJe5kEenx1qe5llb5q0kE01", contact:"contact@mondiloo.com", portal:""};
+/* portal: Stripe customer portal link (https://billing.stripe.com/p/login/...) so parents can cancel or manage their subscription. */
 /* Activities anyone can use for free. Everything else needs Premium (or the free trial). */
 const FREE=["mem","snake","draw","album","daily","words","stories","abc","count","add","nums","colors","animals","haiti","songs","paint","maze","globe"];
 /* Songs: put MP3 files in the songs/ folder and list them here, for example:
@@ -293,3 +294,8 @@ Object.assign(UI.fr,{trialSoon:"⏰ L'essai gratuit se termine dans {n} jours",t
 Object.assign(UI.es,{trialSoon:"⏰ La prueba gratis termina en {n} días",trialOver:"Tu prueba gratis terminó",seePlans:"Ver planes"});
 Object.assign(UI.ht,{trialSoon1:"⏰ Esè gratis la fini nan mwens pase yon jou"});Object.assign(UI.en,{trialSoon1:"⏰ Free trial ends within a day"});
 Object.assign(UI.fr,{trialSoon1:"⏰ L'essai gratuit se termine dans moins d'un jour"});Object.assign(UI.es,{trialSoon1:"⏰ La prueba gratis termina en menos de un día"});
+
+Object.assign(UI.ht,{yourCode:"Kòd ou",codeKeep:"Kenbe kòd sa a pou w aktive Premium sou lòt aparèy.",manageSub:"Jere oswa anile abònman an",unPrem:"Retire Premium sou aparèy sa a",unPremQ:"Peze ankò pou konfime",refundNote:"Pou yon ranbousman, ekri nou:"});
+Object.assign(UI.en,{yourCode:"Your code",codeKeep:"Keep this code to turn on Premium on another device.",manageSub:"Manage or cancel subscription",unPrem:"Remove Premium from this device",unPremQ:"Tap again to confirm",refundNote:"For a refund, write to us:"});
+Object.assign(UI.fr,{yourCode:"Votre code",codeKeep:"Gardez ce code pour activer Premium sur un autre appareil.",manageSub:"Gérer ou annuler l'abonnement",unPrem:"Retirer Premium de cet appareil",unPremQ:"Touchez encore pour confirmer",refundNote:"Pour un remboursement, écrivez-nous :"});
+Object.assign(UI.es,{yourCode:"Tu código",codeKeep:"Guarda este código para activar Premium en otro dispositivo.",manageSub:"Gestionar o cancelar la suscripción",unPrem:"Quitar Premium de este dispositivo",unPremQ:"Toca otra vez para confirmar",refundNote:"Para un reembolso, escríbenos:"});
