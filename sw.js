@@ -1,11 +1,11 @@
 /* Mondiloo service worker: works offline and picks up updates.
    When you publish an update, change VERSION below so phones download the new files. */
-const VERSION = "mondiloo-2.2.2";
+const VERSION = "mondiloo-2.2.3";
 const CORE = ["./", "index.html", "app.html", "css/app.css", "js/content.js", "js/app.js", "manifest.webmanifest",
   "privacy.html", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)));
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE.map(u => new Request(u, { cache: "reload" })))));
 });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== "mondiloo-fonts" && k !== "mondiloo-songs").map(k => caches.delete(k))))

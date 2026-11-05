@@ -1,4 +1,4 @@
-const APP_VERSION="2.2.2";
+const APP_VERSION="2.2.3";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -152,6 +152,7 @@ function render(){
   }
   h+=`<p class="foot">Mondiloo · v${APP_VERSION} · <a href="privacy.html">Privacy</a></p>`;
   $app.innerHTML=h;
+  try{navSync();}catch(e){}
   if(screen==="snake") snakeInit();
   if(screen==="balloon") balloonInit();
   if(screen==="draw") drawInit();
@@ -1210,10 +1211,32 @@ initProfiles();
 render();
 
 /* ---------- offline + updates ---------- */
+
+/* ---------- phone back button: go back inside Mondiloo instead of leaving ---------- */
+const NAV_ROOT=["home","lang","age","who"];let navTrap=false,navIgnore=0;
+function navSync(){
+  if(!NAV_ROOT.includes(screen)){if(!navTrap){try{history.pushState({mdl:1},"");navTrap=true;}catch(e){}}}
+  else if(navTrap){navTrap=false;navIgnore++;try{history.back();}catch(e){navIgnore=0;}}
+}
+window.addEventListener("popstate",()=>{
+  if(navIgnore>0){navIgnore--;return;}
+  navTrap=false;
+  if(NAV_ROOT.includes(screen))return;
+  const b=document.querySelector(".top .back")||document.querySelector(".back")||document.querySelector("[data-go=home]");
+  try{stopAll();}catch(e){}
+  if(b){try{onTap({target:b,preventDefault(){},stopPropagation(){}});}catch(e){screen="home";render();}}
+  else{screen="home";render();}
+  if(!NAV_ROOT.includes(screen))navSync();
+});
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
-  navigator.serviceWorker.register("sw.js").then(reg=>{
-    reg.addEventListener("updatefound",()=>{const w=reg.installing;w&&w.addEventListener("statechange",()=>{
-      if(w.state==="installed"&&navigator.serviceWorker.controller){const b=document.createElement("button");b.className="update";b.textContent="🔄 "+({ht:"Nouvo vèsyon! Peze pou mete ajou",en:"New version! Tap to update",fr:"Nouvelle version ! Touche pour mettre à jour",es:"¡Nueva versión! Toca para actualizar"}[lang||"ht"]);b.onclick=()=>{w.postMessage("skip");};document.body.appendChild(b);}});});
+  const updMsg=()=>({ht:"Nouvo vèsyon! Peze pou mete ajou",en:"New version! Tap to update",fr:"Nouvelle version ! Touche pour mettre à jour",es:"¡Nueva versión! Toca para actualizar"}[lang||"ht"]);
+  const showUpd=w=>{if(!w||document.querySelector("button.update"))return;const b=document.createElement("button");b.className="update";b.textContent="🔄 "+updMsg();
+    b.onclick=()=>{b.disabled=true;b.textContent="⏳ …";try{w.postMessage("skip");}catch(e){}setTimeout(()=>location.reload(),2500);};document.body.appendChild(b);};
+  navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(reg=>{
+    if(reg.waiting&&navigator.serviceWorker.controller)showUpd(reg.waiting);
+    reg.addEventListener("updatefound",()=>{const w=reg.installing;w&&w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)showUpd(w);});});
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")reg.update().catch(()=>{});});
   }).catch(()=>{});
   let reloaded=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(!reloaded){reloaded=true;location.reload();}});
 }
+
