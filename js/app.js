@@ -1,4 +1,4 @@
-const APP_VERSION="2.2.3";
+const APP_VERSION="2.2.4";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -297,7 +297,7 @@ function play(){
       <line x1="100" y1="100" x2="${100+46*Math.sin(ha*Math.PI/180)}" y2="${100-46*Math.cos(ha*Math.PI/180)}" stroke="#FF6B5B" stroke-width="9" stroke-linecap="round"/>
       <line x1="100" y1="100" x2="${100+70*Math.sin(ma*Math.PI/180)}" y2="${100-70*Math.cos(ma*Math.PI/180)}" stroke="#2F80ED" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="100" r="7" fill="#24305E"/></svg></div>
       <div class="opts">${q.opts.map(x=>`<button class="opt" data-a="${x}"><span class="n" style="font-size:34px">${x}</span></button>`).join("")}</div>${fb}`;}
-  if(scr==="puzzle") return `<p class="hint" style="text-align:center">${t("tapTwo")}</p><div class="pz" id="pz"></div><img id="pzprev" alt="" style="width:90px;border-radius:12px;align-self:center;border:3px solid var(--line)">`;
+  if(scr==="puzzle") return `<div class="pzhead"><button class="pzmodel" data-pzzoom="1" aria-label="${t("pzModel")}"><img id="pzprev" alt=""><span>🔍 ${t("pzModel")}</span></button><p class="pzhint">${t("tapTwo")}</p></div><div class="pzwrap"><div class="pz" id="pz"></div><img id="pzbig" class="pzbig" alt="" hidden></div>`;
   if(scr==="music"){const lab=lang==="en"?["C","D","E","F","G","A","B","C"]:["Do","Re","Mi","Fa",lang==="ht"?"Sòl":"Sol","La","Si","Do"];
     return `<div class="piano">${NOTES.map((f,i)=>`<button class="key" data-note="${i}" style="background:${NOTECOL[i]}"><span>${lab[i]}</span></button>`).join("")}</div>
       <div class="nav" style="justify-content:center"><button data-song="1">🎵 ${t("song")}</button></div>`;}
@@ -524,7 +524,7 @@ function puzzleInit(){
   const url=cv.toDataURL();
   let order; do{order=shuffle([...Array(n*n).keys()]);}while(order.every((v,i)=>v===i));
   game={n,url,order,sel:-1,moves:0};
-  document.getElementById("pzprev").src=url; drawPuzzle();
+  document.getElementById("pzprev").src=url; const bg=document.getElementById("pzbig"); if(bg)bg.src=url; drawPuzzle();
 }
 function drawPuzzle(){
   const g=game,el=document.getElementById("pz"); if(!el) return;
@@ -1097,6 +1097,9 @@ document.addEventListener("touchend",e=>{
 },{passive:false});
 document.addEventListener("click",e=>{if(Date.now()-lastTouchTap<700)return;try{onTap(e);}catch(err){showErr(err&&err.message||err);}});
 function onTap(e){
+  if(e.target.closest("[data-pzzoom]")||e.target.id==="pzbig"){const bg=document.getElementById("pzbig");if(bg){bg.hidden=!bg.hidden;clearTimeout(game.zt);if(!bg.hidden)game.zt=setTimeout(()=>{bg.hidden=true;},2500);}return;}
+  if(e.target.closest("[data-exitstay]")||(e.target.id==="exitq")){exitClose(true);return;}
+  if(e.target.closest("[data-exitgo]")){exitClose(false);try{history.back();}catch(err){}setTimeout(()=>{try{window.close();}catch(err){}},300);setTimeout(()=>{if(document.visibilityState!=="visible")return;const tt=document.createElement("div");tt.className="exittoast";tt.textContent={ht:"Peze ⬅ ankò pou fèmen",en:"Press ⬅ again to close",fr:"Appuie encore sur ⬅ pour fermer",es:"Pulsa ⬅ otra vez para cerrar"}[lang||"ht"];document.body.appendChild(tt);setTimeout(()=>tt.remove(),2500);},700);return;}
   const g=e.target.closest("[data-go]");
   if(g){stopAll(); const dest=g.dataset.go; if(dest==="globe"&&screen!=="haiti"){gC=-1;gS=0;} if(dest!=="haiti"&&dest!=="globe")fromGlobe=false;
     if(!["home","lang","age"].includes(dest)&&overLimit()){screen="limit";render();return;}
@@ -1213,20 +1216,23 @@ render();
 /* ---------- offline + updates ---------- */
 
 /* ---------- phone back button: go back inside Mondiloo instead of leaving ---------- */
-const NAV_ROOT=["home","lang","age","who"];let navTrap=false,navIgnore=0;
-function navSync(){
-  if(!NAV_ROOT.includes(screen)){if(!navTrap){try{history.pushState({mdl:1},"");navTrap=true;}catch(e){}}}
-  else if(navTrap){navTrap=false;navIgnore++;try{history.back();}catch(e){navIgnore=0;}}
-}
+const NAV_ROOT=["home","lang","age","who"],NAV_NOTRAP=["lang","age","who"];let navTrap=false;
+function navSync(){if(!NAV_NOTRAP.includes(screen)&&!navTrap&&!document.getElementById("exitq")){try{history.pushState({mdl:1},"");navTrap=true;}catch(e){}}}
+function exitClose(stay){const m=document.getElementById("exitq");if(m)m.remove();if(stay)navSync();}
+function exitAsk(){if(document.getElementById("exitq"))return;
+  const T={ht:["Ou vle kite Mondiloo?","Non, m ap rete","Wi, kite"],en:["Leave Mondiloo?","No, stay","Yes, leave"],fr:["Quitter Mondiloo ?","Non, je reste","Oui, quitter"],es:["¿Salir de Mondiloo?","No, me quedo","Sí, salir"]}[lang||"ht"];
+  const m=document.createElement("div");m.id="exitq";m.className="exitq";
+  m.innerHTML=`<div class="exitbox" role="dialog" aria-modal="true">${tiki("happy")}<h2>${T[0]}</h2><button class="go" data-exitstay="1">${T[1]}</button><button class="go alt" data-exitgo="1">${T[2]}</button></div>`;
+  document.body.appendChild(m);}
 window.addEventListener("popstate",()=>{
-  if(navIgnore>0){navIgnore--;return;}
   navTrap=false;
+  if(screen==="home"){if(document.getElementById("exitq")){exitClose(false);return;}exitAsk();return;}
   if(NAV_ROOT.includes(screen))return;
   const b=document.querySelector(".top .back")||document.querySelector(".back")||document.querySelector("[data-go=home]");
   try{stopAll();}catch(e){}
   if(b){try{onTap({target:b,preventDefault(){},stopPropagation(){}});}catch(e){screen="home";render();}}
   else{screen="home";render();}
-  if(!NAV_ROOT.includes(screen))navSync();
+  navSync();
 });
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   const updMsg=()=>({ht:"Nouvo vèsyon! Peze pou mete ajou",en:"New version! Tap to update",fr:"Nouvelle version ! Touche pour mettre à jour",es:"¡Nueva versión! Toca para actualizar"}[lang||"ht"]);
