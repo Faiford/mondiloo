@@ -1,4 +1,4 @@
-const APP_VERSION="2.2.4";
+const APP_VERSION="2.2.5";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -1097,6 +1097,7 @@ document.addEventListener("touchend",e=>{
 },{passive:false});
 document.addEventListener("click",e=>{if(Date.now()-lastTouchTap<700)return;try{onTap(e);}catch(err){showErr(err&&err.message||err);}});
 function onTap(e){
+  if(e.target.closest("[data-ioshintok]")){try{localStorage.setItem("tk-ioshint","1");}catch(err){}const b=document.querySelector(".ioshint");if(b)b.remove();return;}
   if(e.target.closest("[data-pzzoom]")||e.target.id==="pzbig"){const bg=document.getElementById("pzbig");if(bg){bg.hidden=!bg.hidden;clearTimeout(game.zt);if(!bg.hidden)game.zt=setTimeout(()=>{bg.hidden=true;},2500);}return;}
   if(e.target.closest("[data-exitstay]")||(e.target.id==="exitq")){exitClose(true);return;}
   if(e.target.closest("[data-exitgo]")){exitClose(false);try{history.back();}catch(err){}setTimeout(()=>{try{window.close();}catch(err){}},300);setTimeout(()=>{if(document.visibilityState!=="visible")return;const tt=document.createElement("div");tt.className="exittoast";tt.textContent={ht:"Peze ⬅ ankò pou fèmen",en:"Press ⬅ again to close",fr:"Appuie encore sur ⬅ pour fermer",es:"Pulsa ⬅ otra vez para cerrar"}[lang||"ht"];document.body.appendChild(tt);setTimeout(()=>tt.remove(),2500);},700);return;}
@@ -1234,6 +1235,16 @@ window.addEventListener("popstate",()=>{
   else{screen="home";render();}
   navSync();
 });
+
+/* ---------- iPhone: show how to add Mondiloo to the home screen ---------- */
+function iosHint(){try{
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const standalone=window.navigator.standalone===true||matchMedia("(display-mode: standalone)").matches;
+  if(!ios||standalone||localStorage.getItem("tk-ioshint")==="1")return;
+  const T={ht:"Mete Mondiloo sou ekran telefòn ou: peze <b>Pataje</b> ⬆️ epi <b>Add to Home Screen</b>.",en:"Add Mondiloo to your home screen: tap <b>Share</b> ⬆️ then <b>Add to Home Screen</b>.",fr:"Ajoutez Mondiloo à l'écran d'accueil : touchez <b>Partager</b> ⬆️ puis <b>Sur l'écran d'accueil</b>.",es:"Agrega Mondiloo a tu pantalla de inicio: toca <b>Compartir</b> ⬆️ y luego <b>Agregar a pantalla de inicio</b>."}[lang||"en"];
+  const b=document.createElement("div");b.className="ioshint";b.innerHTML=`<span>📲</span><p>${T}</p><button aria-label="OK" data-ioshintok="1">✕</button>`;document.body.appendChild(b);
+}catch(e){}}
+setTimeout(iosHint,4000);
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   const updMsg=()=>({ht:"Nouvo vèsyon! Peze pou mete ajou",en:"New version! Tap to update",fr:"Nouvelle version ! Touche pour mettre à jour",es:"¡Nueva versión! Toca para actualizar"}[lang||"ht"]);
   const showUpd=w=>{if(!w||document.querySelector("button.update"))return;const b=document.createElement("button");b.className="update";b.textContent="🔄 "+updMsg();

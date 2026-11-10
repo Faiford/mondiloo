@@ -75,6 +75,15 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.4vw,44px);l
 .strip figure{margin:0;flex:0 0 220px;scroll-snap-align:start}
 .strip img{width:100%;height:auto;border-radius:22px;border:6px solid var(--ink);display:block}
 .strip figcaption{font-weight:800;text-align:center;margin-top:8px;font-size:15px}
+.inst{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.instc{background:#fff;border:2px solid var(--line);border-radius:24px;padding:22px}
+.instc h3{margin:0 0 10px}
+.instc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;counter-reset:st}
+.instc li{display:flex;align-items:center;gap:12px;font-weight:700;counter-increment:st}
+.instc li::before{content:counter(st);flex:0 0 26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:14px}
+.instc .ico{flex:0 0 36px;height:36px;border-radius:10px;background:var(--bg);display:grid;place-items:center;font-size:20px}
+.instc .note{margin-top:12px}
+@media (max-width:720px){.inst{grid-template-columns:1fr}}
 .prices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
 .price{background:#fff;border:2px solid var(--line);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:10px}
 .price.best{border:3px solid var(--grape);position:relative}
@@ -171,6 +180,18 @@ footer a{font-weight:700}
   </div>
 </div></section>
 
+<section id="install" style="padding-top:0"><div class="wrap">
+  <h2 data-t="instH"></h2><p class="sub" data-t="instS"></p>
+  <div class="inst">
+    <div class="instc"><h3>🍎 <span data-t="iosH"></span></h3>
+      <ol><li><span class="ico">🧭</span><span data-t="ios1"></span></li><li><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="#2F80ED" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-2" fill="none" stroke="#2F80ED" stroke-width="2.2" stroke-linecap="round"/></svg></span><span data-t="ios2"></span></li><li><span class="ico">➕</span><span data-t="ios3"></span></li><li><span class="ico">✅</span><span data-t="ios4"></span></li></ol>
+      <p class="note" data-t="iosNote"></p></div>
+    <div class="instc"><h3>🤖 <span data-t="andH"></span></h3>
+      <ol><li><span class="ico">🌐</span><span data-t="and1"></span></li><li><span class="ico">⋮</span><span data-t="and2"></span></li><li><span class="ico">📲</span><span data-t="and3"></span></li><li><span class="ico">✅</span><span data-t="ios4"></span></li></ol>
+      <p class="note" data-t="andNote"></p></div>
+  </div>
+</div></section>
+
 <section id="pricing" style="padding-top:0"><div class="wrap">
   <h2 data-t="priceH"></h2><p class="sub" data-t="priceS"></p>
   <div class="prices">
@@ -200,7 +221,7 @@ footer a{font-weight:700}
 
 <script>
 const T={
-en:{h1:"Learn and play in <em>4 languages</em>",lead:"Mondiloo is a joyful learning app for kids ages 3 to 8: more than 50 games and activities in English, Kreyòl, Français and Español.",play:"▶ Play free",seePrices:"See prices",
+en:{instH:"Install on your phone",instS:"Mondiloo works like a real app, even offline. No App Store needed.",iosH:"iPhone & iPad",ios1:"Open <b>mondiloo.com</b> in <b>Safari</b>",ios2:"Tap the <b>Share</b> button",ios3:"Choose <b>Add to Home Screen</b>, then <b>Add</b>",ios4:"Open <b>Mondiloo</b> from your home screen",iosNote:"Tip: in Chrome on iPhone, the Share button is at the top right.",andH:"Android",and1:"Open <b>mondiloo.com</b> in <b>Chrome</b>",and2:"Tap the menu <b>⋮</b> at the top right",and3:"Choose <b>Install app</b> (or <b>Add to Home screen</b>)",andNote:"Coming soon on Google Play too.",h1:"Learn and play in <em>4 languages</em>",lead:"Mondiloo is a joyful learning app for kids ages 3 to 8: more than 50 games and activities in English, Kreyòl, Français and Español.",play:"▶ Play free",seePrices:"See prices",
  t1:"No ads",t2:"Works offline",t3:"No accounts",t4:"4 languages",
  whatH:"Everything in one app",whatS:"Short, playful activities that grow with your child. Switch language at any time.",
  f1h:"50+ games",f1p:"Memory, mazes, coloring, puzzles, snake, balloons, tic-tac-toe and more, each with levels.",
@@ -223,7 +244,7 @@ en:{h1:"Learn and play in <em>4 languages</em>",lead:"Mondiloo is a joyful learn
  q4:"Can I cancel?",r4:"Yes, anytime. Email contact@mondiloo.com and we cancel your subscription. You keep Premium until the end of the paid period.",
  q5:"Does it have voice?",r5:"Words are read aloud in English, French and Spanish by your device's voice. Kreyòl text and Kreyòl songs are included, and a Kreyòl voice is on the way.",
  finalH:"Ready to play?",finalS:"No sign-up. Open it and start in seconds.",privacy:"Privacy"},
-ht:{h1:"Aprann epi jwe nan <em>4 lang</em>",lead:"Mondiloo se yon app aprantisaj plen kè kontan pou timoun 3 a 8 an: plis pase 50 jwèt ak aktivite an Kreyòl, English, Français ak Español.",play:"▶ Jwe gratis",seePrices:"Wè pri yo",
+ht:{instH:"Enstale l sou telefòn ou",instS:"Mondiloo mache tankou yon vrè app, menm san entènèt. Ou pa bezwen App Store.",iosH:"iPhone ak iPad",ios1:"Louvri <b>mondiloo.com</b> nan <b>Safari</b>",ios2:"Peze bouton <b>Pataje</b> a (Share)",ios3:"Chwazi <b>Add to Home Screen</b>, epi <b>Add</b>",ios4:"Louvri <b>Mondiloo</b> sou ekran telefòn ou",iosNote:"Konsèy: nan Chrome sou iPhone, bouton Pataje a anlè adwat.",andH:"Android",and1:"Louvri <b>mondiloo.com</b> nan <b>Chrome</b>",and2:"Peze meni <b>⋮</b> anlè adwat la",and3:"Chwazi <b>Install app</b> (oswa <b>Add to Home screen</b>)",andNote:"Byento sou Google Play tou.",h1:"Aprann epi jwe nan <em>4 lang</em>",lead:"Mondiloo se yon app aprantisaj plen kè kontan pou timoun 3 a 8 an: plis pase 50 jwèt ak aktivite an Kreyòl, English, Français ak Español.",play:"▶ Jwe gratis",seePrices:"Wè pri yo",
  t1:"Pa gen piblisite",t2:"Mache san entènèt",t3:"Pa bezwen kont",t4:"4 lang",
  whatH:"Tout bagay nan yon sèl app",whatS:"Ti aktivite kout e amizan ki grandi ak pitit ou. Ou ka chanje lang nenpòt ki lè.",
  f1h:"50+ jwèt",f1p:"Memwa, labirent, kolorye, pezèl, koulèv, balon, twa an liy ak plis ankò, chak ak nivo.",
@@ -246,7 +267,7 @@ ht:{h1:"Aprann epi jwe nan <em>4 lang</em>",lead:"Mondiloo se yon app aprantisaj
  q4:"Èske m ka anile?",r4:"Wi, nenpòt ki lè. Ekri contact@mondiloo.com e n ap anile abònman an. Ou kenbe Premium jiska fen peryòd ou te peye a.",
  q5:"Èske li gen vwa?",r5:"Vwa aparèy ou a li mo yo an Anglè, Fransè ak Panyòl. Tèks Kreyòl ak chante Kreyòl yo la deja, e yon vwa Kreyòl ap vini.",
  finalH:"Pare pou jwe?",finalS:"Pa bezwen enskri. Louvri l epi kòmanse nan kèk segonn.",privacy:"Konfidansyalite"},
-fr:{h1:"Apprendre et jouer en <em>4 langues</em>",lead:"Mondiloo est une appli d'apprentissage joyeuse pour les enfants de 3 à 8 ans : plus de 50 jeux et activités en English, Kreyòl, Français et Español.",play:"▶ Jouer gratuitement",seePrices:"Voir les prix",
+fr:{instH:"Installer sur votre téléphone",instS:"Mondiloo fonctionne comme une vraie app, même sans internet. Pas besoin de l'App Store.",iosH:"iPhone et iPad",ios1:"Ouvrez <b>mondiloo.com</b> dans <b>Safari</b>",ios2:"Touchez le bouton <b>Partager</b>",ios3:"Choisissez <b>Sur l'écran d'accueil</b>, puis <b>Ajouter</b>",ios4:"Ouvrez <b>Mondiloo</b> depuis votre écran d'accueil",iosNote:"Astuce : dans Chrome sur iPhone, le bouton Partager est en haut à droite.",andH:"Android",and1:"Ouvrez <b>mondiloo.com</b> dans <b>Chrome</b>",and2:"Touchez le menu <b>⋮</b> en haut à droite",and3:"Choisissez <b>Installer l'application</b> (ou <b>Ajouter à l'écran d'accueil</b>)",andNote:"Bientôt sur Google Play aussi.",h1:"Apprendre et jouer en <em>4 langues</em>",lead:"Mondiloo est une appli d'apprentissage joyeuse pour les enfants de 3 à 8 ans : plus de 50 jeux et activités en English, Kreyòl, Français et Español.",play:"▶ Jouer gratuitement",seePrices:"Voir les prix",
  t1:"Sans publicité",t2:"Fonctionne hors ligne",t3:"Sans compte",t4:"4 langues",
  whatH:"Tout dans une seule appli",whatS:"Des activités courtes et ludiques qui grandissent avec votre enfant. Changez de langue à tout moment.",
  f1h:"50+ jeux",f1p:"Mémoire, labyrinthes, coloriage, puzzles, serpent, ballons, morpion et plus, chacun avec des niveaux.",
@@ -269,7 +290,7 @@ fr:{h1:"Apprendre et jouer en <em>4 langues</em>",lead:"Mondiloo est une appli d
  q4:"Puis-je résilier ?",r4:"Oui, à tout moment. Écrivez à contact@mondiloo.com et nous résilions l'abonnement. Vous gardez Premium jusqu'à la fin de la période payée.",
  q5:"Y a-t-il une voix ?",r5:"Les mots sont lus en anglais, français et espagnol par la voix de votre appareil. Le texte et les chansons en kreyòl sont inclus, et une voix kreyòl arrive.",
  finalH:"Prêt à jouer ?",finalS:"Sans inscription. Ouvrez-la et commencez en quelques secondes.",privacy:"Confidentialité"},
-es:{h1:"Aprende y juega en <em>4 idiomas</em>",lead:"Mondiloo es una app de aprendizaje llena de alegría para niños de 3 a 8 años: más de 50 juegos y actividades en English, Kreyòl, Français y Español.",play:"▶ Jugar gratis",seePrices:"Ver precios",
+es:{instH:"Instálala en tu teléfono",instS:"Mondiloo funciona como una app de verdad, incluso sin internet. No necesitas el App Store.",iosH:"iPhone y iPad",ios1:"Abre <b>mondiloo.com</b> en <b>Safari</b>",ios2:"Toca el botón <b>Compartir</b>",ios3:"Elige <b>Agregar a pantalla de inicio</b> y luego <b>Agregar</b>",ios4:"Abre <b>Mondiloo</b> desde tu pantalla de inicio",iosNote:"Consejo: en Chrome para iPhone, el botón Compartir está arriba a la derecha.",andH:"Android",and1:"Abre <b>mondiloo.com</b> en <b>Chrome</b>",and2:"Toca el menú <b>⋮</b> arriba a la derecha",and3:"Elige <b>Instalar app</b> (o <b>Agregar a pantalla principal</b>)",andNote:"Pronto también en Google Play.",h1:"Aprende y juega en <em>4 idiomas</em>",lead:"Mondiloo es una app de aprendizaje llena de alegría para niños de 3 a 8 años: más de 50 juegos y actividades en English, Kreyòl, Français y Español.",play:"▶ Jugar gratis",seePrices:"Ver precios",
  t1:"Sin anuncios",t2:"Funciona sin internet",t3:"Sin cuentas",t4:"4 idiomas",
  whatH:"Todo en una sola app",whatS:"Actividades cortas y divertidas que crecen con tu hijo. Cambia de idioma cuando quieras.",
  f1h:"50+ juegos",f1p:"Memoria, laberintos, colorear, rompecabezas, serpiente, globos, tres en raya y más, cada uno con niveles.",
