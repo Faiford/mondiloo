@@ -1,4 +1,4 @@
-const APP_VERSION="2.3.4";
+const APP_VERSION="2.3.5";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -373,7 +373,7 @@ function memInit(){
   const a={...A()}; a.pairs=Math.min({a:8,b:10,c:10}[age||"b"],{a:3,b:4,c:5}[age||"b"]+lvl("mem")-1); let cards=[];
   if(a.memMode==="numword"){const ns=shuffle(Array.from({length:99},(_,i)=>i+2)).slice(0,a.pairs);
     ns.forEach(n=>{cards.push({k:n,face:String(n),say:nw(n)});cards.push({k:n,face:nw(n),say:nw(n),word:true});});}
-  else if(a.memMode==="picword"){const ws=shuffle(WORDS).slice(0,a.pairs); ws.forEach((w,i)=>{cards.push({k:i,face:w[0],say:word(w)});cards.push({k:i,face:word(w),say:word(w),word:true});});}
+  else if(a.memMode==="picword"&&lvl("mem")>=3){const ws=shuffle(WORDS).slice(0,a.pairs); ws.forEach((w,i)=>{cards.push({k:i,face:w[0],say:word(w)});cards.push({k:i,face:word(w),say:word(w),word:true});});}
   else {const ws=shuffle(WORDS).slice(0,a.pairs); ws.forEach((w,i)=>{for(let j=0;j<2;j++)cards.push({k:i,face:w[0],say:word(w)});});}
   game={cards:shuffle(cards).map(c=>({...c,up:false,done:false})),open:[],moves:0,found:0,busy:false};
 }

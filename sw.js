@@ -1,6 +1,6 @@
 /* Mondiloo service worker: works offline and picks up updates.
    When you publish an update, change VERSION below so phones download the new files. */
-const VERSION = "mondiloo-2.3.4";
+const VERSION = "mondiloo-2.3.5";
 const CORE = ["./", "index.html", "app.html", "css/app.css", "js/content.js", "js/app.js", "js/voice-ht.js", "manifest.webmanifest",
   "privacy.html", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
