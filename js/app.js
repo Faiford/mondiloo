@@ -1,4 +1,4 @@
-const APP_VERSION="2.3.0";
+const APP_VERSION="2.3.1";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -261,7 +261,7 @@ function play(){
     <div class="pal">${COLORS.map((c,i)=>`<button class="dot${i===1?" on":""}" data-col="${i}" style="background:${c[0]}" aria-label="${c[WI[lang]]}"></button>`).join("")}</div>
     <div class="pal">${[6,14,26].map((w,i)=>`<button class="sz${i===1?" on":""}" data-sz="${w}" aria-label="${w}"><i style="width:${w}px;height:${w}px"></i></button>`).join("")}</div>`;
   if(scr==="abc"){const L=ALPHA[lang];const cur=game.letter||L[0];const w=alphaWord(cur);
-    return `<button class="wcard" data-say="1"><span class="word" style="font-size:72px">${cur} ${cur.toLowerCase()}</span>${w?`<span class="pic" style="font-size:72px">${w[0]}</span><span class="word" style="font-size:34px"><span>${w[1].slice(0,cur.length)}</span>${w[1].slice(cur.length)}</span>`:""}</button>
+    return `<button class="wcard" data-say="1"><span class="word" style="font-size:72px">${cur} ${cur.toLowerCase()}</span>${w?`<span class="pic" style="font-size:72px">${w[0]}</span><span class="word" style="font-size:34px">${(()=>{const i=Math.max(0,w[1].toLowerCase().indexOf(cur.toLowerCase()));return `${w[1].slice(0,i)}<span>${w[1].slice(i,i+cur.length)}</span>${w[1].slice(i+cur.length)}`;})()}</span>`:""}</button>
       <div class="board" style="grid-template-columns:repeat(6,minmax(0,1fr))">${L.map(x=>`<button data-letter="${x}" class="${x===cur?"on":""}">${x}</button>`).join("")}</div>`;}
   if(scr==="phrases"){
     const tabs=`<div class="cats"><button class="cat" data-pmode="learn" aria-pressed="${pMode==="learn"}">📖 ${t("learn")}</button><button class="cat" data-pmode="test" aria-pressed="${pMode==="test"}">❓ ${t("testM")}</button></div>`;
@@ -668,7 +668,7 @@ function kidsView(){
 function traceInit(){
   const g=document.getElementById("trg"), ink=document.getElementById("tri"); if(!g||!ink) return;
   const L=ALPHA[lang], letter=L[trIdx%L.length], S=360, gc=g.getContext("2d"), ic=ink.getContext("2d");
-  const fs=letter.length>1?190:270;
+  const fs=letter.length>2?130:letter.length>1?190:270;
   const drawLetter=(ctx,fill,stroke)=>{ctx.font=`800 ${fs}px "Baloo 2","Arial Rounded MT Bold",Arial,sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
     if(fill){ctx.fillStyle=fill;ctx.fillText(letter,S/2,S/2+12);} if(stroke){ctx.setLineDash([10,10]);ctx.lineWidth=4;ctx.strokeStyle=stroke;ctx.strokeText(letter,S/2,S/2+12);ctx.setLineDash([]);}};
   gc.clearRect(0,0,S,S); drawLetter(gc,"#EFE6D3","#C9B99A");
