@@ -1,4 +1,4 @@
-const APP_VERSION="2.3.1";
+const APP_VERSION="2.3.2";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -1116,7 +1116,10 @@ document.addEventListener("touchend",e=>{
   try{onTap({target:el});}catch(err){showErr(err&&err.message||err);}
 },{passive:false});
 document.addEventListener("click",e=>{if(Date.now()-lastTouchTap<700)return;try{onTap(e);}catch(err){showErr(err&&err.message||err);}});
+let updW=null;
+function doUpdate(b){if(b){b.disabled=true;b.textContent="⏳ …";}try{if(updW)updW.postMessage("skip");}catch(e){}setTimeout(()=>location.reload(),2500);}
 function onTap(e){
+  const ub=e.target.closest&&e.target.closest("[data-update]"); if(ub){doUpdate(ub);return;}
   if(e.target.closest("[data-ioshintok]")){try{localStorage.setItem("tk-ioshint","1");}catch(err){}const b=document.querySelector(".ioshint");if(b)b.remove();return;}
   if(e.target.closest("[data-pzzoom]")||e.target.id==="pzbig"){const bg=document.getElementById("pzbig");if(bg){bg.hidden=!bg.hidden;clearTimeout(game.zt);if(!bg.hidden)game.zt=setTimeout(()=>{bg.hidden=true;},2500);}return;}
   if(e.target.closest("[data-exitstay]")||(e.target.id==="exitq")){exitClose(true);return;}
@@ -1267,8 +1270,8 @@ function iosHint(){try{
 setTimeout(iosHint,4000);
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   const updMsg=()=>({ht:"Nouvo vèsyon! Peze pou mete ajou",en:"New version! Tap to update",fr:"Nouvelle version ! Touche pour mettre à jour",es:"¡Nueva versión! Toca para actualizar"}[lang||"ht"]);
-  const showUpd=w=>{if(!w||document.querySelector("button.update"))return;const b=document.createElement("button");b.className="update";b.textContent="🔄 "+updMsg();
-    b.onclick=()=>{b.disabled=true;b.textContent="⏳ …";try{w.postMessage("skip");}catch(e){}setTimeout(()=>location.reload(),2500);};document.body.appendChild(b);};
+  const showUpd=w=>{if(!w||document.querySelector("button.update"))return;const b=document.createElement("button");b.className="update";b.dataset.update="1";b.textContent="🔄 "+updMsg();
+    updW=w;document.body.appendChild(b);};
   navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(reg=>{
     if(reg.waiting&&navigator.serviceWorker.controller)showUpd(reg.waiting);
     reg.addEventListener("updatefound",()=>{const w=reg.installing;w&&w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)showUpd(w);});});
