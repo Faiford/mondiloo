@@ -1,4 +1,4 @@
-const APP_VERSION="2.3.2";
+const APP_VERSION="2.3.3";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -83,6 +83,7 @@ const HT_KEYS=typeof VOICE_HT==="object"?Object.keys(VOICE_HT).sort((a,b)=>b.len
 function htClip(text){
   if(typeof VOICE_HT!=="object")return null; const n=htNorm(text); if(!n)return null;
   if(VOICE_HT[n])return VOICE_HT[n];
+  if(/^konbyen .+ ki genyen$/.test(n)&&VOICE_HT["konbyen ki genyen"])return VOICE_HT["konbyen ki genyen"];
   if(n.split(" ").length>7)return null;
   const pad=" "+n+" "; for(const k of HT_KEYS){if(pad.includes(" "+k+" "))return VOICE_HT[k];}
   return null;
@@ -211,7 +212,7 @@ function opts3(n,min,max){const s=new Set([n]);const spread=max>30?10:3;let g=0;
 function newQ(){
   const scr=qScr();
   locked=false; const a=A(); const e=ITEMS[rnd(0,ITEMS.length-1)];
-  if(scr==="count"){const n=rnd(a.count[0],a.count[1]);q={n,e,ans:n,opts:opts3(n,a.count[0],a.count[1]),say:t("qCount")};}
+  if(scr==="count"){const n=rnd(a.count[0],a.count[1]);q={n,e,ans:n,opts:opts3(n,a.count[0],a.count[1]),say:(COUNT_Q[lang]||[])[ITEMS.indexOf(e)]||t("qCount")};}
   if(scr==="add"){let x,y; if(a.add<=10){x=rnd(1,a.add-1);y=rnd(1,a.add-x);} else {x=rnd(5,a.add-10);y=rnd(1,Math.min(20,a.add-x));}
     q={x,y,e,ans:x+y,opts:opts3(x+y,2,a.add),say:`${nw(x)} + ${nw(y)}. ${t("qAdd")}`};}
   if(scr==="sub"){const x=rnd(3,a.sub),y=rnd(1,Math.min(x-1,20));q={x,y,e,ans:x-y,opts:opts3(x-y,0,a.sub),say:`${nw(x)} − ${nw(y)}. ${t("qSub")}`};}

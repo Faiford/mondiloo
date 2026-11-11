@@ -144,6 +144,12 @@ const NOTES=[261.63,293.66,329.63,349.23,392,440,493.88,523.25];
 const NOTECOL=["#E53935","#FB8C00","#FDD835","#2E9E4F","#13A3A3","#1E63D6","#7E3FD0","#E0457B"];
 const SONG=[0,0,4,4,5,5,4,-1,3,3,2,2,1,1,0];
 const ITEMS=["🍎","🥭","⭐","🐟","🌺","⚽","🐔","🍌"];
+/* "How many <things> are there?" for each counting item, per language. */
+const COUNT_Q={
+ ht:["Konbyen pòm ki genyen?","Konbyen mango ki genyen?","Konbyen zetwal ki genyen?","Konbyen pwason ki genyen?","Konbyen flè ki genyen?","Konbyen boul ki genyen?","Konbyen poul ki genyen?","Konbyen fig ki genyen?"],
+ en:["How many apples are there?","How many mangoes are there?","How many stars are there?","How many fish are there?","How many flowers are there?","How many balls are there?","How many chickens are there?","How many bananas are there?"],
+ fr:["Combien de pommes y a-t-il ?","Combien de mangues y a-t-il ?","Combien d'étoiles y a-t-il ?","Combien de poissons y a-t-il ?","Combien de fleurs y a-t-il ?","Combien de ballons y a-t-il ?","Combien de poules y a-t-il ?","Combien de bananes y a-t-il ?"],
+ es:["¿Cuántas manzanas hay?","¿Cuántos mangos hay?","¿Cuántas estrellas hay?","¿Cuántos peces hay?","¿Cuántas flores hay?","¿Cuántas pelotas hay?","¿Cuántas gallinas hay?","¿Cuántos plátanos hay?"]};
 const FRUITS=["🍎","🥭","🍌","🍊","🍉","🍇","🍍","🥥"];
 
 /* ===== 1.5.0: more games (coloring, maze, dots, shadows, differences, kitchen, habits, order) ===== */
