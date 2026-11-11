@@ -1,4 +1,4 @@
-const APP_VERSION="2.2.5";
+const APP_VERSION="2.3.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -20,7 +20,7 @@ const word=w=>w[WI[lang]];
 const nw=n=>numWord(n,lang);
 const addStar=(k=1)=>{const before=Math.floor(stars/10),sb=Math.min(STICKERS.length,Math.floor(stars/5));stars+=k;save();if(Math.min(STICKERS.length,Math.floor(stars/5))>sb){setTimeout(()=>{sfx("star");cheer(t("newSticker")+" "+STICKERS[Math.floor(stars/5)-1]);},700);}if(Math.floor(stars/10)>before){setTimeout(()=>{confetti(140);cheer("🏆");},300);}const s=document.querySelector(".pill span");if(s)s.textContent=stars;};
 function stopTimersOnly(){timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];}
-function stopAll(){micStop();document.querySelectorAll("audio").forEach(x=>{try{x.pause();}catch(e){}});timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};clearTimeout(sayT);try{if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();}catch(e){}}
+function stopAll(){micStop();htStop();document.querySelectorAll("audio").forEach(x=>{try{x.pause();}catch(e){}});timers.forEach(x=>{clearInterval(x);clearTimeout(x);});timers=[];game={};clearTimeout(sayT);try{if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();}catch(e){}}
 
 let sound=true; try{sound=localStorage.getItem("tk-snd")!=="0";}catch(e){}
 function tiki(mood){
@@ -76,8 +76,28 @@ function cheer(text){
 let ttsOK=null, sayT=null;
 function ttsVoices(){try{const v=window.speechSynthesis&&speechSynthesis.getVoices&&speechSynthesis.getVoices();return (v&&typeof v.length==="number")?Array.from(v):[];}catch(e){return [];}}
 try{if(window.speechSynthesis){speechSynthesis.onvoiceschanged=()=>{if(ttsOK===null&&ttsVoices().length)ttsOK=true;};if(ttsVoices().length)ttsOK=true;}}catch(e){}
+/* Kreyòl: Monia's recorded voice (js/voice-ht.js). Exact sentence first; for short prompts, the longest recorded word inside it. */
+let htAudio=null;
+const htNorm=s=>String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[’]/g,"'").replace(/[^a-z0-9' ]+/g," ").replace(/\s+/g," ").trim();
+const HT_KEYS=typeof VOICE_HT==="object"?Object.keys(VOICE_HT).sort((a,b)=>b.length-a.length):[];
+function htClip(text){
+  if(typeof VOICE_HT!=="object")return null; const n=htNorm(text); if(!n)return null;
+  if(VOICE_HT[n])return VOICE_HT[n];
+  if(n.split(" ").length>7)return null;
+  const pad=" "+n+" "; for(const k of HT_KEYS){if(pad.includes(" "+k+" "))return VOICE_HT[k];}
+  return null;
+}
+function htStop(){try{if(htAudio){htAudio.pause();htAudio=null;}}catch(e){}}
+function htSay(text){
+  const c=htClip(text); if(!c)return false;
+  htStop(); clearTimeout(sayT);
+  sayT=setTimeout(()=>{try{htAudio=new Audio(c);htAudio.play().catch(()=>{});}catch(e){}},60);
+  return true;
+}
 function speak(text){
-  if(!text||lang==="ht"||!sound||ttsOK===false) return;
+  if(!text||!sound) return;
+  if(lang==="ht"){htSay(text);return;}
+  if(ttsOK===false) return;
   const s=window.speechSynthesis; if(!s||typeof SpeechSynthesisUtterance==="undefined") return;
   clearTimeout(sayT);
   sayT=setTimeout(()=>{
@@ -179,7 +199,7 @@ function render(){
   if(screen==="talk") talkInit();
 }
 function playTop(){
-  const right=["puzzle","music","songs","album",...NEWG,...NEWG2,...NEWG3,"talk"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:lang==="ht"?`<span class="soon">🔈 Vwa kreyòl: byento</span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
+  const right=["puzzle","music","songs","album",...NEWG,...NEWG2,...NEWG3,"talk"].includes(screen)?`<span class="score" id="score"></span>`:screen==="draw"?`<button class="say" data-clear="1">🧽 ${t("clear")}</button>`:["mem","snake","balloon","sort"].includes(screen)?`<span class="score" id="score"></span>`:`<button class="say" data-say="1">🔊 ${t("listen")}</button>`;
   const lvBar=LVGAMES.includes(screen)?`<div class="lvbar"><button data-lv="-1" ${lvl(screen)<=1?"disabled":""} aria-label="-">◀</button><b>${t("level")} ${lvl(screen)}</b><button data-lv="1" ${lvl(screen)>=lvMax(screen)?"disabled":""} aria-label="+">▶</button></div>`:"";
   const dHead=screen==="daily"?`<div class="dhead">🔥 ${t("daily")} · ${Math.min(daily.i+1,3)}/3</div>`:"";
   const backBtn=screen==="globe"&&gC>=0?`<button class="back" data-gback="1">← ${t("back")}</button>`:`<button class="back" data-go="${screen==="haiti"&&fromGlobe?"globe":"home"}">← ${t("back")}</button>`;
