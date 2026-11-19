@@ -1,4 +1,4 @@
-const APP_VERSION="2.3.6";
+const APP_VERSION="2.4.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -709,7 +709,7 @@ const inPlay=()=>STORE==="play";
 let PREM={}; try{PREM=JSON.parse(localStorage.getItem("tk-prem")||"{}")||{};}catch(e){PREM={};}
 const savePrem=()=>{try{localStorage.setItem("tk-prem",JSON.stringify(PREM));}catch(e){}};
 /* A code in the link (from the thank-you page after paying) activates Premium straight away. */
-try{const qc=new URLSearchParams(location.search).get("code");if(qc&&codeOk(qc)){PREM.code=qc.trim().toUpperCase();savePrem();setTimeout(()=>{try{confetti(160);cheer(t("premOn"));}catch(e){}},600);history.replaceState(null,"",location.pathname);}}catch(e){}
+try{const qc=new URLSearchParams(location.search).get("code");if(qc&&codeOk(qc)){history.replaceState(null,"",location.pathname);setTimeout(()=>useCode(qc),400);}}catch(e){}
 const DAYMS=86400000;
 function codeOk(code){const m=/^MDL-([A-Z0-9]{4})-([A-Z0-9]{4})$/.exec(String(code||"").trim().toUpperCase());if(!m)return false;
   let h=2166136261;for(const ch of "mondiloo509:"+m[1]){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}
@@ -717,15 +717,45 @@ function codeOk(code){const m=/^MDL-([A-Z0-9]{4})-([A-Z0-9]{4})$/.exec(String(co
 const trialDaysLeft=()=>PREM.trial?Math.max(0,Math.ceil((PREM.trial+SHOP.trialDays*DAYMS-Date.now())/DAYMS)):0;
 const isPremium=()=>!SHOP.enabled||codeOk(PREM.code)||trialDaysLeft()>0;
 const isLocked=k=>!!(SHOP.enabled&&GAMEINFO[k]&&!FREE.includes(k)&&!isPremium());
-let payErr=false, wantedK=null;
+let payErr=false, wantedK=null, payMsg="", lostOpen=false, codeBusy=false, typedCode="";
+/* ---------- Premium code server checks (device limit, cancelled subscriptions, lost code) ---------- */
+function devId(){let d="";try{d=localStorage.getItem("tk-dev")||"";if(!d){d=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,12));localStorage.setItem("tk-dev",d);}}catch(e){d=d||"nostorage-"+Date.now();}return d;}
+/* Not in the Play app yet: its Data safety form says no data leaves the device. */
+const codeChecks=()=>!!SHOP.api&&!inPlay();
+function codeApi(path,body){if(!codeChecks())return Promise.reject(new Error("noapi"));const ctl=typeof AbortController!=="undefined"?new AbortController():null;const tm=setTimeout(()=>{try{ctl&&ctl.abort();}catch(e){}},8000);
+  return fetch(SHOP.api+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal:ctl?ctl.signal:undefined}).then(r=>r.json()).finally(()=>clearTimeout(tm));}
+const codeMsg=j=>j.error==="limit"?t("codeLimit").replace("{n}",j.max||3):j.error==="inactive"?t("codeOff"):t("badCode");
+function premGranted(code,verified){typedCode="";PREM.code=code;PREM.v=verified?1:0;PREM.chk=verified?Date.now():0;savePrem();payErr=false;payMsg="";sfx("ok");confetti(160);cheer(t("premOn"));if(screen==="paywall"){screen=wantedK||"home";wantedK=null;}render();}
+/* entering a code: ask the server; with no internet, accept it now and check it later */
+function useCode(v){const code=String(v||"").trim().toUpperCase();typedCode=code;if(!codeOk(code)){payErr=true;payMsg="";render();return;}
+  if(codeBusy)return;codeBusy=true;payErr=false;payMsg=t("codeWait");if(screen==="paywall")render();
+  codeApi("/activate",{code,dev:devId()}).then(j=>{codeBusy=false;if(j&&j.ok)premGranted(code,!j.unchecked);else if(!j||!["limit","inactive","unknown"].includes(j.error))premGranted(code,false);else{payErr=true;payMsg=codeMsg(j||{});if(screen!=="paywall"){wantedK=null;screen="paywall";}render();}})
+   .catch(()=>{codeBusy=false;premGranted(code,false);});}
+/* every few days (when online) make sure the code is still good on this device */
+function recheckCode(){if(!SHOP.enabled||!codeOk(PREM.code)||!codeChecks()||(typeof navigator!=="undefined"&&navigator.onLine===false))return;
+  const wait=PREM.v?3*DAYMS:0;if(PREM.chk&&Date.now()-PREM.chk<wait)return;
+  codeApi("/activate",{code:PREM.code,dev:devId()}).then(j=>{if(!j)return;
+    if(j.ok){PREM.v=j.unchecked?PREM.v:1;PREM.chk=Date.now();savePrem();return;}
+    if(j.error==="limit"||j.error==="inactive"||(j.error==="unknown"&&PREM.v===0)){payMsg=codeMsg(j);payErr=true;PREM.code="";PREM.v=0;savePrem();render();try{cheer(esc(payMsg));}catch(e){}}
+  }).catch(()=>{});}
+function lostView(){if(!codeChecks())return "";if(!lostOpen)return `<p class="hint" style="text-align:center"><button class="linkish" data-lost="1">🔎 ${t("lostCode")}</button></p>`;
+  return `<div class="lostbox"><p class="hint">${t("lostHelp")}</p>
+   <input id="lemail" class="txt" type="email" autocomplete="email" placeholder="${t("emailL")}">
+   <input id="l4" class="txt" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="${t("last4L")}">
+   <button class="go" data-recover="1">${t("findCode")}</button></div>`;}
+function recoverCode(){const email=((document.getElementById("lemail")||{}).value||"").trim(),last4=((document.getElementById("l4")||{}).value||"").trim();
+  if(codeBusy)return;codeBusy=true;payErr=false;payMsg=t("codeWait");render();
+  codeApi("/recover",{email,last4}).then(j=>{codeBusy=false;if(j&&j.ok&&j.code){lostOpen=false;codeBusy=false;useCode(j.code);}else{payErr=true;payMsg=j&&j.error==="too_many"?t("tooMany"):t("lostNo");render();}})
+   .catch(()=>{codeBusy=false;payErr=true;payMsg=t("netErr");render();});}
 function paywallView(){
   return `<div class="hello" style="flex-direction:column;text-align:center">${tiki("happy")}<h1>⭐ ${t("unlockAll")}</h1><p class="hint">${t("premBenefits")}</p></div>
    ${inPlay()||SHOP.payMonth||SHOP.payYear?"":`<div class="prices"><div><b>${SHOP.priceMonth}</b><small>${t("perMonth")}</small></div><div class="best"><b>${SHOP.priceYear}</b><small>${t("perYear")}</small></div></div>`}
    ${PREM.trialUsed?`<p class="hint" style="text-align:center">${t("trialUsed")}</p>`:`<button class="go" data-trial="1">🎁 ${t("tryFree")}</button>`}
    ${inPlay()?"":SHOP.payMonth||SHOP.payYear?`<div class="paybtns">${SHOP.payMonth?`<a class="go linkbtn" href="${SHOP.payMonth}" target="_blank" rel="noopener">💳 ${SHOP.priceMonth} <small>${t("perMonth")}</small></a>`:""}${SHOP.payYear?`<a class="go linkbtn best" href="${SHOP.payYear}" target="_blank" rel="noopener">⭐ ${SHOP.priceYear} <small>${t("perYear")} · ${t("bestDeal")}</small></a>`:""}</div><p class="hint" style="text-align:center">${t("payNote")}${SHOP.contact?` <a href="mailto:${SHOP.contact}">${esc(SHOP.contact)}</a>`:""}</p>`:SHOP.payUrl?`<a class="go linkbtn" href="${SHOP.payUrl}" target="_blank" rel="noopener">💳 ${t("buy")}</a>`:`<p class="hint" style="text-align:center">${t("payLater")}${SHOP.contact?" "+esc(SHOP.contact):""}</p>`}
    <h3>🔑 ${t("haveCode")}</h3>
-   <div class="gaterow"><input id="pcode" class="txt" autocomplete="off" autocapitalize="characters" placeholder="MDL-XXXX-XXXX"><button class="go" data-code="1">${t("activate")}</button></div>
-   ${payErr?`<p class="fb no">${t("badCode")}</p>`:""}`;
+   <div class="gaterow"><input id="pcode" class="txt" autocomplete="off" autocapitalize="characters" placeholder="MDL-XXXX-XXXX" value="${esc(typedCode)}"><button class="go" data-code="1">${t("activate")}</button></div>
+   ${payMsg?`<p class="hint codemsg${payErr?" no":""}">${esc(payMsg)}</p>`:payErr?`<p class="fb no">${t("badCode")}</p>`:""}
+   ${lostView()}`;
 }
 function trialBanner(){if(!SHOP.enabled||codeOk(PREM.code)||!PREM.trial)return "";const n=trialDaysLeft();
   if(n>0&&n<=2)return `<button class="trialb" data-go="paywall"><span>${n===1?t("trialSoon1"):t("trialSoon").replace("{n}",n)}</span><b>${t("seePlans")} →</b></button>`;
@@ -1173,8 +1203,10 @@ function onTap(e){
   const pg=e.target.closest("[data-parentgo]"); if(pg){stopAll();gateNew("parent");screen="gate";render();return;}
   if(e.target.closest("[data-pgate]")){const v=+(document.getElementById("pgate")||{}).value;if(v===gate.a+gate.b){if(gate.next==="trial"){if(!PREM.trialUsed){PREM.trial=Date.now();PREM.trialUsed=true;savePrem();confetti(120);cheer(t("tryFree")+" ✓");}screen=wantedK&&!isLocked(wantedK)?wantedK:"home";wantedK=null;}else screen=gate.next;render();}else{gate.err=true;render();}return;}
   if(e.target.closest("[data-trial]")){gateNew("trial");screen="gate";render();return;}
-  if(e.target.closest("[data-unprem]")){if(!unPremArm){unPremArm=true;render();setTimeout(()=>{unPremArm=false;},5000);return;}unPremArm=false;PREM.code="";savePrem();render();return;}
-  if(e.target.closest("[data-code]")){const v=(document.getElementById("pcode")||{}).value||"";if(codeOk(v)){PREM.code=v.trim().toUpperCase();savePrem();sfx("ok");confetti(160);cheer(t("premOn"));screen=wantedK||"home";wantedK=null;render();}else{payErr=true;render();}return;}
+  if(e.target.closest("[data-unprem]")){if(!unPremArm){unPremArm=true;render();setTimeout(()=>{unPremArm=false;},5000);return;}unPremArm=false;if(PREM.code&&codeChecks())codeApi("/release",{code:PREM.code,dev:devId()}).catch(()=>{});PREM.code="";PREM.v=0;savePrem();render();return;}
+  if(e.target.closest("[data-code]")){useCode((document.getElementById("pcode")||{}).value||"");return;}
+  if(e.target.closest("[data-lost]")){lostOpen=true;payMsg="";payErr=false;render();return;}
+  if(e.target.closest("[data-recover]")){recoverCode();return;}
   const lm=e.target.closest("[data-limit]"); if(lm){STATS.limit=+lm.dataset.limit;saveStats();render();return;}
   const pv=e.target.closest("[data-pv]"); if(pv){pvIdx=(pvIdx+ +pv.dataset.pv+PROVERBS.length)%PROVERBS.length;render();return;}
   const hx=e.target.closest("[data-hx]"); if(hx&&!hx.disabled){hIdx=Math.max(0,Math.min(HAITI.length-1,hIdx+ +hx.dataset.hx));render();sfx("pop");return;}
@@ -1237,6 +1269,8 @@ document.addEventListener("keydown",e=>{
 
 initProfiles();
 render();
+setTimeout(recheckCode,2500);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")recheckCode();});
 
 /* ---------- offline + updates ---------- */
 
