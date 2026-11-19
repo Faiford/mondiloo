@@ -1,4 +1,4 @@
-const APP_VERSION="2.4.0";
+const APP_VERSION="2.4.1";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -759,7 +759,7 @@ function paywallView(){
 }
 function trialBanner(){if(!SHOP.enabled||codeOk(PREM.code)||!PREM.trial)return "";const n=trialDaysLeft();
   if(n>0&&n<=2)return `<button class="trialb" data-go="paywall"><span>${n===1?t("trialSoon1"):t("trialSoon").replace("{n}",n)}</span><b>${t("seePlans")} →</b></button>`;
-  if(n<=0)return `<button class="trialb over" data-go="paywall"><span>⭐ ${t("trialOver")}</span><b>${t("seePlans")} →</b></button>`;return "";}
+  if(n<=0)return `<button class="trialb ended" data-go="paywall"><span>⭐ ${t("trialOver")}</span><b>${t("seePlans")} →</b></button>`;return "";}
 let unPremArm=false;
 function subView(){const mail=SHOP.contact?`<a href="mailto:${SHOP.contact}">${esc(SHOP.contact)}</a>`:"";
   return `<p class="hint">${t("yourCode")}: <b style="user-select:all;letter-spacing:1px">${esc(PREM.code)}</b><br>${t("codeKeep")}</p>
