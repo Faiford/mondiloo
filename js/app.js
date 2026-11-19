@@ -1,4 +1,4 @@
-const APP_VERSION="2.4.1";
+const APP_VERSION="2.4.2";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -704,7 +704,9 @@ function traceCheck(){
 }
 /* ---------- Free + Premium ---------- */
 /* Android (Google Play) build opens app.html?src=play: hide outside payment links there (store policy). */
-let STORE="";try{if(/[?&]src=play/.test(location.search)||document.referrer.indexOf("android-app://")===0)localStorage.setItem("tk-store","play");STORE=localStorage.getItem("tk-store")||"";}catch(e){}
+/* Play app = this tab was opened by the Android app (?src=play). Kept per tab (sessionStorage): Chrome and the Play app share
+   localStorage, so a saved flag would hide the website's payment options in Chrome too. */
+let STORE="";try{localStorage.removeItem("tk-store");if(/[?&]src=play/.test(location.search)||document.referrer.indexOf("android-app://")===0)sessionStorage.setItem("tk-store","play");STORE=sessionStorage.getItem("tk-store")||"";}catch(e){}
 const inPlay=()=>STORE==="play";
 let PREM={}; try{PREM=JSON.parse(localStorage.getItem("tk-prem")||"{}")||{};}catch(e){PREM={};}
 const savePrem=()=>{try{localStorage.setItem("tk-prem",JSON.stringify(PREM));}catch(e){}};
