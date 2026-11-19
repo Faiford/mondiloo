@@ -1,4 +1,4 @@
-const APP_VERSION="2.3.5";
+const APP_VERSION="2.3.6";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -171,7 +171,7 @@ function render(){
   } else {
     h+=`<section class="card">${playTop()}${play()}</section>`;
   }
-  h+=`<p class="foot">Mondiloo · v${APP_VERSION} · <a href="privacy.html">Privacy</a></p>`;
+  h+=`<p class="foot">Mondiloo · v${APP_VERSION} · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>`;
   $app.innerHTML=h;
   try{navSync();}catch(e){}
   if(screen==="snake") snakeInit();
