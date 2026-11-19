@@ -1,4 +1,4 @@
-const APP_VERSION="2.4.2";
+const APP_VERSION="2.5.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -626,8 +626,8 @@ function parentView(){
     <h3>${t("limitL")}</h3>
     <div class="cats">${lims.map(m=>`<button class="cat" data-limit="${m}" aria-pressed="${STATS.limit===m}">${m?m+" "+t("minU"):t("noLimit")}</button>`).join("")}</div>
     <h3>⭐ ${t("planL")}: ${planLine()}</h3>
-    ${SHOP.enabled&&!codeOk(PREM.code)?`<button class="go alt" data-go="paywall">⭐ ${t("unlockAll")}</button>`:""}
-    ${codeOk(PREM.code)?subView():""}
+    ${SHOP.enabled&&!codeOk(PREM.code)&&!playPrem()?`<button class="go alt" data-go="paywall">⭐ ${t("unlockAll")}</button>`:""}
+    ${codeOk(PREM.code)?subView():playPrem()?playSubView():""}
     <h3>🖨️ ${t("worksheetsL")}</h3>
     <div class="cats">${Object.keys(LANGS).map(k=>`<a class="cat" href="${WORKSHEETS[k]}" target="_blank" rel="noopener">📄 ${LANGS[k].name}</a>`).join("")}</div>
     ${kidsView()}`;
@@ -717,7 +717,8 @@ function codeOk(code){const m=/^MDL-([A-Z0-9]{4})-([A-Z0-9]{4})$/.exec(String(co
   let h=2166136261;for(const ch of "mondiloo509:"+m[1]){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}
   const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let x=h,out="";for(let i=0;i<4;i++){out+=A[x%32];x=Math.floor(x/32);}return out===m[2];}
 const trialDaysLeft=()=>PREM.trial?Math.max(0,Math.ceil((PREM.trial+SHOP.trialDays*DAYMS-Date.now())/DAYMS)):0;
-const isPremium=()=>!SHOP.enabled||codeOk(PREM.code)||trialDaysLeft()>0;
+const playPrem=()=>!!(PREM.play&&PREM.play.sku);
+const isPremium=()=>!SHOP.enabled||codeOk(PREM.code)||playPrem()||trialDaysLeft()>0;
 const isLocked=k=>!!(SHOP.enabled&&GAMEINFO[k]&&!FREE.includes(k)&&!isPremium());
 let payErr=false, wantedK=null, payMsg="", lostOpen=false, codeBusy=false, typedCode="";
 /* ---------- Premium code server checks (device limit, cancelled subscriptions, lost code) ---------- */
@@ -740,6 +741,31 @@ function recheckCode(){if(!SHOP.enabled||!codeOk(PREM.code)||!codeChecks()||(typ
     if(j.ok){PREM.v=j.unchecked?PREM.v:1;PREM.chk=Date.now();savePrem();return;}
     if(j.error==="limit"||j.error==="inactive"||(j.error==="unknown"&&PREM.v===0)){payMsg=codeMsg(j);payErr=true;PREM.code="";PREM.v=0;savePrem();render();try{cheer(esc(payMsg));}catch(e){}}
   }).catch(()=>{});}
+/* ---------- Google Play Billing (inside the Play app, via the Digital Goods API) ---------- */
+let playSvc=null, playPrices={};
+const PLAY_SKUS=()=>SHOP.play?[SHOP.play.month,SHOP.play.year]:[];
+async function playInit(){if(!inPlay()||!SHOP.play||!("getDigitalGoodsService" in window))return;
+  try{playSvc=await window.getDigitalGoodsService("https://play.google.com/billing");}catch(e){playSvc=null;return;}
+  if(!playSvc)return;
+  try{(await playSvc.getDetails(PLAY_SKUS())).forEach(d=>{const p=d.price||{};try{playPrices[d.itemId]=new Intl.NumberFormat(undefined,{style:"currency",currency:p.currency}).format(+p.value);}catch(e){playPrices[d.itemId]=p.value+" "+(p.currency||"");}});}catch(e){}
+  await playSync();if(screen==="paywall"||screen==="parent"||screen==="home")render();}
+/* what Play says we own right now (active subscriptions only) */
+async function playSync(){if(!playSvc)return;let list=[];try{list=await playSvc.listPurchases();}catch(e){return;}
+  const mine=list.find(p=>PLAY_SKUS().includes(p.itemId));
+  if(mine){const was=PREM.play&&PREM.play.token;PREM.play={sku:mine.itemId,token:mine.purchaseToken};savePrem();if(was!==mine.purchaseToken)playVerify(mine.itemId,mine.purchaseToken);}
+  else if(PREM.play){PREM.play=null;savePrem();}}
+/* the server checks the purchase with Google and acknowledges it (Google refunds purchases not acknowledged within 3 days) */
+function playVerify(sku,token){if(!SHOP.api)return Promise.resolve(null);
+  return fetch(SHOP.api+"/play",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sku,token})}).then(r=>r.json()).catch(()=>null);}
+async function playBuy(sku){if(!playSvc){payErr=true;payMsg=t("playErr");render();return;}
+  try{const req=new PaymentRequest([{supportedMethods:"https://play.google.com/billing",data:{sku}}],{total:{label:"Total",amount:{currency:"USD",value:"0"}}});
+    const res=await req.show();const token=res.details&&res.details.purchaseToken;
+    if(!token){await res.complete("fail");throw new Error("notoken");}
+    PREM.play={sku,token};savePrem();await res.complete("success");playVerify(sku,token);
+    payErr=false;payMsg="";sfx("ok");confetti(160);cheer(t("premOn"));screen=wantedK&&!isLocked(wantedK)?wantedK:"home";wantedK=null;render();}
+  catch(e){if(e&&e.name==="AbortError"){screen="paywall";render();return;}payErr=true;payMsg=t("playErr");screen="paywall";render();}}
+function playButtons(){if(!playSvc)return "";const m=SHOP.play.month,y=SHOP.play.year;
+  return `<div class="paybtns"><button class="go linkbtn" data-playbuy="${m}">💳 ${esc(playPrices[m]||SHOP.priceMonth)} <small>${t("perMonth")}</small></button><button class="go linkbtn best" data-playbuy="${y}">⭐ ${esc(playPrices[y]||SHOP.priceYear)} <small>${t("perYear")} · ${t("bestDeal")}</small></button></div><p class="hint" style="text-align:center">${t("playNote")}</p>`;}
 function lostView(){if(!codeChecks())return "";if(!lostOpen)return `<p class="hint" style="text-align:center"><button class="linkish" data-lost="1">🔎 ${t("lostCode")}</button></p>`;
   return `<div class="lostbox"><p class="hint">${t("lostHelp")}</p>
    <input id="lemail" class="txt" type="email" autocomplete="email" placeholder="${t("emailL")}">
@@ -753,13 +779,13 @@ function paywallView(){
   return `<div class="hello" style="flex-direction:column;text-align:center">${tiki("happy")}<h1>⭐ ${t("unlockAll")}</h1><p class="hint">${t("premBenefits")}</p></div>
    ${inPlay()||SHOP.payMonth||SHOP.payYear?"":`<div class="prices"><div><b>${SHOP.priceMonth}</b><small>${t("perMonth")}</small></div><div class="best"><b>${SHOP.priceYear}</b><small>${t("perYear")}</small></div></div>`}
    ${PREM.trialUsed?`<p class="hint" style="text-align:center">${t("trialUsed")}</p>`:`<button class="go" data-trial="1">🎁 ${t("tryFree")}</button>`}
-   ${inPlay()?"":SHOP.payMonth||SHOP.payYear?`<div class="paybtns">${SHOP.payMonth?`<a class="go linkbtn" href="${SHOP.payMonth}" target="_blank" rel="noopener">💳 ${SHOP.priceMonth} <small>${t("perMonth")}</small></a>`:""}${SHOP.payYear?`<a class="go linkbtn best" href="${SHOP.payYear}" target="_blank" rel="noopener">⭐ ${SHOP.priceYear} <small>${t("perYear")} · ${t("bestDeal")}</small></a>`:""}</div><p class="hint" style="text-align:center">${t("payNote")}${SHOP.contact?` <a href="mailto:${SHOP.contact}">${esc(SHOP.contact)}</a>`:""}</p>`:SHOP.payUrl?`<a class="go linkbtn" href="${SHOP.payUrl}" target="_blank" rel="noopener">💳 ${t("buy")}</a>`:`<p class="hint" style="text-align:center">${t("payLater")}${SHOP.contact?" "+esc(SHOP.contact):""}</p>`}
+   ${inPlay()?playButtons():SHOP.payMonth||SHOP.payYear?`<div class="paybtns">${SHOP.payMonth?`<a class="go linkbtn" href="${SHOP.payMonth}" target="_blank" rel="noopener">💳 ${SHOP.priceMonth} <small>${t("perMonth")}</small></a>`:""}${SHOP.payYear?`<a class="go linkbtn best" href="${SHOP.payYear}" target="_blank" rel="noopener">⭐ ${SHOP.priceYear} <small>${t("perYear")} · ${t("bestDeal")}</small></a>`:""}</div><p class="hint" style="text-align:center">${t("payNote")}${SHOP.contact?` <a href="mailto:${SHOP.contact}">${esc(SHOP.contact)}</a>`:""}</p>`:SHOP.payUrl?`<a class="go linkbtn" href="${SHOP.payUrl}" target="_blank" rel="noopener">💳 ${t("buy")}</a>`:`<p class="hint" style="text-align:center">${t("payLater")}${SHOP.contact?" "+esc(SHOP.contact):""}</p>`}
    <h3>🔑 ${t("haveCode")}</h3>
    <div class="gaterow"><input id="pcode" class="txt" autocomplete="off" autocapitalize="characters" placeholder="MDL-XXXX-XXXX" value="${esc(typedCode)}"><button class="go" data-code="1">${t("activate")}</button></div>
    ${payMsg?`<p class="hint codemsg${payErr?" no":""}">${esc(payMsg)}</p>`:payErr?`<p class="fb no">${t("badCode")}</p>`:""}
    ${lostView()}`;
 }
-function trialBanner(){if(!SHOP.enabled||codeOk(PREM.code)||!PREM.trial)return "";const n=trialDaysLeft();
+function trialBanner(){if(!SHOP.enabled||codeOk(PREM.code)||playPrem()||!PREM.trial)return "";const n=trialDaysLeft();
   if(n>0&&n<=2)return `<button class="trialb" data-go="paywall"><span>${n===1?t("trialSoon1"):t("trialSoon").replace("{n}",n)}</span><b>${t("seePlans")} →</b></button>`;
   if(n<=0)return `<button class="trialb ended" data-go="paywall"><span>⭐ ${t("trialOver")}</span><b>${t("seePlans")} →</b></button>`;return "";}
 let unPremArm=false;
@@ -768,7 +794,8 @@ function subView(){const mail=SHOP.contact?`<a href="mailto:${SHOP.contact}">${e
   <div class="cats">${SHOP.portal&&!inPlay()?`<a class="cat" href="${SHOP.portal}" target="_blank" rel="noopener">⚙️ ${t("manageSub")}</a>`:SHOP.contact?`<a class="cat" href="mailto:${SHOP.contact}?subject=Mondiloo%20subscription%20${encodeURIComponent(PREM.code)}">⚙️ ${t("manageSub")}</a>`:""}
   <button class="cat" data-unprem="1">${unPremArm?"⚠️ "+t("unPremQ"):"🚪 "+t("unPrem")}</button></div>
   ${mail?`<p class="hint">${t("refundNote")} ${mail}</p>`:""}`;}
-function planLine(){return codeOk(PREM.code)?t("premOn"):trialDaysLeft()>0?t("trialLeft").replace("{n}",trialDaysLeft()):t("freePlan");}
+function playSubView(){const sku=PREM.play.sku;return `<div class="cats"><a class="cat" href="https://play.google.com/store/account/subscriptions?sku=${encodeURIComponent(sku)}&package=${encodeURIComponent(SHOP.play.pkg)}" target="_blank" rel="noopener">⚙️ ${t("playManage")}</a></div>`;}
+function planLine(){return codeOk(PREM.code)||playPrem()?t("premOn"):trialDaysLeft()>0?t("trialLeft").replace("{n}",trialDaysLeft()):t("freePlan");}
 /* ---------- level win / fail ---------- */
 function levelWin(g){ statOk();
   const n=lvl(g); unlockNext(g); addStar(2); sfx("ok"); confetti(160); cheer(t("levelDone").replace("{n}",n)); speak(t("levelDone").replace("{n}",n));
@@ -1203,8 +1230,9 @@ function onTap(e){
   const tbb=e.target.closest("[data-tube]"); if(tbb){tubeTap(+tbb.dataset.tube);return;}
   if(e.target.closest("[data-sundo]")){const g=game;if(g.hist&&g.hist.length){g.tb=g.hist.pop();g.sel=-1;g.moves++;drawSort();}return;}
   const pg=e.target.closest("[data-parentgo]"); if(pg){stopAll();gateNew("parent");screen="gate";render();return;}
-  if(e.target.closest("[data-pgate]")){const v=+(document.getElementById("pgate")||{}).value;if(v===gate.a+gate.b){if(gate.next==="trial"){if(!PREM.trialUsed){PREM.trial=Date.now();PREM.trialUsed=true;savePrem();confetti(120);cheer(t("tryFree")+" ✓");}screen=wantedK&&!isLocked(wantedK)?wantedK:"home";wantedK=null;}else screen=gate.next;render();}else{gate.err=true;render();}return;}
+  if(e.target.closest("[data-pgate]")){const v=+(document.getElementById("pgate")||{}).value;if(v===gate.a+gate.b){if(String(gate.next).indexOf("buy:")===0){playBuy(gate.next.slice(4));return;}if(gate.next==="trial"){if(!PREM.trialUsed){PREM.trial=Date.now();PREM.trialUsed=true;savePrem();confetti(120);cheer(t("tryFree")+" ✓");}screen=wantedK&&!isLocked(wantedK)?wantedK:"home";wantedK=null;}else screen=gate.next;render();}else{gate.err=true;render();}return;}
   if(e.target.closest("[data-trial]")){gateNew("trial");screen="gate";render();return;}
+  const pb=e.target.closest("[data-playbuy]");if(pb){gateNew("buy:"+pb.dataset.playbuy);screen="gate";render();return;}
   if(e.target.closest("[data-unprem]")){if(!unPremArm){unPremArm=true;render();setTimeout(()=>{unPremArm=false;},5000);return;}unPremArm=false;if(PREM.code&&codeChecks())codeApi("/release",{code:PREM.code,dev:devId()}).catch(()=>{});PREM.code="";PREM.v=0;savePrem();render();return;}
   if(e.target.closest("[data-code]")){useCode((document.getElementById("pcode")||{}).value||"");return;}
   if(e.target.closest("[data-lost]")){lostOpen=true;payMsg="";payErr=false;render();return;}
@@ -1272,7 +1300,8 @@ document.addEventListener("keydown",e=>{
 initProfiles();
 render();
 setTimeout(recheckCode,2500);
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")recheckCode();});
+playInit();
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){recheckCode();playSync().then(()=>{if(screen==="home"||screen==="parent")render();});}});
 
 /* ---------- offline + updates ---------- */
 

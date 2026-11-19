@@ -13,6 +13,9 @@
      Text     MANUAL_CODES  (optional) codes given by hand, with their device limit:
                             "MDL-GPLY-QTEY:100,MDL-XXXX-YYYY:3"
      Text     MAX_DEVICES   (optional) default 3
+     Secret   GOOGLE_SA     (for Google Play purchases) the JSON key of a Google Cloud service account
+                            that has access to the app in Play Console
+   5. POST /play     {sku, token}        → Play app purchase: checks it with Google and acknowledges it
 */
 const SALT = "mondiloo509:";
 const ABC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -87,6 +90,47 @@ async function active(env, code, rec) {
   return OK_STATUS.includes(rec.st);
 }
 
+/* ---------- Google Play Developer API (service account → access token) ---------- */
+const PKG = "com.mondiloo.app";
+const PLAY_SKUS = ["premium_monthly", "premium_yearly"];
+let gTok = null, gTokExp = 0;
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const b64uStr = str => b64u(new TextEncoder().encode(str));
+async function googleToken(env) {
+  if (gTok && Date.now() < gTokExp) return gTok;
+  const sa = JSON.parse(env.GOOGLE_SA);
+  const now = Math.floor(Date.now() / 1000);
+  const unsigned = b64uStr(JSON.stringify({ alg: "RS256", typ: "JWT" })) + "." + b64uStr(JSON.stringify({
+    iss: sa.client_email, scope: "https://www.googleapis.com/auth/androidpublisher",
+    aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600 }));
+  const pem = sa.private_key.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
+  const der = Uint8Array.from(atob(pem), c => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsigned));
+  const r = await fetch("https://oauth2.googleapis.com/token", { method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + unsigned + "." + b64u(sig) });
+  if (!r.ok) throw new Error("google token " + r.status);
+  const j = await r.json(); gTok = j.access_token; gTokExp = Date.now() + (j.expires_in - 120) * 1000;
+  return gTok;
+}
+async function playCheck(env, sku, token) {
+  const base = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/" + PKG +
+    "/purchases/subscriptions/" + encodeURIComponent(sku) + "/tokens/" + encodeURIComponent(token);
+  const auth = { Authorization: "Bearer " + await googleToken(env) };
+  const r = await fetch(base, { headers: auth });
+  if (r.status === 404 || r.status === 400 || r.status === 410) return { ok: false, error: "unknown" };
+  if (!r.ok) throw new Error("play " + r.status);
+  const p = await r.json();
+  const until = +p.expiryTimeMillis || 0;
+  if (until < Date.now()) return { ok: false, error: "inactive" };
+  if (p.acknowledgementState === 0) {
+    const a = await fetch(base + ":acknowledge", { method: "POST", headers: { ...auth, "Content-Type": "application/json" }, body: "{}" });
+    if (!a.ok && a.status !== 400) throw new Error("ack " + a.status);
+  }
+  return { ok: true, until };
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -109,8 +153,8 @@ export default {
         return reply({ ok: true, code: codeFor(id) });
       }
       if (request.method !== "POST") return reply({ ok: false, error: "method" }, 405);
-      if (!env.CODES) return reply({ ok: true, unchecked: true });     // KV not set up yet: don't block anyone
       let body = {}; try { body = await request.json(); } catch (e) {}
+      if (!env.CODES && url.pathname !== "/play") return reply({ ok: true, unchecked: true });   // KV not set up yet: don't block anyone
 
       /* 2. activate / check a device */
       if (url.pathname === "/activate" || url.pathname === "/release") {
@@ -129,6 +173,14 @@ export default {
         else { await putRec(env, code, rec); return reply({ ok: false, error: "limit", max }); }
         await putRec(env, code, rec);
         return reply({ ok: true, used: rec.dev.length, max });
+      }
+
+      /* 5. Google Play purchase (from the Play app) */
+      if (url.pathname === "/play") {
+        const sku = String(body.sku || ""), token = String(body.token || "");
+        if (!PLAY_SKUS.includes(sku) || !/^[A-Za-z0-9._:-]{20,500}$/.test(token)) return reply({ ok: false, error: "bad_request" }, 400);
+        if (!env.GOOGLE_SA) return reply({ ok: true, unchecked: true });
+        return reply(await playCheck(env, sku, token));
       }
 
       /* 4. lost code */
