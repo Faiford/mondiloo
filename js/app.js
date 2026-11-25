@@ -1,4 +1,4 @@
-const APP_VERSION="2.5.0";
+const APP_VERSION="2.6.0";
 /* ---------- state ---------- */
 let pvIdx=0, hIdx=0, trIdx=0, gC=-1, gS=0, fromGlobe=false;
 let lang=null, age=null, screen="lang", stars=0, wIdx=0, theme="mix", pIdx=0, pMode="learn", story=-1, sPage=0, q=null, locked=false, timers=[], game={};
@@ -84,15 +84,34 @@ function htClip(text){
   if(typeof VOICE_HT!=="object")return null; const n=htNorm(text); if(!n)return null;
   if(VOICE_HT[n])return VOICE_HT[n];
   if(/^konbyen .+ ki genyen$/.test(n)&&VOICE_HT["konbyen ki genyen"])return VOICE_HT["konbyen ki genyen"];
-  if(n.split(" ").length>7)return null;
-  const pad=" "+n+" "; for(const k of HT_KEYS){if(pad.includes(" "+k+" "))return VOICE_HT[k];}
+  const nw_=n.split(" ").length; if(nw_>7)return null;
+  /* a known word inside a short text ("B. Bato" -> "bato"), but not one word picked out of a whole sentence */
+  const pad=" "+n+" "; for(const k of HT_KEYS){if(k.split(" ").length*3<nw_)continue;if(pad.includes(" "+k+" "))return VOICE_HT[k];}
   return null;
 }
 function htStop(){try{if(htAudio){htAudio.pause();htAudio=null;}}catch(e){}}
+/* Question start + word: "Chèche koulè…" then "wouj". Starts live in VOICE_HT_STEM (not VOICE_HT) so they never
+   win the "longest key inside a short text" match on their own. */
+const HT_TPL=["qColor","qFind","qShape","qBody","qAnimal","qDay","emoQ","oppQ","cookPut","levelDone"];
+function htChain(text){
+  if(typeof VOICE_HT_STEM!=="object"||!UI.ht)return null;
+  for(const k of HT_TPL){const tpl=UI.ht[k];if(!tpl)continue;const ph=tpl.includes("{n}")?"{n}":"{x}";const i=tpl.indexOf(ph);if(i<0)continue;
+    const pre=tpl.slice(0,i),post=tpl.slice(i+ph.length);if(!text.startsWith(pre)||!text.endsWith(post)||text.length<=pre.length+post.length)continue;
+    const mid=text.slice(pre.length,text.length-post.length).trim();
+    const stem=VOICE_HT_STEM[htNorm(pre)]; if(!stem)continue;
+    const word=ph==="{n}"?(VOICE_HT[htNorm(numWord(+mid,"ht"))]||null):(VOICE_HT[htNorm(mid)]||htClip(mid));
+    if(!word)continue;
+    const list=[stem,word]; const tail=htNorm(post); if(tail&&VOICE_HT_STEM[tail])list.push(VOICE_HT_STEM[tail]);
+    return list;}
+  return null;
+}
 function htSay(text){
-  const c=htClip(text); if(!c)return false;
+  const n=htNorm(text); let list=null;
+  if(typeof VOICE_HT==="object"&&VOICE_HT[n])list=[VOICE_HT[n]];
+  else list=htChain(text)||(htClip(text)?[htClip(text)]:null);
+  if(!list)return false;
   htStop(); clearTimeout(sayT);
-  sayT=setTimeout(()=>{try{htAudio=new Audio(c);htAudio.play().catch(()=>{});}catch(e){}},60);
+  sayT=setTimeout(()=>{let i=0;const next=()=>{if(i>=list.length)return;try{const a=new Audio(list[i++]);htAudio=a;a.onended=()=>{if(htAudio===a)setTimeout(next,90);};a.play().catch(()=>{});}catch(e){}};next();},60);
   return true;
 }
 function speak(text){
